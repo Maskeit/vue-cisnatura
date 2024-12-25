@@ -13,7 +13,6 @@ async function getProducts() {
 
 async function getCatalogoProducts(page = 1, limit = 16) {
   if (productsCache[page]) {
-    console.log(`Productos cargados desde el cache para la página ${page}`);
     return productsCache[page];
   }
 
@@ -46,4 +45,13 @@ function filterProductsByCategory(category) {
   );
 }
 
-export default { getProducts, getCatalogoProducts, filterProductsByCategory };
+function getAllCachedProducts() {
+  return Object.values(productsCache).flatMap(page => page.products);
+}
+
+export default { 
+  getProducts, 
+  getCatalogoProducts, 
+  filterProductsByCategory, 
+  getAllCachedProducts 
+};

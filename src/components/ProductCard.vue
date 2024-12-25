@@ -1,6 +1,6 @@
 <template>
     <div @click="$emit('click', product)"
-        class="bg-white w-64 shadow-lg rounded-lg overflow-hidden transform transition duration-300 hover:scale-105"
+        class="product-card bg-white w-56 shadow-md rounded-lg overflow-hidden transform transition duration-300 hover:scale-105 cursor-pointer"
         data-product-id="product.id">
         <!-- Imagen -->
         <div class="w-full bg-white">
@@ -19,7 +19,7 @@
 
         <!-- Footer -->
         <div class="flex items-center justify-between px-4 py-3 border-t border-gray-200">
-            <span class="text-xl font-semibold text-gray-800">
+            <span class="text-md font-semibold text-gray-800">
                 ${{ product.price }} MX
             </span>
             <button @click.stop="$emit('add-to-cart', product.id)"
@@ -53,4 +53,9 @@ export default {
 
 <style scoped>
 /* Estilo adicional si se necesita */
+@media (width<500px) {
+    .product-card{
+        min-width: calc(100% - 2rem);
+    }
+}
 </style>

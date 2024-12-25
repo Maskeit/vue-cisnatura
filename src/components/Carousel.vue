@@ -1,7 +1,7 @@
 <template>
     <div id="carousel" class="relative w-full">
         <!-- Contenedor con relación de aspecto 16:9 -->
-        <div class="relative overflow-hidden aspect-w-16 aspect-h-9">
+        <div class="relative overflow-hidden aspect-w-16 aspect-h-6">
             <!-- Slides -->
             <div class="flex transition-transform duration-700 w-full"
                 :style="{ transform: `translateX(-${currentSlide * 100}%)` }">

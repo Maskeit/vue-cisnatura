@@ -45,14 +45,6 @@ export default {
         isOpen: { type: Boolean, default: false },
         product: { type: Object, required: true },
     },
-    watch: {
-        isOpen(newValue) {
-            console.log("isOpen cambiado:", newValue); // Confirmar si se actualiza
-        },
-        product(newValue) {
-            console.log("Producto recibido:", newValue); // Confirmar si llega el producto
-        }
-    },
     methods: {
         closeModal() {
             this.$emit("close");

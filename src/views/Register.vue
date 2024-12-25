@@ -1,0 +1,266 @@
+<template>
+    <div class="register-container">
+        <div class="register-card">
+            <h2 class="title">Registrarse</h2>
+            <p class="subtitle">Introduce tus datos para crear una cuenta</p>
+
+            <form @submit.prevent="handleRegister" class="register-form">
+                <div class="form-group">
+                    <label for="name">Nombre completo</label>
+                    <input id="name" v-model="name" type="text" placeholder="Tu nombre" class="form-input" />
+                    <span v-if="errors.name" class="error-message">{{ errors.name }}</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Correo electrónico</label>
+                    <input id="email" v-model="email" type="email" placeholder="Correo electrónico"
+                        class="form-input" />
+                    <span v-if="errors.email" class="error-message">{{ errors.email }}</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <div class="input-password">
+                        <input id="password" v-model="password" :type="showPassword ? 'text' : 'password'"
+                            placeholder="Contraseña" class="form-input" />
+                        <button type="button" class="toggle-password" @click="showPassword = !showPassword">
+                            <i :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+                        </button>
+                    </div>
+                    <span v-if="errors.password" class="error-message">{{ errors.password }}</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="password2">Repite la Contraseña</label>
+                    <div class="input-password">
+                        <input id="password2" v-model="password2" :type="showPassword2 ? 'text' : 'password'"
+                            placeholder="Repite la contraseña" class="form-input" />
+                        <button type="button" class="toggle-password" @click="showPassword2 = !showPassword2">
+                            <i :class="showPassword2 ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+                        </button>
+                    </div>
+                    <span v-if="errors.password2" class="error-message">{{ errors.password2 }}</span>
+                </div>
+
+                <button type="submit" class="btn-submit">Registrarse</button>
+                <p v-if="errorMessage" class="error-server-message">{{ errorMessage }}</p>
+            </form>
+
+            <div class="register-footer">
+                <p>¿Ya tienes una cuenta? <router-link to="/Login" class="link">Inicia sesión aquí</router-link></p>
+            </div>
+            <img src="/icons/logocis.svg" alt="Logo" class="h-16 m-auto" />
+        </div>
+        <!-- Modal para notificación -->
+        <div v-if="showModal" class="modal-overlay">
+            <div class="modal-content">
+                <p>Revise su bandeja de correo electrónico para validar su correo.</p>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script setup>
+import { ref } from "vue";
+import { AuthService } from "@/services/AuthService";
+import { useRouter } from "vue-router";
+
+const name = ref("");
+const email = ref("");
+const password = ref("");
+const password2 = ref("");
+const showPassword = ref(false);
+const showPassword2 = ref(false);
+const errors = ref({});
+const errorMessage = ref("");
+const showModal = ref(false);
+const router = useRouter();
+
+const validateForm = () => {
+    errors.value = {};
+    let isValid = true;
+
+    if (!name.value) {
+        errors.value.name = "El nombre es obligatorio.";
+        isValid = false;
+    }
+
+    if (!email.value) {
+        errors.value.email = "El correo electrónico es obligatorio.";
+        isValid = false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+        errors.value.email = "Introduce un correo electrónico válido.";
+        isValid = false;
+    }
+
+    if (!password.value) {
+        errors.value.password = "La contraseña es obligatoria.";
+        isValid = false;
+    } else if (
+        !/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).{8,}/.test(password.value)
+    ) {
+        errors.value.password =
+            "La contraseña debe tener al menos 8 caracteres, una letra mayúscula, una letra minúscula, un número y un símbolo.";
+        isValid = false;
+    }
+
+    if (!password2.value) {
+        errors.value.password2 = "Repite la contraseña.";
+        isValid = false;
+    } else if (password.value !== password2.value) {
+        errors.value.password2 = "Las contraseñas no coinciden.";
+        isValid = false;
+    }
+
+    return isValid;
+};
+
+const handleRegister = async () => {
+    if (!validateForm()) return;
+
+    try {
+        const result = await AuthService.register(name.value, email.value, password.value);
+
+        if (result.status === 200) {
+            showModal.value = true;
+            setTimeout(() => {
+                showModal.value = false;
+                router.push("/Login");
+            }, 5000);
+        }
+    } catch (error) {
+        errorMessage.value = error.response?.data?.message || "Error al registrar el usuario.";
+        console.error("Error al registrar:", error);
+    }
+};
+</script>
+
+<style scoped>
+.register-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f9f9f9;
+}
+
+.register-card {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 100%;
+    max-width: 400px;
+}
+
+.title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    transition: border 0.2s;
+}
+
+.form-input:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.input-password {
+    display: flex;
+    align-items: center;
+}
+
+.toggle-password {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-left: -30px;
+    padding: 0;
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #505f2b;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-submit:hover {
+    background-color: #7c8a6f;
+}
+
+.error-message,
+.error-server-message {
+    color: #d9534f;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    text-align: left;
+}
+
+.link {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.link:hover {
+    text-decoration: underline;
+}
+
+.register-footer {
+    margin-top: 1.5rem;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+</style>

@@ -1,33 +1,11 @@
 <template>
-  <div id="app" class="font-sans">
-    <!-- Navbar -->
-    <Navbar />
-
-    <!-- Main Content -->
-    <div class="content">
-      <router-view></router-view>
-    </div>
-
-    <!-- Footer -->
-    <Footer />
-  </div>
+  <router-view />
 </template>
 
 <script>
-import Navbar from "@/components/Navbar.vue";
-import Footer from "@/components/Footer.vue";
-
-export default {
-  components: {
-    Navbar,
-    Footer,
-  },
-};
+export default {};
 </script>
 
 <style>
-.content{
-  min-height: 100dvh;
-}
-
+/* Opcional: Define estilos globales aquí si son absolutamente necesarios */
 </style>

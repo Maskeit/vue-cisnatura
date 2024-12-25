@@ -8,7 +8,7 @@
             <div v-if="loading" class="text-center py-4">Cargando productos...</div>
 
             <!-- Productos -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 justify-center items-center">
+            <div class="product-list gap-4">
                 <ProductCard v-for="product in filteredProducts" :key="product.id" :product="product"
                     @click="openModal(product)" />
             </div>
@@ -100,7 +100,6 @@ export default {
                 );
             }
 
-            console.log(`Filtrados ${this.filteredProducts.length} productos para la categoría: ${category}`);
         },
         openModal(product) {
             console.log("Producto seleccionado:", product); // Debug
@@ -118,3 +117,20 @@ export default {
     },
 };
 </script>
+<style>
+@media (width<731px) {
+
+    .product-list {
+        align-items: center;
+        justify-content: center;
+        display: flex;
+        flex-direction: column;
+    }
+}
+.product-list{
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+</style>
