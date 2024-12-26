@@ -27,9 +27,10 @@
 
                 <!-- Barra de entrada de búsqueda -->
                 <div class="flex flex-grow">
-                    <input type="text" placeholder="Buscar"
+                    <input v-model="searchQuery" @input="handleRealTimeSearch" type="text" placeholder="Buscar"
                         class="border rounded-l-md p-2 w-full focus:outline-none focus:ring-2 focus:ring-green-400" />
-                    <button class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 rounded-r-md">
+                    <button @click="handleSearch"
+                        class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 rounded-r-md">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -151,6 +152,7 @@
 <script>
 import { Bars3Icon, ChevronDownIcon, ShoppingCartIcon, MapPinIcon } from "@heroicons/vue/24/outline";
 import { AuthService } from "@/services/AuthService";
+import { EventBus } from "@/services/eventBus";
 import Cookies from 'js-cookie';
 export default {
     components: {
@@ -166,6 +168,12 @@ export default {
             userDropdownOpen: false, // Controla el dropdown del usuario
             userLoggedIn: false,
             userName: null,
+
+            searchQuery: "", // Almacena la búsqueda actual
+            searchError: null, // Error al buscar
+
+            searchResults: [], // Resultados encontrados
+            localProducts: [], // Productos cargados en memoria
         };
     },
     async mounted() {
@@ -234,7 +242,19 @@ export default {
             } catch (error) {
                 console.error("Error cerrando sesión:", error);
             }
-        }
+        },
+        handleRealTimeSearch() {
+            if (this.searchQuery.trim()) {
+                EventBus.emit("filterProducts", this.searchQuery);
+            }
+        },
+        handleSearch() {
+            if (!this.searchQuery.trim()) {
+                this.searchError = "Por favor, ingresa un término para buscar.";
+                return;
+            }
+            EventBus.emit("serverSearch", this.searchQuery);
+        },
     },
 };
 </script>

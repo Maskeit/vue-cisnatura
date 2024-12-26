@@ -29,7 +29,7 @@ import ProductCard from "@/components/ProductCard.vue";
 import ProductModal from "@/components/ProductModal.vue";
 import Pagination from "@/components/Pagination.vue";
 import ProductService from "@/services/ProductService";
-
+import { EventBus } from "@/services/eventBus";
 export default {
     components: { Sidebar, ProductCard, ProductModal, Pagination },
     data() {
@@ -60,8 +60,24 @@ export default {
             ],
         };
     },
-    async created() {
-        await this.fetchProducts(this.currentPage);
+    created() {
+        // Escuchar eventos desde el EventBus
+        EventBus.on("filterProducts", this.filterProducts);
+        EventBus.on("serverSearch", this.serverSearch);
+
+        // Cargar productos iniciales
+        this.fetchProducts(this.currentPage)
+            .then(() => {
+                this.filteredProducts = [...this.products]; // Inicializar productos filtrados
+            })
+            .catch((error) => {
+                console.error("Error al cargar productos iniciales:", error);
+            });
+    },
+    beforeUnmount() {
+        // Desregistrar eventos al desmontar el componente
+        EventBus.off("filterProducts", this.filterProducts);
+        EventBus.off("serverSearch", this.serverSearch);
     },
     methods: {
         async fetchProducts(page) {
@@ -102,17 +118,53 @@ export default {
 
         },
         openModal(product) {
-            console.log("Producto seleccionado:", product); // Debug
             this.selectedProduct = { ...product };
             this.isModalOpen = true;
         },
         closeModal() {
-            console.log("Cerrando modal"); // Debug
             this.isModalOpen = false;
             this.selectedProduct = null;
         },
         handleAddToCart(productId) {
             console.log(`Producto ${productId} añadido al carrito.`);
+        },
+        async fetchProducts(page) {
+            this.loading = true;
+            try {
+                const { products, total } = await ProductService.getCatalogoProducts(page, this.limit);
+                this.products = products;
+                this.filteredProducts = products;
+                this.totalPages = Math.ceil(total / this.limit);
+            } catch (error) {
+                console.error("Error al cargar los productos:", error);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async filterProducts(query) {
+            const lowerQuery = query.toLowerCase();
+            this.filteredProducts = this.products.filter(
+                (product) =>
+                    product.product_name.toLowerCase().includes(lowerQuery) ||
+                    product.description.toLowerCase().includes(lowerQuery) ||
+                    product.type.toLowerCase().includes(lowerQuery)
+            );
+            if (this.filteredProducts.length === 0) {
+                console.warn("No se encontraron productos.");
+            }
+        },
+        async serverSearch(query) {
+            this.loading = true;
+            try {
+                const { products, message } = await ProductService.searchProducts(query);
+                this.filteredProducts = products.length ? [...products] : [];
+                this.searchMessage = message || null;
+            } catch (error) {
+                console.error("Error al buscar productos en el servidor:", error);
+                this.searchMessage = "Error al buscar productos. Intente más tarde.";
+            } finally {
+                this.loading = false;
+            }
         },
     },
 };
@@ -127,7 +179,8 @@ export default {
         flex-direction: column;
     }
 }
-.product-list{
+
+.product-list {
     display: grid;
     justify-content: center;
     align-items: center;

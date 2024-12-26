@@ -1,7 +1,7 @@
 <template>
-    <div class="p-6">
+    <div class="home-content p-6">
         <h2 class="text-2xl font-bold text-left mb-6 text-red-500">
-            Has click aquí para ir a comprar
+            <router-link to="/Catalogo" class="hover:text-green-600" active-class="text-green-600">Has click aquí para ver más productos.</router-link>
         </h2>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6 justify-items-center">
@@ -54,3 +54,11 @@ export default {
     },
 };
 </script>
+
+<style>
+.home-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+</style>
