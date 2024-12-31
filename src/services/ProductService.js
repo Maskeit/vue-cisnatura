@@ -1,6 +1,5 @@
 import axiosInstance from "./axiosInstance";
 let productsCache = {}; // Cache por página
-console.log("Cache actualizado:",productsCache);
 async function getProducts() {
   try {
     const response = await axiosInstance.get("/products");
@@ -26,7 +25,7 @@ async function getCatalogoProducts(page = 1, limit = 16) {
       productsCache[page] = {
         products: data.data.products,
         total: data.data.totalProducts,
-      };      
+      };
       return productsCache[page];
     }
 
@@ -39,49 +38,51 @@ async function getCatalogoProducts(page = 1, limit = 16) {
 async function searchProducts(query) {
   const lowerQuery = query.toLowerCase();
 
-  // Buscar primero en la caché local
-  const localResults = Object.values(productsCache).flatMap((page) =>
-    page.products.filter(
+  // Buscar primero en la caché local (todas las páginas cargadas)
+  const localResults = getAllCachedProducts().filter(
       (product) =>
-        product.product_name.toLowerCase().includes(lowerQuery) ||
-        product.description.toLowerCase().includes(lowerQuery) ||
-        product.type.toLowerCase().includes(lowerQuery)
-    )
+          product.product_name.toLowerCase().includes(lowerQuery) ||
+          product.description.toLowerCase().includes(lowerQuery) ||
+          product.type.toLowerCase().includes(lowerQuery)
   );
 
   if (localResults.length > 0) {
-    return { products: localResults, message: null };
+      return { products: localResults, message: null };
   }
 
   // Si no hay resultados locales, buscar en el servidor
   try {
-    const response = await axiosInstance.get("/search", {
-      params: { search: query },
-    });
-
-    if (response.status === 200 && response.data.data.length > 0) {
-      const fetchedProducts = response.data.data;
-
-      // Agregar al caché local
-      fetchedProducts.forEach((product) => {
-        if (
-          !Object.values(productsCache)
-            .flatMap((p) => p.products)
-            .some((p) => p.id === product.id)
-        ) {
-          productsCache[product.id] = product; // Evitar duplicados
-        }
+      const response = await axiosInstance.get("/search", {
+          params: { search: query },
       });
 
-      return { products: fetchedProducts, message: null };
-    }
-    return { products: [], message: "No se encontraron productos." };
+      if (response.status === 200 && response.data.data.length > 0) {
+          const fetchedProducts = response.data.data;
+
+          // Agregar los productos al caché si no existen
+          fetchedProducts.forEach((product) => {
+              const isAlreadyCached = Object.values(productsCache)
+                  .flatMap((page) => page.products)
+                  .some((p) => p.id === product.id);
+
+              if (!isAlreadyCached) {
+                  if (!productsCache[1]) {
+                      productsCache[1] = { products: [], total: 0 };
+                  }
+                  productsCache[1].products.push(product);
+              }
+          });
+
+          return { products: fetchedProducts, message: null };
+      }
+
+      return { products: [], message: "No se encontraron productos." };
   } catch (error) {
-    console.error("Error al buscar productos en el servidor:", error);
-    return {
-      products: [],
-      message: "Error al buscar productos. Intente más tarde.",
-    };
+      console.error("Error al buscar productos en el servidor:", error);
+      return {
+          products: [],
+          message: "Error al buscar productos. Intente más tarde.",
+      };
   }
 }
 function filterProductsByCategory(category) {
@@ -95,11 +96,14 @@ function filterProductsByCategory(category) {
 function getAllCachedProducts() {
   return Object.values(productsCache).flatMap((page) => page.products);
 }
-
+function getCachedProductsByPage(page) {
+  return productsCache[page]?.products || [];
+}
 export default {
   getProducts,
   getCatalogoProducts,
   filterProductsByCategory,
   getAllCachedProducts,
   searchProducts,
+  getCachedProductsByPage, // Nuevo método
 };

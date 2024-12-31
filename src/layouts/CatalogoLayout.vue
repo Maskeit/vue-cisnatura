@@ -8,7 +8,7 @@
             <div v-if="loading" class="text-center py-4">Cargando productos...</div>
 
             <!-- Productos -->
-            <div class="product-list gap-4">
+            <div class="product-list">
                 <ProductCard v-for="product in filteredProducts" :key="product.id" :product="product"
                     @click="openModal(product)" />
             </div>
@@ -42,29 +42,41 @@ export default {
             limit: 16,
             loading: false,
             isModalOpen: false,
-            categoryMap: {
-                "Todos los productos": null,
-                "Tinturas": "tintura",
-                "Dióxido de cloro": "cds",
-                "Cursos/Talleres": "curso",
-                "Paquetes": "paquete",
-                "Productos Naturales": "otro",
-            },
             categories: [
-                "Todos los productos",
-                "Tinturas",
-                "Dióxido de cloro",
-                "Cursos/Talleres",
-                "Paquetes",
-                "Productos Naturales",
+                { displayName: "Todos los productos", value: null },
+                { displayName: "Tinturas", value: "tintura" },
+                { displayName: "Dióxido de cloro", value: "cds" },
+                { displayName: "Cursos/Talleres", value: "curso" },
+                { displayName: "Paquetes", value: "paquete" },
+                { displayName: "Productos Naturales", value: "otro" },
             ],
         };
+    },
+    watch: {
+        "$route.query.category": {
+            immediate: true,
+            handler(newCategory) {
+                if (newCategory) {
+                    this.filterByCategory(newCategory);
+                } else {
+                    this.filteredProducts = [...this.products];
+                }
+            },
+        },
+        "$route.query.search": {
+            immediate: true,
+            handler(newSearch) {
+                if (newSearch) {
+                    this.filterProducts(newSearch);
+                }
+            },
+        },
     },
     created() {
         // Escuchar eventos desde el EventBus
         EventBus.on("filterProducts", this.filterProducts);
         EventBus.on("serverSearch", this.serverSearch);
-
+        EventBus.emit("categoriesUpdated", this.categories);
         // Cargar productos iniciales
         this.fetchProducts(this.currentPage)
             .then(() => {
@@ -99,23 +111,68 @@ export default {
                 await this.fetchProducts(this.currentPage);
             }
         },
-        filterByCategory(category) {
-            const typeFilter = this.categoryMap[category];
+        /**
+        * Filtra los productos cargados en memoria según la categoría seleccionada.
+        */
+        filterByCategory(categoryValue) {
             if (!this.products || this.products.length === 0) {
                 console.error("No hay productos disponibles para filtrar.");
                 return;
             }
 
-            if (!typeFilter) {
-                this.filteredProducts = this.products; // Mostrar todos los productos
+            if (!categoryValue) {
+                // Mostrar todos los productos si no hay filtro
+                this.filteredProducts = [...this.products];
             } else {
+                // Aplicar filtro por tipo
                 this.filteredProducts = this.products.filter(
                     (product) =>
                         product.type &&
-                        product.type.toLowerCase() === typeFilter.toLowerCase()
+                        product.type.toLowerCase() === categoryValue.toLowerCase()
                 );
             }
+        },
 
+        /**
+         * Maneja las búsquedas locales de productos en tiempo real.
+         */
+        async filterProducts(query) {
+            const lowerQuery = query.toLowerCase();
+
+            if (!lowerQuery.trim()) {
+                // Si el input está vacío, muestra los productos de la página actual
+                this.filteredProducts = [...this.products];
+                return;
+            }
+
+            // Filtrar productos cargados localmente
+            this.filteredProducts = this.products.filter(
+                (product) =>
+                    product.product_name.toLowerCase().includes(lowerQuery) ||
+                    product.description.toLowerCase().includes(lowerQuery) ||
+                    product.type.toLowerCase().includes(lowerQuery)
+            );
+
+            if (this.filteredProducts.length === 0) {
+                console.warn("No se encontraron productos en la búsqueda local.");
+            }
+        },
+
+        /**
+         * Busca productos en el servidor si no se encuentran en la caché local.
+         */
+        async serverSearch(query) {
+            this.loading = true;
+            try {
+                const { products, message } = await ProductService.searchProducts(query);
+
+                // Actualizar los productos filtrados con los resultados del servidor
+                this.filteredProducts = products.length ? [...products] : [];
+            } catch (error) {
+                console.error("Error al buscar productos en el servidor:", error);
+            } finally {
+                this.loading = false;
+            }
         },
         openModal(product) {
             this.selectedProduct = { ...product };
@@ -128,62 +185,14 @@ export default {
         handleAddToCart(productId) {
             console.log(`Producto ${productId} añadido al carrito.`);
         },
-        async fetchProducts(page) {
-            this.loading = true;
-            try {
-                const { products, total } = await ProductService.getCatalogoProducts(page, this.limit);
-                this.products = products;
-                this.filteredProducts = products;
-                this.totalPages = Math.ceil(total / this.limit);
-            } catch (error) {
-                console.error("Error al cargar los productos:", error);
-            } finally {
-                this.loading = false;
-            }
-        },
-        async filterProducts(query) {
-            const lowerQuery = query.toLowerCase();
-            this.filteredProducts = this.products.filter(
-                (product) =>
-                    product.product_name.toLowerCase().includes(lowerQuery) ||
-                    product.description.toLowerCase().includes(lowerQuery) ||
-                    product.type.toLowerCase().includes(lowerQuery)
-            );
-            if (this.filteredProducts.length === 0) {
-                console.warn("No se encontraron productos.");
-            }
-        },
-        async serverSearch(query) {
-            this.loading = true;
-            try {
-                const { products, message } = await ProductService.searchProducts(query);
-                this.filteredProducts = products.length ? [...products] : [];
-                this.searchMessage = message || null;
-            } catch (error) {
-                console.error("Error al buscar productos en el servidor:", error);
-                this.searchMessage = "Error al buscar productos. Intente más tarde.";
-            } finally {
-                this.loading = false;
-            }
-        },
     },
 };
 </script>
 <style>
-@media (width<731px) {
-
-    .product-list {
-        align-items: center;
-        justify-content: center;
-        display: flex;
-        flex-direction: column;
-    }
-}
-
 .product-list {
     display: grid;
-    justify-content: center;
-    align-items: center;
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 16px;
+    margin: 0 auto;
 }
 </style>

@@ -1,6 +1,7 @@
 <template>
     <div class="main-layout">
-      <Navbar />
+      <!-- <Navbar /> -->
+      <Navbar :categories="categories" />
       <main>
         <router-view />
       </main>
@@ -16,6 +17,18 @@
     components: {
       Navbar,
       Footer,
+    },
+    data() {
+      return {
+        categories: [
+          { displayName: "Todos los productos", value: null },
+          { displayName: "Tinturas", value: "tintura" },
+          { displayName: "Dióxido de cloro", value: "cds" },
+          { displayName: "Cursos/Talleres", value: "curso" },
+          { displayName: "Paquetes", value: "paquete" },
+          { displayName: "Productos Naturales", value: "otro" },
+        ],
+      };
     },
   };
   </script>

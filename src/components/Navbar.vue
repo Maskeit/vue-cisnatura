@@ -8,36 +8,8 @@
             </div>
 
             <!-- Barra de búsqueda -->
-            <div class="flex-grow max-w-lg mx-4 hidden lg:flex items-center space-x-2">
-                <!-- Botón de categorías -->
-                <div class="relative group">
-                    <button @click="toggleCategoryDropdown" class="hover:text-green-600 flex items-center space-x-1">
-                        <span>Categorías</span>
-                        <ChevronDownIcon class="h-5 w-5" />
-                    </button>
-
-                    <ul v-if="categoryDropdownOpen"
-                        class="absolute z-10 bg-white shadow-md border mt-2 rounded-md w-48 text-sm text-gray-700">
-                        <li class="hover:bg-green-100 px-4 py-2 cursor-pointer">Tinturas</li>
-                        <li class="hover:bg-green-100 px-4 py-2 cursor-pointer">Dióxido de Cloro</li>
-                        <li class="hover:bg-green-100 px-4 py-2 cursor-pointer">Paquetes</li>
-                        <li class="hover:bg-green-100 px-4 py-2 cursor-pointer">Productos Naturales</li>
-                    </ul>
-                </div>
-
-                <!-- Barra de entrada de búsqueda -->
-                <div class="flex flex-grow">
-                    <input v-model="searchQuery" @input="handleRealTimeSearch" type="text" placeholder="Buscar"
-                        class="border rounded-l-md p-2 w-full focus:outline-none focus:ring-2 focus:ring-green-400" />
-                    <button @click="handleSearch"
-                        class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 rounded-r-md">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor" class="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                        </svg>
-                    </button>
-                </div>
+            <div class="hidden lg:block">
+                <SearchBar :categories="categories" />
             </div>
             <!-- Ubicación -->
             <div class="hidden lg:flex items-center text-gray-700">
@@ -65,6 +37,7 @@
                     </svg>
                 </button>
                 <h2 class="text-lg font-semibold mb-4">Menú</h2>
+                <SearchBar :categories="categories" />
                 <ul class="space-y-4">
                     <li>
                         <router-link @click="toggleMenu" to="/"
@@ -88,13 +61,17 @@
                     </li>
                     <div v-if="userLoggedIn" class="relative group">
                         <button @click="toggleUserDropdown" class="hover:text-green-600 flex items-center space-x-1">
-                            <span>Opciones</span>
+                            <span class="mr-2">{{ userName }}</span>
                             <ChevronDownIcon class="h-5 w-5" />
                         </button>
                         <ul v-if="userDropdownOpen"
-                            class="absolute z-10 bg-white shadow-md border mt-2 rounded-md w-48 text-sm">
-                            <li @click="goToAccount" class="hover:bg-green-100 px-4 py-2 cursor-pointer">Cuenta</li>
-                            <li @click="logout" class="hover:bg-green-100 px-4 py-2 cursor-pointer">Cerrar sesión</li>
+                            class="absolute z-10 bg-white shadow-md border mt-2 rounded-md w-48">
+                            <li @click="goToAccount" class="hover:bg-gray-100 px-4 py-2 cursor-pointer">
+                                Cuenta
+                            </li>
+                            <li @click="logout" class="hover:bg-red-100 px-4 py-2 cursor-pointer">
+                                Cerrar sesión
+                            </li>
                         </ul>
                     </div>
                 </ul>
@@ -102,40 +79,40 @@
             <!-- Botones de navegación -->
             <ul class="hidden lg:flex space-x-6 font-light">
                 <li>
-                    <router-link to="/" class="hover:text-green-600" active-class="text-green-600">Inicio</router-link>
+                    <router-link to="/" class="block px-4 py-2 text-center hover:bg-gray-100 rounded-md">
+                        Inicio
+                    </router-link>
                 </li>
                 <li>
-                    <router-link to="/Catalogo" class="hover:text-green-600"
-                        active-class="text-green-600">Productos</router-link>
+                    <router-link to="/Catalogo" class="block px-4 py-2 text-center hover:bg-gray-100 rounded-md">
+                        Productos
+                    </router-link>
                 </li>
                 <li>
-                    <router-link to="/Contacto" class="hover:text-green-600"
-                        active-class="text-green-600">Contacto</router-link>
+                    <router-link to="/Contacto" class="block px-4 py-2 text-center hover:bg-gray-100 rounded-md">
+                        Contacto
+                    </router-link>
                 </li>
                 <li>
-                    <!-- Dropdown o Iniciar Sesión -->
-                    <div class="relative">
-                        <!-- Si no hay sesión, muestra el botón de Iniciar Sesión -->
-                        <button v-if="!userLoggedIn" @click="goToLogin"
-                            class="hover:text-green-600 flex items-center space-x-1">
-                            <router-link to="/Login" class="hover:text-green-600">Iniciar
-                                Sesión</router-link>
+                    <router-link v-if="!userLoggedIn" to="/Login"
+                        class="block px-4 py-2 text-center hover:bg-green-100 rounded-md" active-class="bg-green-200">
+                        Iniciar Sesión
+                    </router-link>
+                    <div v-else class="relative">
+                        <button @click="toggleUserDropdown"
+                            class="flex items-center px-4 py-2 hover:bg-gray-100 rounded-md">
+                            <span class="mr-2">{{ userName }}</span>
+                            <ChevronDownIcon class="h-5 w-5" />
                         </button>
-
-                        <!-- Si hay sesión, muestra el dropdown -->
-                        <div v-else>
-                            <button @click="toggleUserDropdown"
-                                class="hover:text-green-600 flex items-center space-x-1">
-                                <span>{{ userName }}</span>
-                                <ChevronDownIcon class="h-5 w-5" />
-                            </button>
-                            <ul v-if="userDropdownOpen"
-                                class="absolute z-10 bg-white shadow-md border mt-2 rounded-md w-48 text-sm">
-                                <li @click="goToAccount" class="hover:bg-green-100 px-4 py-2 cursor-pointer">Cuenta</li>
-                                <li @click="logout" class="hover:bg-green-100 px-4 py-2 cursor-pointer">Cerrar sesión
-                                </li>
-                            </ul>
-                        </div>
+                        <ul v-if="userDropdownOpen"
+                            class="absolute z-10 bg-white shadow-md border mt-2 rounded-md w-48">
+                            <li @click="goToAccount" class="hover:bg-gray-100 px-4 py-2 cursor-pointer">
+                                Cuenta
+                            </li>
+                            <li @click="logout" class="hover:bg-red-100 px-4 py-2 cursor-pointer">
+                                Cerrar sesión
+                            </li>
+                        </ul>
                     </div>
                 </li>
             </ul>
@@ -150,30 +127,31 @@
 </template>
 
 <script>
+import SearchBar from "./SearchBar.vue";
 import { Bars3Icon, ChevronDownIcon, ShoppingCartIcon, MapPinIcon } from "@heroicons/vue/24/outline";
 import { AuthService } from "@/services/AuthService";
 import { EventBus } from "@/services/eventBus";
 import Cookies from 'js-cookie';
 export default {
+    props: {
+        categories: {
+            type: Array,
+            required: true,
+        },
+    },
     components: {
         Bars3Icon,
         ChevronDownIcon,
         ShoppingCartIcon,
         MapPinIcon,
+        SearchBar
     },
     data() {
         return {
             menuOpen: false,
-            categoryDropdownOpen: false, // Controla el dropdown de categorías
             userDropdownOpen: false, // Controla el dropdown del usuario
             userLoggedIn: false,
             userName: null,
-
-            searchQuery: "", // Almacena la búsqueda actual
-            searchError: null, // Error al buscar
-
-            searchResults: [], // Resultados encontrados
-            localProducts: [], // Productos cargados en memoria
         };
     },
     async mounted() {
@@ -242,18 +220,6 @@ export default {
             } catch (error) {
                 console.error("Error cerrando sesión:", error);
             }
-        },
-        handleRealTimeSearch() {
-            if (this.searchQuery.trim()) {
-                EventBus.emit("filterProducts", this.searchQuery);
-            }
-        },
-        handleSearch() {
-            if (!this.searchQuery.trim()) {
-                this.searchError = "Por favor, ingresa un término para buscar.";
-                return;
-            }
-            EventBus.emit("serverSearch", this.searchQuery);
         },
     },
 };

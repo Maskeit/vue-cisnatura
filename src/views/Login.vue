@@ -1,6 +1,7 @@
 <template>
-  <div class="login-container">    
-    <div class="login-card">   
+  <div class="login-container">
+
+    <div class="login-card">
       <h2 class="title">Iniciar Sesión</h2>
       <p class="subtitle">Introduce tus credenciales para acceder a tu cuenta de Cisnatura</p>
 
@@ -17,15 +18,20 @@
           <span v-if="errors.password" class="error-message">{{ errors.password }}</span>
         </div>
 
-        <button type="submit" class="btn-submit">Iniciar Sesión</button>
+        <!-- Mostrar el botón o el loader -->
+        <div class="form-group">
+          <button v-if="!isLoading" type="submit" class="btn-submit">Iniciar Sesión</button>
+          <div v-else class="flex items-center justify-center">
+            <div class="animate-spin rounded-full h-8 w-8 border-t-4 border-green-500"></div>
+          </div>
+        </div>
         <p v-if="errorMessage" class="error-server-message">{{ errorMessage }}</p>
       </form>
-
       <div class="login-footer">
         <p>¿No tienes una cuenta? <router-link to="/Register" class="link">
             Registrarse
-          </router-link></p>          
-        </div>
+          </router-link></p>
+      </div>
       <img src="/icons/logocis.svg" alt="Logo" class="h-16 m-auto" />
     </div>
   </div>
@@ -42,6 +48,7 @@ export default {
       password: "",
       errorMessage: "",
       errors: {},
+      isLoading: false,
     };
   },
   methods: {
@@ -67,16 +74,19 @@ export default {
         return;
       }
       try {
+        this.isLoading = true;
         const result = await AuthService.login(this.email, this.password);
         if (result && result.data) {
           const token = result.data.Authorization;
           localStorage.setItem("Authorization", token);
-          Cookies.set('SSK', token, { expires: 7, path: '' })
+          Cookies.set('SSK', token, { expires: 7, path: '' });
           this.$router.push("/Catalogo");
         }
       } catch (error) {
         this.errorMessage = "Credenciales incorrectas o error en el servidor";
         console.error("Error al iniciar sesión:", error);
+      } finally {
+        this.isLoading = false;
       }
     },
   },
