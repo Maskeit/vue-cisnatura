@@ -120,7 +120,10 @@
             <router-link to="/Carrito" class="flex items-center relative mx-3">
                 Carrito
                 <ShoppingCartIcon class="h-6 w-6 text-gray-700" />
-                <span class="absolute -top-2 -right-3 bg-red-500 text-white rounded-full px-2 text-sm">4</span>
+                <span v-if="cartCount > 0"
+                    class="absolute -top-2 -right-3 bg-red-500 text-white rounded-full px-2 text-sm">
+                    {{ cartCount }}
+                </span>
             </router-link>
         </div>
     </nav>
@@ -132,6 +135,7 @@ import { Bars3Icon, ChevronDownIcon, ShoppingCartIcon, MapPinIcon } from "@heroi
 import { AuthService } from "@/services/AuthService";
 import { EventBus } from "@/services/eventBus";
 import Cookies from 'js-cookie';
+import CartService from "../services/CartService";
 export default {
     props: {
         categories: {
@@ -152,12 +156,21 @@ export default {
             userDropdownOpen: false, // Controla el dropdown del usuario
             userLoggedIn: false,
             userName: null,
+            cartCount: 0
         };
     },
     async mounted() {
         // Revisa si hay un usuario logueado y actualiza el Navbar
         this.checkUserLoginStatus();
         document.addEventListener("click", this.handleOutsideClick);
+
+        // Escuchar actualizaciones del carrito
+        EventBus.on("cart-updated", (cartItems) => {
+            this.cartCount = cartItems.reduce((total, item) => total + item.cantidad, 0);
+        });
+        // Inicializar el contador del carrito desde el almacenamiento local
+        const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+        this.cartCount = cart.reduce((total, item) => total + item.cantidad, 0);
     },
     beforeDestroy() {
         document.removeEventListener("click", this.handleOutsideClick);

@@ -6,6 +6,7 @@ import BlankLayout from "@/layouts/BlankLayout.vue";
 // Vistas para usuarios regulares
 import Home from "@/views/Home.vue";
 import Catalogo from "@/views/Catalogo.vue";
+import Carrito from "@/views/Carrito.vue";
 import Login from "@/views/Login.vue";
 import Register from "@/views/Register.vue";
 
@@ -22,6 +23,7 @@ const routes = [
     children: [
       { path: "", name: "Home", component: Home },
       { path: "catalogo", name: "Catalogo", component: Catalogo },
+      { path: "carrito", name: "Carrito", component: Carrito },
     ],
   },
   {
