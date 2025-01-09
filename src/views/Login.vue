@@ -76,8 +76,8 @@ export default {
       try {
         this.isLoading = true;
         const result = await AuthService.login(this.email, this.password);
-        if (result && result.data) {
-          const token = result.data.Authorization;
+        if (result) {
+          const token = result;
           localStorage.setItem("Authorization", token);
           Cookies.set('SSK', token, { expires: 7, path: '' });
           this.$router.push("/Catalogo");

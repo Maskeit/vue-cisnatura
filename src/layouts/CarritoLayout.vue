@@ -4,7 +4,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Columna de productos -->
             <div class="lg:col-span-2">
-                <h2 class="text-2xl font-bold mb-4">Productos del carrito</h2>
+                <h2 class="text-2xl font-bold text-gray-600">Productos del carrito</h2>
 
                 <!-- Mostrar mensaje si el carrito está vacío -->
                 <div v-if="cartProducts.length === 0" class="text-center py-10">
@@ -17,7 +17,7 @@
 
             <!-- Columna de resumen -->
             <div>
-                <h2 class="text-2xl font-bold mb-4">Resumen de la compra</h2>
+                <h2 class="text-2xl font-bold text-gray-600">Resumen de la compra</h2>
                 <div class="bg-white shadow-md rounded-lg p-4 relative">
                     <!-- Mostrar el loader -->
                     <div v-if="loading"
@@ -37,9 +37,10 @@
                         <span class="font-semibold text-lg">Total:</span>
                         <span class="text-lg font-bold">${{ totalCost.toFixed(2) }}</span>
                     </div>
-                    <button class="mt-4 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded w-full">
+                    <router-link to="/Address"
+                        class="mt-4 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded w-full text-center block">
                         Continuar
-                    </button>
+                    </router-link>
                 </div>
             </div>
         </div>

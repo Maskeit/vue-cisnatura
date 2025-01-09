@@ -10,12 +10,10 @@ export const AuthService = {
       });
 
       if (response.status === 200 && response.data.data) {
-        const AuthToken = response.data.data; // es el token de la respuesta en data
-        // Almacenar el token en memoria o almacenamiento local
-        localStorage.setItem("Authorization", AuthToken);
-
-        return response.data;
+        const authToken = response.data.data; // es el token de la respuesta en data
+        return authToken.token;
       }
+      return null; // No se encontró el usuario o la contraseña es incorrecta
     } catch (error) {
       console.error("Error en login:", error);
       throw error;

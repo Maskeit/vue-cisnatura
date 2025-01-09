@@ -7,6 +7,7 @@ import BlankLayout from "@/layouts/BlankLayout.vue";
 import Home from "@/views/Home.vue";
 import Catalogo from "@/views/Catalogo.vue";
 import Carrito from "@/views/Carrito.vue";
+import Address from "@/views/Address.vue";
 import Login from "@/views/Login.vue";
 import Register from "@/views/Register.vue";
 
@@ -24,6 +25,7 @@ const routes = [
       { path: "", name: "Home", component: Home },
       { path: "catalogo", name: "Catalogo", component: Catalogo },
       { path: "carrito", name: "Carrito", component: Carrito },
+      { path: "address", name: "Address", component: Address },
     ],
   },
   {

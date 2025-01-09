@@ -12,7 +12,7 @@ export const system = {
   },
   http: {
     send: {
-      authorizationCookies: () => {
+      authorizationCookies: () => { // enfoque en el que tengo 3 cookies con datos diferentes 
         try {
           const SSID = system.cookies.get("SSID");
           const SSK = system.cookies.get("SSK");
@@ -29,7 +29,7 @@ export const system = {
           return null;
         }
       },
-      authorization: () => {
+      authorization: () => { // enfoque en el que SSID, SSK y APISS__NME están en una cadena como token
         try{
           const token = localStorage.getItem("Authorization");
           return token;
