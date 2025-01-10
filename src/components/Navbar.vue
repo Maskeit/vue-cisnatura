@@ -117,14 +117,16 @@
                 </li>
             </ul>
             <!-- Carrito -->
-            <router-link to="/Carrito" class="flex items-center relative mx-3">
-                Carrito
-                <ShoppingCartIcon class="h-6 w-6 text-gray-700" />
-                <span v-if="cartCount > 0"
-                    class="absolute -top-2 -right-3 bg-red-500 text-white rounded-full px-2 text-sm">
-                    {{ cartCount }}
-                </span>
-            </router-link>
+             <div v-if="userLoggedIn">
+                 <router-link to="/Carrito" class="flex items-center relative mx-3">
+                     Carrito
+                     <ShoppingCartIcon class="h-6 w-6 text-gray-700" />
+                     <span v-if="cartCount > 0"
+                         class="absolute -top-2 -right-3 bg-red-500 text-white rounded-full px-2 text-sm">
+                         {{ cartCount }}
+                     </span>
+                 </router-link>
+             </div>
         </div>
     </nav>
 </template>
@@ -217,16 +219,7 @@ export default {
         },
         async logout() {
             try {
-                const response = await AuthService.logout(); // Añade este método para manejar el cierre de sesión en el servidor
-                var message = "";
-                if (response !== 200) {
-                    alert("No se pudo cerrar la sesion intente más tarde");
-                    return;
-                }
-                localStorage.removeItem("Authorization");
-                localStorage.removeItem("username");
-                Cookies.remove('SSK');
-                alert("Sesión cerrada correctamente");
+                if(!await AuthService.logout()) return;
                 this.userLoggedIn = false;
                 this.$router.push("/Login");
                 return;

@@ -34,6 +34,7 @@ import Pagination from "@/components/Pagination.vue";
 import ProductService from "@/services/ProductService";
 import CartService from "@/services/CartService";
 import { EventBus } from "@/services/eventBus";
+import { system } from "@/services/system";
 export default {
     components: { Sidebar, ProductCard, ProductModal, Pagination },
     data() {
@@ -89,7 +90,9 @@ export default {
             .catch((error) => {
                 console.error("Error al cargar productos iniciales:", error);
             });
-        this.fetchCart();
+        if (system.http.check.auth()) {
+            this.fetchCart();
+        }
     },
     beforeUnmount() {
         // Desregistrar eventos al desmontar el componente

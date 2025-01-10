@@ -1,7 +1,7 @@
 export const V_Global_API = "http://cisnaturatienda.local/api/";
 export const V_Global_IMG = "http://cisnaturatienda.local/pimg/";
 export const V_Domain = "";
-
+import router from "@/router";
 export const system = {
   authToken: null,
   // Método para inicializar el authToken una vez
@@ -9,10 +9,12 @@ export const system = {
     if (!this.authToken) {
       this.authToken = this.http.send.authorization();
     }
+    return this.authToken;
   },
   http: {
     send: {
-      authorizationCookies: () => { // enfoque en el que tengo 3 cookies con datos diferentes 
+      authorizationCookies: () => {
+        // enfoque en el que tengo 3 cookies con datos diferentes
         try {
           const SSID = system.cookies.get("SSID");
           const SSK = system.cookies.get("SSK");
@@ -29,8 +31,9 @@ export const system = {
           return null;
         }
       },
-      authorization: () => { // enfoque en el que SSID, SSK y APISS__NME están en una cadena como token
-        try{
+      authorization: () => {
+        // enfoque en el que SSID, SSK y APISS__NME están en una cadena como token
+        try {
           const token = localStorage.getItem("Authorization");
           return token;
         } catch (error) {
@@ -40,17 +43,21 @@ export const system = {
       },
     },
     check: {
-      isLoggedIn: () => {
-        try {
-          const SSID = system.cookies.get("SSID");
-          const SSK = system.cookies.get("SSK");
-          const APISS__NME = system.cookies.get("APISS__NME");
-
-          return SSID && SSK && APISS__NME;
-        } catch (error) {
-          console.error(error);
-          return false;
+      live: () => { //redirecciona a pagina de error
+        const token = localStorage.getItem("Authorization");
+        if (!token || token === null || token === undefined) {
+          system.handlerError.handleError(401, "Página no disponible.");
+          return;
+        } else{
+          return true;
         }
+      },
+      auth: () => {
+        const token = localStorage.getItem("Authorization");
+        if(token){
+          return true;
+        }
+        return false;
       },
     },
   },
@@ -92,4 +99,18 @@ export const system = {
       },
     },
   },
+  handlerError: {
+    handleError: (
+      errorCode = 500,
+      errorMessage = "Ha ocurrido un error inesperado."
+    ) => {
+      router.push({
+        name: "Error",
+        query: { code: errorCode, message: errorMessage },
+      });
+    },
+  },
 };
+
+// Este código se ejecuta antes de cada ruta en el router.js
+system.initializeAuth();

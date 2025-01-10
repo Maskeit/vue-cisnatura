@@ -1,13 +1,8 @@
 import axiosInstance from "./axiosInstance";
-
+import { system } from "./system";
 const CartService = {
   async addProduct(productId, quantity = 1) {
-    const token = localStorage.getItem("Authorization");
-    if (!token) {
-      console.error("No se encontró el token de autorización.");
-      throw new Error("No token provided");
-    }
-
+    if (!system.http.check.live()) return;
     try {
       const response = await axiosInstance.post(`/product/cart/add`, {
         pid: productId,
@@ -17,17 +12,12 @@ const CartService = {
       return status;
     } catch (error) {
       console.error("Error al agregar producto al carrito:", error);
-      throw error;
+      return;
     }
   },
 
   async getCartCount() {
-    const token = localStorage.getItem("Authorization");
-    if (!token) {
-      console.error("No se encontró el token de autorización.");
-      throw new Error("No token provided");
-    }
-
+    if (!system.http.check.live()) return;
     try {
       const response = await axiosInstance.get(`/product/cart/count`);
       return response.data.data; // La cantidad de productos
@@ -36,17 +26,12 @@ const CartService = {
         "Error al obtener la cantidad de productos del carrito:",
         error
       );
-      throw error;
+      return;
     }
   },
 
   async updateProductQuantity(productId, quantity) {
-    const token = localStorage.getItem("Authorization");
-    if (!token) {
-      console.error("No se encontró el token de autorización.");
-      throw new Error("No token provided");
-    }
-
+    if (!system.http.check.live()) return;
     try {
       const response = await axiosInstance.put(`/product/cart/update`, {
         pid: productId,
@@ -60,23 +45,15 @@ const CartService = {
       return false; // Indica que no se actualizó
     } catch (error) {
       console.error("Error al actualizar la cantidad del producto:", error);
-      throw error;
+      return;
     }
   },
 
   async removeProduct(productId) {
-    const token = localStorage.getItem("Authorization");
-    if (!token) {
-      console.error("No se encontró el token de autorización.");
-      throw new Error("No token provided");
-    }
-
+    if (!system.http.check.live()) return;
     try {
       const response = await axiosInstance.delete(`/product/cart/delete`, {
         data: { pid: productId }, // Pasamos el ID del producto como parte del body
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       });
 
       if (response.status === 200) {
@@ -86,17 +63,13 @@ const CartService = {
       return false; // Fallo en la eliminación
     } catch (error) {
       console.error("Error al eliminar producto del carrito:", error);
-      throw error;
+      return;
     }
   },
 
   // Este metodo trae el carrito del ususario en formato json
   async getCart() {
-    const token = localStorage.getItem("Authorization");
-    if (!token) {
-      console.error("No se encontró el token de autorización.");
-      throw new Error("No token provided");
-    }
+    if (!system.http.check.live()) return;
     try {
       const response = await axiosInstance.get(`/product/cart/get`);
       const cartItems = response.data.data; // Los productos del carrito
@@ -104,7 +77,7 @@ const CartService = {
       return cartItems;
     } catch (error) {
       console.error("Error al obtener el carrito:", error);
-      throw error;
+      return;
     }
   },
 };

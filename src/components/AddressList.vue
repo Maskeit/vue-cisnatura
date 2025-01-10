@@ -15,7 +15,7 @@
                 <!-- Dirección -->
                 <p class="text-sm text-gray-600 mb-2">
                     <strong>Dirección:</strong> {{ address.calle }}, {{ address.colonia }}, {{ address.ciudad }}, {{
-                    address.estado }}, CP: {{ address.postalcode }}
+                        address.estado }}, CP: {{ address.postalcode }}
                 </p>
 
                 <!-- Teléfono -->
@@ -31,15 +31,18 @@
                 <!-- Botones -->
                 <div class="flex justify-between items-center mt-4">
                     <label class="flex items-center space-x-2">
-                        <input type="radio" name="selectedAddress" :value="address.id" />
+                        <input type="radio" :value="address.id" :checked="selectedId === address.id"
+                            @change="selectAddress(address.id)" />
                         <span class="text-gray-700">Seleccionar</span>
                     </label>
-                    <div class="flex space-x-2">
-                        <button @click="deleteAddress(address.id)"
-                            class="bg-gray-400 text-white px-3 py-1 rounded-md hover:bg-red-600">
-                            Descartar
-                        </button>
-                    </div>
+                    <button @click="deleteAddress(address.id)" :disabled="isDeleting === address.id"
+                        class="bg-gray-400 text-white px-3 py-1 rounded-md hover:bg-red-600">
+                        <span v-if="isDeleting !== address.id">Descartar</span>
+                        <span v-else class="flex items-center justify-center">
+                            <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-white"></div>
+                            Eliminando...
+                        </span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -55,20 +58,65 @@
 import { UserAccountService } from "@/services/UserAccountService";
 
 export default {
+    data() {
+        return {
+            isDeleting: null,
+            localAddresses: [...this.addresses], // copia local de las direcciones
+            selectedId: null,
+        }
+    },
+    watch: {
+        addresses: {
+            inmediate: true,
+            handler(newVal) {
+                this.localAddresses = [...newVal];
+            }
+        }
+    },
     props: {
         addresses: {
             type: Array,
             default: () => [],
         },
+        value: {
+            type: String, // para almacenar id seleccionado
+            default: null,
+        }
     },
     methods: {
+        selectAddress(id) {
+            this.selectedId = id; // Actualiza el ID seleccionado localmente
+            this.$emit("addressSelected", id); // Emite evento al padre
+        },
         async deleteAddress(id) {
             if (confirm("¿Estás seguro de que deseas eliminar esta dirección?")) {
+                this.isDeleting = id; // Activa el loader para este ID
                 try {
-                    await UserAccountService.deleteAddress(id);
-                    this.$emit("updateAddresses"); // Emitir evento para actualizar direcciones
+                    // Realizar la solicitud al servidor
+                    const response = await UserAccountService.deleteAddress(id);
+
+                    if (response === 200) {
+                        // Eliminar del arreglo local
+                        this.localAddresses = this.localAddresses.filter((address) => address.id !== id);
+
+                        // Emitir evento para sincronizar con el padre
+                        this.$emit("updateAddresses", this.localAddresses);
+                        // Limpia la selección si el domicilio eliminado estaba seleccionado
+                        if (this.selectedId === id) {
+                            this.selectedId = null;
+                            this.$emit("addressSelected", null);
+                        }
+                        // Si hay menos de 3 direcciones, emitir evento para mostrar el formulario
+                        if (this.localAddresses.length < 3) {
+                            this.$emit("showAddressForm");
+                        }
+                    } else {
+                        console.error("No se pudo eliminar el domicilio en el servidor.");
+                    }
                 } catch (error) {
-                    console.error("Error al eliminar la dirección:", error);
+                    console.error("Error al eliminar el domicilio:", error);
+                } finally {
+                    this.isDeleting = null; // Desactivar el loader
                 }
             }
         },

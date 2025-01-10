@@ -82,7 +82,7 @@ export default {
             // Emitir evento para actualizar el contador del carrito en el Navbar
             EventBus.emit("cart-updated", cart);
         } catch (error) {
-            console.error("Error al cargar el carrito:", error);
+            console.error(error);
         } finally {
             this.loading = false; // Deshabilitar loader
         }

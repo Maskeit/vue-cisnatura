@@ -8,9 +8,10 @@ import Home from "@/views/Home.vue";
 import Catalogo from "@/views/Catalogo.vue";
 import Carrito from "@/views/Carrito.vue";
 import Address from "@/views/Address.vue";
+import ConfirmOrder from "@/views/ConfirmOrder.vue";
 import Login from "@/views/Login.vue";
 import Register from "@/views/Register.vue";
-
+import Error from "@/views/Error.vue";
 // Vistas para administradores
 // import AdminDashboard from "@/views/admin/AdminDashboard.vue";
 // import AdminProducts from "@/views/admin/AdminProducts.vue";
@@ -26,7 +27,25 @@ const routes = [
       { path: "catalogo", name: "Catalogo", component: Catalogo },
       { path: "carrito", name: "Carrito", component: Carrito },
       { path: "address", name: "Address", component: Address },
+      { path: "ConfirmOrder", name: "ConfirmOrder", component: ConfirmOrder}
     ],
+  },
+  {
+    path: "/Error",
+    name: "Error",
+    component: Error,
+    props: (route) => ({
+      errorCode: route.query.code || 404,
+      errorMessage: route.query.message || "Página no encontrada",
+    }),
+  },
+  // Catch-all para rutas no definidas
+  {
+    path: "/:pathMatch(.*)*",
+    redirect: {
+      name: "Error",
+      query: { code: 404, message: "Página no encontrada" },
+    },
   },
   {
     path: "/login",

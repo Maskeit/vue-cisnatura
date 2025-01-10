@@ -1,5 +1,5 @@
 import axios from "axios";
-import { V_Global_API } from "./system";
+import { V_Global_API, system } from "./system";
 
 const axiosInstance = axios.create({
   baseURL: V_Global_API,
@@ -7,10 +7,7 @@ const axiosInstance = axios.create({
 });
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("Authorization");
-    if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`;
-    }
+    config.headers["Authorization"] = `Bearer ${system.authToken}`;
     return config;
   },
   (error) => {

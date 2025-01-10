@@ -1,15 +1,15 @@
 <template>
     <div>
         <!-- Lista de direcciones -->
-        <AddressList :addresses="addresses" @updateAddresses="fetchAddresses" />
+        <AddressList :addresses="addresses" @addressSelected="setSelectedAddress" @updateAddresses="updateAddresses"
+            @showAddressForm="showForm = true" />
 
         <!-- Mostrar formulario si hay menos de 3 direcciones -->
         <div v-if="addresses.length < 3">
-            <AddressForm @addressSaved="fetchAddresses" />
+            <AddressForm @addressSaved="handleAddressSaved" />
         </div>
-
-        <!-- Botón de continuar si hay al menos una dirección -->
-        <div v-if="addresses.length > 0" class="my-4 text-center">
+        <!-- Botón de continuar, solo si hay un domicilio seleccionado -->
+        <div v-if="selectedAddress" class="my-4 text-center">
             <button @click="continueToCheckout" class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700">
                 Continuar
             </button>
@@ -29,26 +29,38 @@ export default {
     },
     data() {
         return {
+            showForm: false,
             addresses: [], // Lista de direcciones
+            selectedAddress: null, // ID de la dirección seleccionada
         };
     },
     async mounted() {
         await this.fetchAddresses();
     },
     methods: {
+        setSelectedAddress(id) {
+            this.selectedAddress = id; // Actualiza el ID seleccionado
+        },
         async fetchAddresses() {
-            try {
-                const response = await UserAccountService.getAllAddress();
-                if (response) {
-                    this.addresses = response; // Guardar las direcciones en el estado
-                }
-            } catch (error) {
-                console.error("Error al obtener las direcciones:", error);
+            // Recupera la lista de direcciones del servidor
+            const response = await UserAccountService.getAllAddress();
+            if (response) {
+                this.addresses = response; // Guardar direcciones en el estado local
             }
         },
+        updateAddresses(newAddresses) {
+            if (!newAddresses.find(address => address.id === this.selectedAddress)) {
+                this.selectedAddress = null; // Limpia si la dirección seleccionada fue eliminada
+            }
+            this.addresses = newAddresses;
+        },
+        handleAddressSaved() {
+            // Este evento se emite cuando se guarda una dirección
+            this.fetchAddresses(); // Recargar direcciones
+        },
         continueToCheckout() {
-            // Redirige al siguiente paso
-            this.$router.push("/checkout");
+            localStorage.setItem("selectedAddressId", this.selectedAddress);
+            this.$router.push("/ConfirmOrder");
         },
     },
 };

@@ -82,9 +82,13 @@
             </div>
 
             <!-- Botón -->
-            <button type="submit"
+            <button type="submit" :disabled="isSaving"
                 class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-md">
-                Guardar dirección
+                <span v-if="!isSaving">Guardar dirección</span>
+                <span v-else class="flex items-center justify-center gap-2">
+                    <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-white"></div>
+                    Guardando...
+                </span>
             </button>
         </form>
     </div>
@@ -96,6 +100,7 @@ import { UserAccountService } from "@/services/UserAccountService";
 export default {
     data() {
         return {
+            isSaving: false,
             states: estadosmunicipios,
             cities: [],
             form: {
@@ -109,16 +114,7 @@ export default {
                 city: "",
             },
             saveAddress: [],
-            loading: true,
         };
-    },
-    async mounted() {
-        try {
-            const address = await UserAccountService.getAddress();
-            console.log(address);
-        } catch (e) {
-
-        }
     },
     methods: {
         updateCities() {
@@ -126,6 +122,11 @@ export default {
             this.cities = this.states[this.form.state] || [];
         },
         submitForm: async function () {
+            // validar si ya hay 3 direcciones
+            if (this.saveAddress.length >= 3) {
+                alert("Ya tienes 3 direcciones guardadas");
+                return;
+            }
             // Validación básica en el cliente
             if (
                 !this.form.name ||
@@ -141,13 +142,12 @@ export default {
             }
 
             try {
-                this.loading = true;
+                this.isSaving = true;
 
                 // Llamar al servicio para guardar la dirección
                 const response = await UserAccountService.saveAddress(this.form);
 
-                if (response.success) {
-                    alert("Dirección guardada correctamente");
+                if (response === 200) {
                     this.form = {
                         name: "",
                         rfc: "",
@@ -158,15 +158,15 @@ export default {
                         state: "",
                         city: "",
                     };
-                    this.$emit("addressSaved"); // Emitir evento
+                    this.$emit("addressSaved"); // Emitir evento para refrescar la lista
                 } else {
-                    alert(response.message);
+                    alert("Error al guardar la dirección. Intenta nuevamente.");
                 }
             } catch (error) {
                 console.error("Error al guardar la dirección:", error);
                 alert("Error al guardar la dirección. Intenta nuevamente.");
             } finally {
-                this.loading = false;
+                this.isSaving = false;
             }
         },
     },
