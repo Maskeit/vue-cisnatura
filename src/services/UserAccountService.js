@@ -46,5 +46,26 @@ export const UserAccountService = {
       console.error("Error al eliminar la dirección:", error);
       return;
     }
+  },
+
+  async sendAddressToOrder(id) {
+    if (!system.http.check.live()) return;
+    try {
+      const response = await axiosInstance.put("/order/update/address", {data: id});
+      return response.data.status;
+    } catch (error) {
+      console.error("Error al enviar la dirección al pedido:", error);
+      return;
+    }
+  },
+  async getOrder(){
+    if (!system.http.check.live()) return;
+    try{
+      const response = await axiosInstance.get("/order/get");
+      return response.data.data;
+    } catch (error){
+      console.error("Error al obtener los pedidos:", error);
+      return;
+    }
   }
 };

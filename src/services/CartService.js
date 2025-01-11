@@ -80,6 +80,17 @@ const CartService = {
       return;
     }
   },
+
+  async createTemporalOrder(payload) {
+    if (!system.http.check.live()) return;
+    try {
+      const response = await axiosInstance.post(`/product/cart/order`, payload); // añade los productos a una preorden de solo productos
+      return response.data.status;
+    } catch (error) {
+      console.error("Error al crear la orden temporal:", error);
+      return;
+    }
+  }
 };
 
 export default CartService;

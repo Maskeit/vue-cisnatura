@@ -9,6 +9,10 @@
                 <!-- Mostrar mensaje si el carrito está vacío -->
                 <div v-if="cartProducts.length === 0" class="text-center py-10">
                     <p class="text-gray-500">No hay productos en tu carrito.</p>
+                    <router-link to="/Catalogo"
+                        class="mt-4 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded inline-block">
+                        Ir al catalogo
+                    </router-link>
                 </div>
                 <!-- Tarjetas de productos -->
                 <ProductCartCard v-for="(product, index) in cartProducts" :key="index" :product="product"
@@ -16,9 +20,12 @@
             </div>
 
             <!-- Columna de resumen -->
-            <div>
+            <div v-if="totalCost > 0">
                 <h2 class="text-2xl font-bold text-gray-600">Resumen de la compra</h2>
                 <div class="bg-white shadow-md rounded-lg p-4 relative">
+                    <p v-if="isOnlyCourses" class="text-sm text-green-500">
+                        ¡El envío es gratis porque tu carrito solo contiene cursos!
+                    </p>
                     <!-- Mostrar el loader -->
                     <div v-if="loading"
                         class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center">
@@ -31,16 +38,19 @@
                     </div>
                     <div class="flex justify-between mb-2">
                         <span class="font-semibold">Envío:</span>
-                        <span>${{ shippingCost.toFixed(2) }}</span>
+                        <span v-if="totalShippingCost > 0">${{ totalShippingCost.toFixed(2) }}</span>
+                        <span v-else class="text-green-500">¡Gratis!</span>
                     </div>
+
                     <div class="flex justify-between border-t pt-2">
                         <span class="font-semibold text-lg">Total:</span>
                         <span class="text-lg font-bold">${{ totalCost.toFixed(2) }}</span>
                     </div>
-                    <router-link to="/Address"
-                        class="mt-4 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded w-full text-center block">
+                    <button @click="continueToAddress"
+                        class="mt-4 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded w-full text-center block"
+                        :disabled="loading">
                         Continuar
-                    </router-link>
+                    </button>
                 </div>
             </div>
         </div>
@@ -64,14 +74,25 @@ export default {
         };
     },
     computed: {
+        // Subtotal de productos
         productSubtotal() {
             return this.cartProducts.reduce(
                 (sum, product) => sum + product.price * product.cantidad,
                 0
             );
         },
+        // Verifica si todos los productos del carrito son cursos
+        isOnlyCourses() {
+            return this.cartProducts.every((product) => product.type === "curso");
+        },
+        // Costo total de envío
+        totalShippingCost() {
+            // Si todos los productos son cursos, el envío es 0
+            return this.isOnlyCourses ? 0 : this.shippingCost;
+        },
+        // Costo total incluyendo productos y envío
         totalCost() {
-            return this.productSubtotal + this.shippingCost;
+            return this.productSubtotal + this.totalShippingCost;
         },
     },
     async mounted() {
@@ -135,6 +156,39 @@ export default {
                 console.error("Error al eliminar el producto del carrito:", error);
             } finally {
                 this.loading = false; // Ocultar el loader
+            }
+        },
+        async continueToAddress() {
+            try {
+                // Crear el payload con los datos del carrito
+                const payload = {
+                    items: this.cartProducts.map((product) => ({
+                        productId: product.productId,
+                        name: product.product_name,
+                        quantity: product.cantidad,
+                        unitPrice: product.price,
+                        totalPrice: product.price * product.cantidad,
+                    })),
+                    subtotal: this.productSubtotal, // Subtotal de los productos
+                    shippingCost: this.totalShippingCost, // Costo de envío (0 si solo hay cursos)
+                    total: this.totalCost, // Subtotal + envío
+                    address_id: localStorage.getItem("selectedAddressId")
+                };
+
+                // Llamar al método createTemporalOrder del servicio
+                const response = await CartService.createTemporalOrder(payload);
+
+                // Verificar si la respuesta fue exitosa
+                if (response && response === 201) {
+                    // Redirigir a la página de direcciones
+                    this.$router.push("/Address");
+                } else {
+                    console.error("Error al crear la orden temporal:", response?.message || "Sin detalles");
+                    alert("Hubo un problema al crear la orden temporal. Intenta de nuevo.");
+                }
+            } catch (error) {
+                console.error("Error al procesar la orden temporal:", error);
+                alert("Ocurrió un error al procesar tu orden. Intenta de nuevo.");
             }
         }
     },
