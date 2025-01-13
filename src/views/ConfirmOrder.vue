@@ -33,6 +33,8 @@ import OrderSummary from "@/components/OrderSummary.vue";
 import OrderWarnings from "@/components/OrderWarnings.vue";
 import ConfirmButton from "@/components/ConfirmButton.vue";
 import { UserAccountService } from "@/services/UserAccountService";
+import { createCheckoutSession } from "@/services/stripeService";
+
 export default {
     components: {
         SelectedAddress,
@@ -71,10 +73,26 @@ export default {
                 this.isLoading = false; // Desactivar loader
             }
         },
-        handleConfirm() {
-            // Navegar al checkout de Stripe
-            this.$router.push("/checkout");
-        },
+        async handleConfirm() {
+            this.isLoading = true;
+
+            try {
+                // Llama al backend para crear la sesión de checkout
+                const { url } = await createCheckoutSession();
+
+                if (!url) {
+                    throw new Error("No se pudo obtener la URL de checkout");
+                }
+
+                // Redirige al usuario al checkout de Stripe
+                window.location.href = url;
+            } catch (error) {
+                console.error("Error en la confirmación:", error);
+                alert("Hubo un problema al redirigir al checkout. Por favor, intenta de nuevo.");
+            } finally {
+                this.isLoading = false;
+            }
+        }
     },
     mounted() {
         this.fetchOrderDetails();

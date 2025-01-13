@@ -9,6 +9,10 @@ import Catalogo from "@/views/Catalogo.vue";
 import Carrito from "@/views/Carrito.vue";
 import Address from "@/views/Address.vue";
 import ConfirmOrder from "@/views/ConfirmOrder.vue";
+
+import Success from "@/views/PaymentStatus/Success.vue";
+import Cancel from "@/views/PaymentStatus/Cancel.vue";
+
 import Login from "@/views/Login.vue";
 import Register from "@/views/Register.vue";
 import Error from "@/views/Error.vue";
@@ -27,7 +31,9 @@ const routes = [
       { path: "catalogo", name: "Catalogo", component: Catalogo },
       { path: "carrito", name: "Carrito", component: Carrito },
       { path: "address", name: "Address", component: Address },
-      { path: "ConfirmOrder", name: "ConfirmOrder", component: ConfirmOrder}
+      { path: "ConfirmOrder", name: "ConfirmOrder", component: ConfirmOrder},
+      { path: "Success", name: "Success", component: Success },
+      { path: "Cancel", name: "Cancel", component: Cancel },
     ],
   },
   {

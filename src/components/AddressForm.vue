@@ -27,12 +27,20 @@
                     placeholder="RFC (opcional)" />
             </div>
 
-            <!-- Calle y número -->
+            <!-- Calle -->
             <div class="mb-4">
-                <label for="street" class="block text-gray-700 font-semibold">Calle y número</label>
+                <label for="street" class="block text-gray-700 font-semibold">Calle</label>
                 <input v-model="form.street" type="text" id="street"
                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-400 focus:border-green-400"
-                    placeholder="Calle, número exterior e interior" required />
+                    placeholder="Calle" />
+            </div>
+
+            <!-- Número -->
+            <div class="mb-4">
+                <label for="number" class="block text-gray-700 font-semibold">Número</label>
+                <input v-model="form.number" type="text" id="number"
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-400 focus:border-green-400"
+                    placeholder="Número exterior" />
             </div>
 
             <!-- Colonia o fraccionamiento -->
@@ -107,6 +115,7 @@ export default {
                 name: "",
                 rfc: "",
                 street: "",
+                number: "", // Campo adicional para el número
                 colony: "",
                 postalCode: "",
                 phone: "",
@@ -131,6 +140,7 @@ export default {
             if (
                 !this.form.name ||
                 !this.form.street ||
+                !this.form.number ||
                 !this.form.colony ||
                 !this.form.postalCode ||
                 !this.form.phone ||
@@ -143,15 +153,20 @@ export default {
 
             try {
                 this.isSaving = true;
-
+                const fullStreet = `${this.form.street} ${this.form.number}`.trim();
+                const payload = {
+                    ...this.form,
+                    street: fullStreet,
+                };
                 // Llamar al servicio para guardar la dirección
-                const response = await UserAccountService.saveAddress(this.form);
+                const response = await UserAccountService.saveAddress(payload);
 
                 if (response === 200) {
                     this.form = {
                         name: "",
                         rfc: "",
                         street: "",
+                        number: "",
                         colony: "",
                         postalCode: "",
                         phone: "",
