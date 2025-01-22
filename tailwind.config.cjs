@@ -1,6 +1,5 @@
 // tailwind.config.cjs
 const aspectRatio = require("@tailwindcss/aspect-ratio");
-const lineClamp = require("@tailwindcss/line-clamp"); // Importa el plugin
 const defaultTheme = require("tailwindcss/defaultTheme");
 
 module.exports = {
@@ -16,5 +15,4 @@ module.exports = {
       },
     },
   },
-  plugins: [aspectRatio, lineClamp],
 };

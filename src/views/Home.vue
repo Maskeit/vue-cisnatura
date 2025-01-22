@@ -1,9 +1,13 @@
 <template>
-  <div class="p-0">
+  <div class="flex flex-col">
     <!-- Componente Carrusel -->
-    <Carousel />
+    <div class="h-2/3">
+      <Carousel />
+    </div>
     <!-- Layout para productos destacados -->
-    <HomeLayout />
+    <div class="flex-grow">
+      <HomeLayout />
+    </div>
   </div>
 </template>
 

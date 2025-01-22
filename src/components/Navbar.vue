@@ -1,127 +1,111 @@
 <template>
-    <nav class="bg-white shadow-md">
-        <!-- Fila superior -->
-        <div class="flex justify-between items-center px-4 py-2">
+    <nav class="sticky top-0 z-50 bg-white shadow-md">
+        <!-- Fila Superior -->
+        <div class="flex justify-between items-center px-4 py-2 lg:px-8">
             <!-- Logo -->
             <div class="flex items-center">
-                <img src="/icons/logocis.svg" alt="Logo" class="h-12 mr-2" />
+                <img src="/icons/logocis.svg" alt="Logo" class="h-10 lg:h-16 mr-2" />
             </div>
 
             <!-- Barra de búsqueda -->
-            <div class="hidden lg:block">
+            <div class="hidden lg:flex items-center flex-grow mx-4">
                 <SearchBar :categories="categories" />
             </div>
-            <!-- Ubicación -->
-            <div class="hidden lg:flex items-center text-gray-700">
-                <MapPinIcon class="h-6 w-6" />
-                <div>
-                    <small>Entregas en</small><br />
-                    <strong>México</strong>
+
+            <!-- Controles (ubicación y carrito) si le quito el hidden-->
+            <div class="flex items-center space-x-4">
+                <div class="hidden lg:flex items-center text-gray-700">
+                    <MapPinIcon class="h-5 w-5 mr-1" />
+                    <div class="text-sm">
+                        <span>Entregas en</span><br />
+                        <strong>México</strong>
+                    </div>
                 </div>
+                <!-- Carrito -->
+                <div v-if="userLoggedIn">
+                    <router-link to="/Carrito" class="relative flex items-center">
+                        <ShoppingCartIcon class="h-6 w-6 text-gray-700" />
+                        <span v-if="cartCount > 0"
+                            class="absolute -top-2 -right-3 bg-red-500 text-white text-xs rounded-full px-2">
+                            {{ cartCount }}
+                        </span>
+                    </router-link>
+                </div>
+                <!-- Botón del menú hamburguesa (solo en móviles) -->
+                <button @click="toggleMenu" class="lg:hidden text-gray-700">
+                    <Bars3Icon class="h-6 w-6" />
+                </button>
             </div>
-            <!-- Botón hamburguesa para dispositivos pequeños -->
-            <button @click="toggleMenu" class="block lg:hidden text-gray-600">
-                <Bars3Icon class="h-6 w-6" />
-            </button>
         </div>
 
-        <!-- Fila inferior -->
-        <div class="flex justify-center items-center px-4 py-2">
-            <!-- Menú desplegable móvil -->
-            <div :class="menuOpen ? 'translate-x-0 z-20' : 'translate-x-full z-20'"
-                class="fixed top-0 right-0 w-3/4 h-full bg-white shadow-lg p-6 transform transition-transform lg:hidden">
-                <button @click="toggleMenu" class="absolute top-4 right-4 text-gray-700">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+        <!-- Menú de Navegación -->
+        <div class="hidden lg:flex justify-center space-x-6 py-2 border-t">
+            <router-link to="/" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">
+                Inicio
+            </router-link>
+            <router-link to="/Catalogo" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">
+                Productos
+            </router-link>
+            <router-link to="/Contacto" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">
+                Contacto
+            </router-link>
+            <router-link v-if="!userLoggedIn" to="/Login"
+                class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">
+                Iniciar Sesión
+            </router-link>
+            <div v-else class="relative">
+                <button @click="toggleUserDropdown"
+                    class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition flex items-center">
+                    {{ userName }}
+                    <ChevronDownIcon class="h-4 w-4 ml-1" />
                 </button>
-                <h2 class="text-lg font-semibold mb-4">Menú</h2>
+                <ul v-if="userDropdownOpen" class="absolute bg-white border shadow-lg mt-2 rounded-md py-1 w-48">
+                    <li @click="goToAccount" class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                        Cuenta
+                    </li>
+                    <li @click="logout" class="px-4 py-2 hover:bg-red-100 cursor-pointer">
+                        Cerrar sesión
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Menú desplegable móvil -->
+        <div :class="menuOpen ? 'translate-x-0' : 'translate-x-full'"
+            class="fixed top-0 right-0 w-3/4 h-full bg-white shadow-lg transform transition-transform duration-300 lg:hidden">
+            <button @click="toggleMenu" class="absolute top-4 right-4">
+                <svg class="h-6 w-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <div class="pt-12 px-6">
                 <SearchBar :categories="categories" />
-                <ul class="space-y-4">
+                <ul class="space-y-4 mt-4">
                     <li>
                         <router-link @click="toggleMenu" to="/"
-                            class="text-green-600 hover:text-green-800">Inicio</router-link>
+                            class="block text-green-600 hover:text-green-800">Inicio</router-link>
                     </li>
                     <li>
                         <router-link @click="toggleMenu" to="/Catalogo"
-                            class="text-green-600 hover:text-green-800">Productos</router-link>
+                            class="block text-green-600 hover:text-green-800">Productos</router-link>
                     </li>
                     <li>
                         <router-link @click="toggleMenu" to="/Carrito"
-                            class="text-green-600 hover:text-green-800">Carrito</router-link>
+                            class="block text-green-600 hover:text-green-800">Carrito</router-link>
                     </li>
                     <li>
                         <router-link @click="toggleMenu" to="/Contacto"
-                            class="text-green-600 hover:text-green-800">Contacto</router-link>
+                            class="block text-green-600 hover:text-green-800">Contacto</router-link>
                     </li>
                     <li v-if="!userLoggedIn">
-                        <router-link @click="toggleMenu" to="/Login" class="text-green-600 hover:text-green-800">Iniciar
-                            Sesión</router-link>
+                        <router-link @click="toggleMenu" to="/Login"
+                            class="block text-green-600 hover:text-green-800">Iniciar Sesión</router-link>
                     </li>
-                    <div v-if="userLoggedIn" class="relative group">
-                        <button @click="toggleUserDropdown" class="hover:text-green-600 flex items-center space-x-1">
-                            <span class="mr-2">{{ userName }}</span>
-                            <ChevronDownIcon class="h-5 w-5" />
-                        </button>
-                        <ul v-if="userDropdownOpen"
-                            class="absolute z-10 bg-white shadow-md border mt-2 rounded-md w-48">
-                            <li @click="goToAccount" class="hover:bg-gray-100 px-4 py-2 cursor-pointer">
-                                Cuenta
-                            </li>
-                            <li @click="logout" class="hover:bg-red-100 px-4 py-2 cursor-pointer">
-                                Cerrar sesión
-                            </li>
-                        </ul>
-                    </div>
+                    <li v-else>
+                        <button @click="logout" class="block text-red-600 hover:text-red-800">Cerrar Sesión</button>
+                    </li>
                 </ul>
             </div>
-            <!-- Botones de navegación -->
-            <ul class="hidden lg:flex space-x-6 font-light">
-                <li>
-                    <router-link to="/" class="block px-4 py-2 text-center hover:bg-gray-100 rounded-md">
-                        Inicio
-                    </router-link>
-                </li>
-                <li>
-                    <router-link to="/Catalogo" class="block px-4 py-2 text-center hover:bg-gray-100 rounded-md">
-                        Productos
-                    </router-link>
-                </li>
-                <li>
-                    <router-link to="/Contacto" class="block px-4 py-2 text-center hover:bg-gray-100 rounded-md">
-                        Contacto
-                    </router-link>
-                </li>
-                <li>
-                    <router-link v-if="!userLoggedIn" to="/Login"
-                        class="block px-4 py-2 text-center hover:bg-green-100 rounded-md" active-class="bg-green-200">
-                        Iniciar Sesión
-                    </router-link>
-                    <div v-else class="relative">
-                        <button @click="toggleUserDropdown"
-                            class="flex items-center px-4 py-2 hover:bg-gray-100 rounded-md">
-                            <span class="mr-2">{{ userName }}</span>
-                            <ChevronDownIcon class="h-5 w-5" />
-                        </button>
-                        <ul v-if="userDropdownOpen"
-                            class="absolute z-10 bg-white shadow-md border mt-2 rounded-md w-48">
-                            <li @click="goToAccount" class="hover:bg-gray-100 px-4 py-2 cursor-pointer">
-                                Cuenta
-                            </li>
-                            <li @click="logout" class="hover:bg-red-100 px-4 py-2 cursor-pointer">
-                                Cerrar sesión
-                            </li>
-                        </ul>
-                    </div>
-                </li>
-            </ul>
-            <!-- Carrito -->
-            <router-link to="/Carrito" class="flex items-center relative mx-3">
-                Carrito
-                <ShoppingCartIcon class="h-6 w-6 text-gray-700" />
-                <span class="absolute -top-2 -right-3 bg-red-500 text-white rounded-full px-2 text-sm">4</span>
-            </router-link>
         </div>
     </nav>
 </template>
@@ -132,6 +116,7 @@ import { Bars3Icon, ChevronDownIcon, ShoppingCartIcon, MapPinIcon } from "@heroi
 import { AuthService } from "@/services/AuthService";
 import { EventBus } from "@/services/eventBus";
 import Cookies from 'js-cookie';
+import CartService from "../services/CartService";
 export default {
     props: {
         categories: {
@@ -152,12 +137,21 @@ export default {
             userDropdownOpen: false, // Controla el dropdown del usuario
             userLoggedIn: false,
             userName: null,
+            cartCount: 0
         };
     },
     async mounted() {
         // Revisa si hay un usuario logueado y actualiza el Navbar
         this.checkUserLoginStatus();
         document.addEventListener("click", this.handleOutsideClick);
+
+        // Escuchar actualizaciones del carrito
+        EventBus.on("cart-updated", (cartItems) => {
+            this.cartCount = cartItems.reduce((total, item) => total + item.cantidad, 0);
+        });
+        // Inicializar el contador del carrito desde el almacenamiento local
+        const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+        this.cartCount = cart.reduce((total, item) => total + item.cantidad, 0);
     },
     beforeDestroy() {
         document.removeEventListener("click", this.handleOutsideClick);
@@ -204,16 +198,7 @@ export default {
         },
         async logout() {
             try {
-                const response = await AuthService.logout(); // Añade este método para manejar el cierre de sesión en el servidor
-                var message = "";
-                if (response !== 200) {
-                    alert("No se pudo cerrar la sesion intente más tarde");
-                    return;
-                }
-                localStorage.removeItem("Authorization");
-                localStorage.removeItem("username");
-                Cookies.remove('SSK');
-                alert("Sesión cerrada correctamente");
+                if (!await AuthService.logout()) return;
                 this.userLoggedIn = false;
                 this.$router.push("/Login");
                 return;

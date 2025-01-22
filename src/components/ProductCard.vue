@@ -22,10 +22,16 @@
             <span class="text-md font-semibold text-gray-800">
                 ${{ product.price }} MX
             </span>
-            <button @click.stop="$emit('add-to-cart', product.id)"
+            <button @click.stop="handleAddToCart"
                 class="bg-white hover:bg-gray-100 text-gray-800 font-medium py-2 px-4 rounded-full shadow flex items-center gap-1">
-                <span>Añadir</span>
-                <ShoppingCartIcon class="h-5 w-5 text-gray-800" />
+                <template v-if="addedToCart">
+                    <span>✓</span>
+                    <span>Agregado</span>
+                </template>
+                <template v-else>
+                    <span>Añadir</span>
+                    <ShoppingCartIcon class="h-5 w-5 text-gray-800" />
+                </template>
             </button>
         </div>
     </div>
@@ -33,6 +39,7 @@
 
 <script>
 import { ShoppingCartIcon } from "@heroicons/vue/24/outline";
+import CartManager from "@/services/CartManager";
 
 export default {
     name: "ProductCard",
@@ -43,9 +50,20 @@ export default {
             required: true,
         },
     },
-    methods: {
-        addToCart(productId) {
-            this.$emit("add-to-cart", productId); // Emite el evento para agregar al carrito
+    data() {
+        return {
+            addedToCart: false, // Estado temporal para mostrar el mensaje de éxito
+        };
+    },
+    methods: {    
+        async handleAddToCart() {
+            const success = await CartManager.addProductToCart(this.product, 1);
+            if (success) {
+                this.addedToCart = true;
+                setTimeout(() => {
+                    this.addedToCart = false;
+                }, 2000);
+            }
         },
     },
 };
@@ -54,7 +72,7 @@ export default {
 <style scoped>
 /* Estilo adicional si se necesita */
 @media (width<500px) {
-    .product-card{
+    .product-card {
         min-width: calc(100% - 2rem);
     }
 }

@@ -29,8 +29,14 @@
                 <span class="text-2xl font-bold">${{ product.price }} MX</span>
                 <button @click="addToCart(product.id)"
                     class="bg-white hover:bg-gray-100 text-gray-800 font-medium py-2 px-4 rounded-full shadow flex items-center gap-1">
-                    <span>Añadir</span>
-                    <ShoppingCartIcon class="h-5 w-5 text-gray-800" />
+                    <template v-if="addedToCart">
+                        <span>✓</span>
+                        <span>Agregado</span>
+                    </template>
+                    <template v-else>
+                        <span>Añadir</span>
+                        <ShoppingCartIcon class="h-5 w-5 text-gray-800" />
+                    </template>
                 </button>
             </div>
         </div>
@@ -38,6 +44,7 @@
 </template>
 <script>
 import { XMarkIcon, ShoppingCartIcon } from "@heroicons/vue/24/solid";
+import CartManager from "@/services/CartManager";
 
 export default {
     components: { XMarkIcon, ShoppingCartIcon },
@@ -45,13 +52,24 @@ export default {
         isOpen: { type: Boolean, default: false },
         product: { type: Object, required: true },
     },
+    data() {
+        return {
+            addedToCart: false, // Estado temporal para mostrar el mensaje de éxito
+        };
+    },
     methods: {
         closeModal() {
             this.$emit("close");
         },
-        addToCart(productId) {
-            console.log("añadiendo")
-            this.$emit("add-to-cart", productId);
+        async addToCart(productId) {
+            const success = await CartManager.addProductToCart(this.product, 1);
+            if (success) {
+                this.$emit("add-to-cart", productId);
+                this.addedToCart = true;
+                setTimeout(() => {
+                    this.addedToCart = false;
+                }, 2000);
+            }
         },
     },
 };

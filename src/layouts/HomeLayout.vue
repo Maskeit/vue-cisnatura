@@ -17,15 +17,16 @@
         <ProductModal :isOpen="isModalOpen" :product="selectedProduct" @close="closeModal"
             @add-to-cart="handleAddToCart" />
     </div>
+    <HomeIndicates />
 </template>
 
 <script>
 import ProductCard from "@/components/ProductCard.vue";
 import ProductService from "@/services/ProductService";
 import ProductModal from "@/components/ProductModal.vue";
-
+import HomeIndicates from "@/components/HomeIndicates.vue";
 export default {
-    components: { ProductCard, ProductModal },
+    components: { ProductCard, ProductModal,HomeIndicates },
     data() {
         return {
             products: [],

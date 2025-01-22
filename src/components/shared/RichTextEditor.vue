@@ -1,0 +1,72 @@
+<template>
+    <div>
+        <div ref="editor"></div>
+    </div>
+</template>
+
+<script>
+import Quill from "quill";
+import "quill/dist/quill.snow.css";
+
+export default {
+    props: {
+        value: {
+            type: String,
+            required: true,
+        },
+    },
+    watch: {
+        value(newValue) {
+            console.log("Nuevo valor recibido en el editor:", newValue);
+            if (this.quill && this.quill.root.innerHTML !== newValue) {
+                this.quill.root.innerHTML = this.sanitizeHtml(newValue || "");
+            }
+        },
+    },
+    methods: {
+        sanitizeHtml(html) {
+            if (!html) return "";
+            const tempDiv = document.createElement("div");
+            tempDiv.innerHTML = html;
+
+            // Limpia cualquier nodo no válido
+            const allowedTags = ["P", "STRONG", "EM", "UL", "LI", "OL", "A", "SPAN"];
+            Array.from(tempDiv.querySelectorAll("*")).forEach((node) => {
+                if (!allowedTags.includes(node.tagName)) {
+                    node.remove();
+                }
+            });
+
+            return tempDiv.innerHTML;
+        },
+        getContent() {
+            // Devuelve el contenido actual del editor
+            return this.quill.root.innerHTML;
+        },
+    },
+    mounted() {
+        console.log("Contenido inicial recibido por el editor:", this.value);
+
+        this.quill = new Quill(this.$refs.editor, {
+            theme: "snow",
+            modules: {
+                toolbar: [
+                    ["bold", "italic", "underline"],
+                    [{ list: "ordered" }, { list: "bullet" }],
+                    [{ align: [] }],
+                    //["link", "image"],
+                ],
+            },
+        });
+
+        // Limpia y valida el contenido HTML antes de asignarlo
+        const sanitizedContent = this.sanitizeHtml(this.value || "");
+        console.log("Contenido después de limpieza:", sanitizedContent);
+        this.quill.root.innerHTML = sanitizedContent;
+
+        this.quill.on("text-change", () => {
+            this.$emit("input", this.quill.root.innerHTML);
+        });
+    }
+};
+</script>

@@ -10,12 +10,11 @@ export const AuthService = {
       });
 
       if (response.status === 200 && response.data.data) {
-        const AuthToken = response.data.data; // es el token de la respuesta en data
-        // Almacenar el token en memoria o almacenamiento local
-        localStorage.setItem("Authorization", AuthToken);
-
-        return response.data;
+        const authToken = response.data.data; // es el token de la respuesta en data
+        system.authToken = authToken.token; // Guardar el token en el sistema
+        return authToken.token;
       }
+      return null; // No se encontró el usuario o la contraseña es incorrecta
     } catch (error) {
       console.error("Error en login:", error);
       throw error;
@@ -82,17 +81,19 @@ export const AuthService = {
 
   async logout() {
     try {
-      const token = localStorage.getItem("Authorization");
-      if (!token) return;
-      const response = await axiosInstance.post("client/session/close", {}, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });   
-      return response.data.status;
+      const response = await axiosInstance.post("client/session/close");
+      if (response.data.status !== 200) {
+        return false;
+      }
+      return true;
     } catch (error) {
-      console.error("Error al cerrar sesión:", error);
-      throw error;
+      console.error("Error durante el cierre de sesión:", error);
+    } finally {
+      // Eliminar token y otros datos locales independientemente del resultado
+      system.authToken = null;
+      localStorage.clear(); // Limpia todo el local storage
+      // Opcional: Eliminar cookies relacionadas
+      system.cookies.remove("SSK");
     }
   },
 };

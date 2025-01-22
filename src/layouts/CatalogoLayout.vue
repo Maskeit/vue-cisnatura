@@ -5,7 +5,10 @@
 
         <!-- Main Content -->
         <div class="flex-1 p-6">
-            <div v-if="loading" class="text-center py-4">Cargando productos...</div>
+            <!-- Loader de carga -->
+            <div v-if="isLoading" class="flex items-center justify-center h-full">
+                <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-green-500"></div>
+            </div>
 
             <!-- Productos -->
             <div class="product-list">
@@ -29,7 +32,9 @@ import ProductCard from "@/components/ProductCard.vue";
 import ProductModal from "@/components/ProductModal.vue";
 import Pagination from "@/components/Pagination.vue";
 import ProductService from "@/services/ProductService";
+import CartService from "@/services/CartService";
 import { EventBus } from "@/services/eventBus";
+import { system } from "@/services/system";
 export default {
     components: { Sidebar, ProductCard, ProductModal, Pagination },
     data() {
@@ -40,7 +45,7 @@ export default {
             currentPage: 1,
             totalPages: 0,
             limit: 16,
-            loading: false,
+            isLoading: false,
             isModalOpen: false,
             categories: [
                 { displayName: "Todos los productos", value: null },
@@ -85,6 +90,9 @@ export default {
             .catch((error) => {
                 console.error("Error al cargar productos iniciales:", error);
             });
+        if (system.http.check.auth()) {
+            this.fetchCart();
+        }
     },
     beforeUnmount() {
         // Desregistrar eventos al desmontar el componente
@@ -92,8 +100,17 @@ export default {
         EventBus.off("serverSearch", this.serverSearch);
     },
     methods: {
+        async fetchCart() {
+            try {
+                const cartItems = await CartService.getCart();
+                // Puedes emitir un evento para actualizar otros componentes
+                EventBus.emit("cart-updated", cartItems);
+            } catch (error) {
+                console.error("Error al cargar el carrito:", error);
+            }
+        },
         async fetchProducts(page) {
-            this.loading = true;
+            this.isLoading = true;
             try {
                 const { products, total } = await ProductService.getCatalogoProducts(page, this.limit);
                 this.products = products;
@@ -102,7 +119,7 @@ export default {
             } catch (error) {
                 console.error("Error al cargar los productos:", error);
             } finally {
-                this.loading = false;
+                this.isLoading = false;
             }
         },
         async changePage(page) {
