@@ -1,6 +1,12 @@
 <template>
   <div class="login-container">
-
+    <!-- Botón para regresar al Home -->
+    <router-link to="/" class="back-home-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+        stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7m0 0l7-7m-7 7h16" />
+      </svg>
+    </router-link>
     <div class="login-card">
       <h2 class="title">Iniciar Sesión</h2>
       <p class="subtitle">Introduce tus credenciales para acceder a tu cuenta de Cisnatura</p>
@@ -100,6 +106,31 @@ export default {
   align-items: center;
   min-height: 100vh;
   background-color: #f9f9f9;
+}
+
+.back-home-btn {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: #f1f5f9;
+  border-radius: 50%;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.back-home-btn:hover {
+  background-color: #e5e7eb;
+  transform: scale(1.1);
+}
+
+.back-home-btn svg {
+  height: 1.5rem;
+  width: 1.5rem;
+  color: #374151;
 }
 
 .login-card {

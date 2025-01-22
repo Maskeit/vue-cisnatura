@@ -6,31 +6,35 @@
             <div class="flex items-center">
                 <img src="/icons/logocis.svg" alt="Logo" class="h-10 lg:h-16 mr-2" />
             </div>
-
-            <!-- Barra de búsqueda -->
-            <div class="hidden lg:flex items-center flex-grow mx-4">
-                <SearchBar :categories="categories" />
+            <div class="hidden lg:flex justify-center space-x-6 py-2">
+                <router-link to="/" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">
+                    Inicio
+                </router-link>
+                <router-link to="/AdminProducts" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">
+                    Productos
+                </router-link>
+                <router-link to="/AdminDashboard" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">
+                    Ventas
+                </router-link>
+                <router-link v-if="!userLoggedIn" to="/Login"
+                    class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">
+                    Iniciar Sesión
+                </router-link>
+                <div v-else class="relative">
+                    <button @click="toggleUserDropdown"
+                        class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition flex items-center">
+                        {{ userName }}
+                        <ChevronDownIcon class="h-4 w-4 ml-1" />
+                    </button>
+                    <ul v-if="userDropdownOpen" class="absolute bg-white border shadow-lg mt-2 rounded-md py-1 w-48">
+                        <li @click="logout" class="px-4 py-2 hover:bg-red-100 cursor-pointer">
+                            Cerrar sesión
+                        </li>
+                    </ul>
+                </div>
             </div>
-
             <!-- Controles (ubicación y carrito) si le quito el hidden-->
             <div class="flex items-center space-x-4">
-                <div class="hidden lg:flex items-center text-gray-700">
-                    <MapPinIcon class="h-5 w-5 mr-1" />
-                    <div class="text-sm">
-                        <span>Entregas en</span><br />
-                        <strong>México</strong>
-                    </div>
-                </div>
-                <!-- Carrito -->
-                <div v-if="userLoggedIn">
-                    <router-link to="/Carrito" class="relative flex items-center">
-                        <ShoppingCartIcon class="h-6 w-6 text-gray-700" />
-                        <span v-if="cartCount > 0"
-                            class="absolute -top-2 -right-3 bg-red-500 text-white text-xs rounded-full px-2">
-                            {{ cartCount }}
-                        </span>
-                    </router-link>
-                </div>
                 <!-- Botón del menú hamburguesa (solo en móviles) -->
                 <button @click="toggleMenu" class="lg:hidden text-gray-700">
                     <Bars3Icon class="h-6 w-6" />
@@ -39,36 +43,7 @@
         </div>
 
         <!-- Menú de Navegación -->
-        <div class="hidden lg:flex justify-center space-x-6 py-2 border-t">
-            <router-link to="/" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">
-                Inicio
-            </router-link>
-            <router-link to="/Catalogo" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">
-                Productos
-            </router-link>
-            <router-link to="/Contacto" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">
-                Contacto
-            </router-link>
-            <router-link v-if="!userLoggedIn" to="/Login"
-                class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">
-                Iniciar Sesión
-            </router-link>
-            <div v-else class="relative">
-                <button @click="toggleUserDropdown"
-                    class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition flex items-center">
-                    {{ userName }}
-                    <ChevronDownIcon class="h-4 w-4 ml-1" />
-                </button>
-                <ul v-if="userDropdownOpen" class="absolute bg-white border shadow-lg mt-2 rounded-md py-1 w-48">
-                    <li @click="goToAccount" class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                        Cuenta
-                    </li>
-                    <li @click="logout" class="px-4 py-2 hover:bg-red-100 cursor-pointer">
-                        Cerrar sesión
-                    </li>
-                </ul>
-            </div>
-        </div>
+
 
         <!-- Menú desplegable móvil -->
         <div :class="menuOpen ? 'translate-x-0' : 'translate-x-full'"
@@ -79,29 +54,20 @@
                 </svg>
             </button>
             <div class="pt-12 px-6">
-                <SearchBar :categories="categories" />
                 <ul class="space-y-4 mt-4">
                     <li>
                         <router-link @click="toggleMenu" to="/"
                             class="block text-green-600 hover:text-green-800">Inicio</router-link>
                     </li>
                     <li>
-                        <router-link @click="toggleMenu" to="/Catalogo"
+                        <router-link @click="toggleMenu" to="/xqc/AdminProducts"
                             class="block text-green-600 hover:text-green-800">Productos</router-link>
                     </li>
                     <li>
-                        <router-link @click="toggleMenu" to="/Carrito"
-                            class="block text-green-600 hover:text-green-800">Carrito</router-link>
+                        <router-link @click="toggleMenu" to="/xqc/AdminDashboard"
+                            class="block text-green-600 hover:text-green-800">Ventas</router-link>
                     </li>
                     <li>
-                        <router-link @click="toggleMenu" to="/Contacto"
-                            class="block text-green-600 hover:text-green-800">Contacto</router-link>
-                    </li>
-                    <li v-if="!userLoggedIn">
-                        <router-link @click="toggleMenu" to="/Login"
-                            class="block text-green-600 hover:text-green-800">Iniciar Sesión</router-link>
-                    </li>
-                    <li v-else>
                         <button @click="logout" class="block text-red-600 hover:text-red-800">Cerrar Sesión</button>
                     </li>
                 </ul>
@@ -111,12 +77,12 @@
 </template>
 
 <script>
-import SearchBar from "./SearchBar.vue";
+
 import { Bars3Icon, ChevronDownIcon, ShoppingCartIcon, MapPinIcon } from "@heroicons/vue/24/outline";
-import { AuthService } from "@/services/AuthService";
+import { AuthService } from "@/services/AdminServices/AuthService";
 import { EventBus } from "@/services/eventBus";
 import Cookies from 'js-cookie';
-import CartService from "../services/CartService";
+//use admin 
 export default {
     props: {
         categories: {
@@ -127,9 +93,6 @@ export default {
     components: {
         Bars3Icon,
         ChevronDownIcon,
-        ShoppingCartIcon,
-        MapPinIcon,
-        SearchBar
     },
     data() {
         return {
@@ -144,14 +107,6 @@ export default {
         // Revisa si hay un usuario logueado y actualiza el Navbar
         this.checkUserLoginStatus();
         document.addEventListener("click", this.handleOutsideClick);
-
-        // Escuchar actualizaciones del carrito
-        EventBus.on("cart-updated", (cartItems) => {
-            this.cartCount = cartItems.reduce((total, item) => total + item.cantidad, 0);
-        });
-        // Inicializar el contador del carrito desde el almacenamiento local
-        const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-        this.cartCount = cart.reduce((total, item) => total + item.cantidad, 0);
     },
     beforeDestroy() {
         document.removeEventListener("click", this.handleOutsideClick);
@@ -183,24 +138,18 @@ export default {
             this.userDropdownOpen = !this.userDropdownOpen;
             this.categoryDropdownOpen = false; // Cierra el dropdown de category        
         },
-        toggleCategoryDropdown() {
-            this.categoryDropdownOpen = !this.categoryDropdownOpen;
-            this.userDropdownOpen = false; // Cierra el dropdown de usuario
-        },
         handleOutsideClick(event) { // cierra el dropdown si se hace click fuera del dropdown
             if (!this.$el.contains(event.target) && this.categoryDropdownOpen || !this.$el.contains(event.target) && this.userDropdownOpen) {
                 this.categoryDropdownOpen = false;
                 this.userDropdownOpen = false;
             }
         },
-        goToAccount() {
-            this.$router.push("/Cuenta");
-        },
+
         async logout() {
             try {
                 if (!await AuthService.logout()) return;
                 this.userLoggedIn = false;
-                this.$router.push("/Login");
+                this.$router.push("/xqc/AdminLogin");
                 return;
             } catch (error) {
                 console.error("Error cerrando sesión:", error);

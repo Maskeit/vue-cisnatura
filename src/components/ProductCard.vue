@@ -34,15 +34,12 @@
                 </template>
             </button>
         </div>
-
-
     </div>
 </template>
 
 <script>
 import { ShoppingCartIcon } from "@heroicons/vue/24/outline";
-import CartService from "@/services/CartService";
-import { EventBus } from "@/services/eventBus";
+import CartManager from "@/services/CartManager";
 
 export default {
     name: "ProductCard",
@@ -58,54 +55,14 @@ export default {
             addedToCart: false, // Estado temporal para mostrar el mensaje de éxito
         };
     },
-    methods: {
+    methods: {    
         async handleAddToCart() {
-            const token = localStorage.getItem("Authorization");
-            if (!token) {
-                EventBus.emit("showModal", {
-                    message: "Para agregar productos al carrito es necesario tener una cuenta.",
-                    confirmText: "Iniciar Sesión",
-                    cancelText: "Cancelar",
-                });
-                return;
-            }
-
-            try {
-                const response = await CartService.addProduct(this.product.id, 1);
-                if (response === 201) {
-                    // Actualizar el carrito localmente
-                    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-
-                    // Buscar si el producto ya existe en el carrito
-                    const existingProduct = cart.find((item) => item.product_id === this.product.id);
-
-                    if (existingProduct) {
-                        // Incrementar la cantidad si el producto ya existe
-                        existingProduct.cantidad += 1;
-                    } else {
-                        // Si el producto no existe, agregarlo al carrito
-                        cart.push({
-                            product_id: this.product.id,
-                            product_name: this.product.product_name,
-                            cantidad: 1,
-                            price: this.product.price,
-                            thumb: this.product.thumb,
-                        });
-                    }
-
-                    // Guardar el carrito actualizado en localStorage
-                    localStorage.setItem("cart", JSON.stringify(cart));
-
-                    // Emitir evento para actualizar el contador del carrito en el Navbar
-                    EventBus.emit("cart-updated", cart);
-                    // Mostrar estado temporal en el botón
-                    this.addedToCart = true;
-                    setTimeout(() => {
-                        this.addedToCart = false;
-                    }, 2000); // Ocultar el estado después de 2 segundos
-                }
-            } catch (error) {
-                console.error("Error al agregar al carrito:", error);
+            const success = await CartManager.addProductToCart(this.product, 1);
+            if (success) {
+                this.addedToCart = true;
+                setTimeout(() => {
+                    this.addedToCart = false;
+                }, 2000);
             }
         },
     },

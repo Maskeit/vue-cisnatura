@@ -83,7 +83,7 @@ export const system = {
     system.cookies.remove("APISS__NME");
     localStorage.clear();
     // Redirige al usuario
-    window.location.href = V_Global_API + "login";
+    router.push("/Login");
   },
   platform: {
     session: {

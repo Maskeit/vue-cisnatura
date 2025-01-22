@@ -76,6 +76,7 @@ const CartService = {
       localStorage.setItem("cart", JSON.stringify(cartItems)); // Guardar en el almacenamiento local
       return cartItems;
     } catch (error) {
+      system.clearCookiesAndRedirect();
       console.error("Error al obtener el carrito:", error);
       return;
     }
