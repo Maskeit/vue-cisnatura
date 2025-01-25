@@ -68,7 +68,5 @@ export default {
     /* Cubre el contenedor sin deformarse */
     object-position: center;
     /* Centra la imagen si tiene dimensiones diferentes */
-    border-radius: 8px;
-    /* Opcional: Redondear bordes */
 }
 </style>

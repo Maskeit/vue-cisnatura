@@ -198,34 +198,33 @@ export default {
             this.isModalOpen = false;
             this.selectedProduct = null;
         },
-        handleSaveProduct(data, hasImage) {
-            if (hasImage) {
-                // Llamar al método para enviar FormData
-                ProductServices.editProduct(data, true)
-                    .then((response) => {
-                        console.log("Producto actualizado con imagen:", response);
-                        this.isModalOpen = false;
-                    })
-                    .catch((error) => {
-                        console.error("Error al actualizar producto con imagen:", error);
-                    });
-            } else {
-                // Llamar al método para enviar JSON
-                ProductServices.editProduct(data, false)
-                    .then((response) => {
-                        console.log("Producto actualizado sin imagen:", response);
-                        this.isModalOpen = false;
-                    })
-                    .catch((error) => {
-                        console.error("Error al actualizar producto sin imagen:", error);
-                    });
-            }
-        },
         openCreateProductModal() {
             this.isCreateModalOpen = true;
         },
         closeCreateProductModal() {
             this.isCreateModalOpen = false;
+        },
+        async handleSaveProduct(data, hasImage) {
+            try {
+                let response;
+                if (hasImage) {
+                    // Llamar al método para enviar FormData
+                    response = await ProductServices.editProduct(data, true);
+                } else {
+                    // Llamar al método para enviar JSON
+                    response = await ProductServices.editProduct(data, false);
+                }
+
+                if (response === 201) {
+                    console.log("Producto actualizado exitosamente:", response);
+                    // Recargar productos después de guardar
+                    await this.fetchProducts(this.currentPage);
+                    // Emitir un evento al modal para que muestre el mensaje de éxito
+                    EventBus.emit("showConfirmation", "Producto actualizado exitosamente.");
+                }
+            } catch (error) {
+                console.error("Error al actualizar producto:", error);
+            }
         },
         async handleCreateProduct(formData) {
             try {
@@ -239,13 +238,15 @@ export default {
                 console.error("Error al crear el producto:", error);
             }
         },
-        async handleDeleteProduct(product) {
+        async handleDeleteProduct(productId) {
             try {
-                const response = await ProductServices.deleteProduct(product);
+                const response = await ProductServices.deleteProduct(productId);
                 if (response === 201) {
-                    await this.fetchProducts(this.currentPage);
+                    // Elimina el producto de la lista reactiva `products`
+                    this.products = this.products.filter((product) => product.id !== productId);
+                    this.filteredProducts = this.filteredProducts.filter((product) => product.id !== productId);
                 } else {
-                    alert("Error al cambiar estado del producto");
+                    alert("Error al eliminar el producto.");
                 }
             } catch (error) {
                 console.error("Error al eliminar el producto:", error);
@@ -254,8 +255,12 @@ export default {
         async handleToggleProduct(productId) {
             try {
                 const response = await ProductServices.toggleProduct(productId);
-                if (response === 201) {
-                    await this.fetchProducts(this.currentPage);
+                if (response === 201) { // esto quiere decir que si se cambio la visibilidad en la base de datos. 
+                    // Encuentra el producto en la lista y actualiza su estado "active"
+                    const product = this.products.find((p) => p.id === productId);
+                    if (product) {
+                        product.active = product.active == 1 ? 0 : 1; // Alterna el estado
+                    }
                 } else {
                     alert("Error al cambiar estado del producto");
                 }

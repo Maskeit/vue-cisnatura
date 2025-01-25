@@ -1,6 +1,6 @@
 import axiosInstance from "./axiosInstance";
 import { system, V_Global_API } from "./system";
-
+import Cookes from 'js-cookie';
 export const AuthService = {
   async login(email, password) {
     try {
@@ -92,8 +92,6 @@ export const AuthService = {
       // Eliminar token y otros datos locales independientemente del resultado
       system.authToken = null;
       localStorage.clear(); // Limpia todo el local storage
-      // Opcional: Eliminar cookies relacionadas
-      system.cookies.remove("SSK");
     }
   },
 };

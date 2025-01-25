@@ -67,9 +67,15 @@
         message="Esta acción no se puede deshacer. ¿Deseas continuar?" confirmText="Eliminar" cancelText="Cancelar"
         @confirm="confirmDeleteProduct" @cancel="isDeleteModalOpen = false" />
 
-    <ConfirmationModal v-if="isToggleModalOpen" :isOpen="isToggleModalOpen" title="¿Deshabilitar Producto?"
-        message="Puedes habilitar este producto nuevamente más tarde." confirmText="Deshabilitar" cancelText="Cancelar"
+    <ConfirmationModal v-if="isToggleModalOpen" :isOpen="isToggleModalOpen"
+        :title="editedProduct.active == 1 ? '¿Deshabilitar Producto?' : '¿Habilitar Producto?'" :message="editedProduct.active === 1
+            ? 'Puedes habilitar este producto nuevamente más tarde.'
+            : 'El producto estará habilitado para su visualización.'"
+        :confirmText="editedProduct.active == 1 ? 'Deshabilitar' : 'Habilitar'" cancelText="Cancelar"
         @confirm="confirmToggleProduct" @cancel="isToggleModalOpen = false" />
+
+    <ConfirmationModal v-if="isConfirmationModalOpen" :isOpen="isConfirmationModalOpen" title="¡Éxito!"
+        message="El producto se actualizó correctamente." confirmText="Aceptar" @confirm="closeConfirmationModal" />
 </template>
 
 <script>
@@ -88,11 +94,15 @@ export default {
             previewImage: null,
             isDeleteModalOpen: false, // Controla el modal de confirmación
             isToggleModalOpen: false,
+            isConfirmationModalOpen: false, // Controla el modal de confirmación para ediciones
         };
     },
     methods: {
         closeModal() {
             this.$emit("close");
+        },
+        closeConfirmationModal() {
+            this.isConfirmationModalOpen = false;
         },
         handleImageChange(event) {
             const file = event.target.files[0];
@@ -102,32 +112,40 @@ export default {
             }
         },
         saveProduct() {
-            const hasImage = !!this.editedProduct.imageFile; // Verifica si hay una imagen
-            let dataToSend;
+            try {
+                const hasImage = !!this.editedProduct.imageFile; // Verifica si hay una imagen
+                let dataToSend;
 
-            if (hasImage) {
-                // Construir FormData si hay una imagen
-                const formData = new FormData();
-                formData.append("id", this.editedProduct.id);
-                formData.append("name", this.editedProduct.product_name);
-                formData.append("description", this.editedProduct.description);
-                formData.append("price", this.editedProduct.price);
-                formData.append("stock", this.editedProduct.stock);
-                formData.append("image", this.editedProduct.imageFile); // Agregar imagen
-                dataToSend = formData;
-            } else {
-                // Usar JSON si no hay imagen
-                dataToSend = {
-                    id: this.editedProduct.id,
-                    name: this.editedProduct.product_name,
-                    description: this.editedProduct.description,
-                    price: this.editedProduct.price,
-                    stock: this.editedProduct.stock,
-                };
+                if (hasImage) {
+                    // Construir FormData si hay una imagen
+                    const formData = new FormData();
+                    formData.append("id", this.editedProduct.id);
+                    formData.append("name", this.editedProduct.product_name);
+                    formData.append("description", this.editedProduct.description);
+                    formData.append("price", this.editedProduct.price);
+                    formData.append("stock", this.editedProduct.stock);
+                    formData.append("image", this.editedProduct.imageFile); // Agregar imagen
+                    dataToSend = formData;
+                } else {
+                    // Usar JSON si no hay imagen
+                    dataToSend = {
+                        id: this.editedProduct.id,
+                        name: this.editedProduct.product_name,
+                        description: this.editedProduct.description,
+                        price: this.editedProduct.price,
+                        stock: this.editedProduct.stock,
+                    };
+                }
+
+                // Llamar al método del componente padre
+                this.$emit("save-product", dataToSend, hasImage);
+
+                // Si el producto se guarda correctamente, muestra el modal de confirmación
+                this.isConfirmationModalOpen = true;
+                this.closeModal(); // Cierra el modal principal
+            } catch (error) {
+                console.error("Error al guardar el producto:", error);
             }
-
-            // Emitir los datos al componente padre
-            this.$emit("save-product", dataToSend, hasImage);
         },
         showDeleteConfirmation() {
             this.isDeleteModalOpen = true; // Abre el modal de confirmación
