@@ -1,5 +1,5 @@
 <template>
-    <div class="main-layout">
+    <div class="flex flex-col min-h-screen">
         <!-- <Navbar /> -->
         <Navbar :categories="categories" />
         <main>
@@ -33,12 +33,6 @@ export default {
 </script>
 
 <style>
-.main-layout {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-}
-
 main {
     flex: 1;
     /* Asegura que el contenido principal ocupe el espacio disponible */

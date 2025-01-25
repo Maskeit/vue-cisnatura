@@ -2,9 +2,6 @@
     <AdminCatalogoLayout />
 </template>
 
-<script>
+<script setup lang="js">
 import AdminCatalogoLayout from '@/layouts/admin/AdminCatalogoLayout.vue';
-export default {
-    components: {AdminCatalogoLayout}
-}
 </script>

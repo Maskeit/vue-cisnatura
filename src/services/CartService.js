@@ -72,13 +72,19 @@ const CartService = {
     if (!system.http.check.live()) return;
     try {
       const response = await axiosInstance.get(`/product/cart/get`);
-      const cartItems = response.data.data; // Los productos del carrito
-      localStorage.setItem("cart", JSON.stringify(cartItems)); // Guardar en el almacenamiento local
+
+      if (response.status === 204) {
+        localStorage.setItem("cart", JSON.stringify([])); // Guardar un array vacío
+        return [];
+      }
+
+      const cartItems = response.data.data || [];
+      localStorage.setItem("cart", JSON.stringify(cartItems)); // Guardar datos correctamente
       return cartItems;
     } catch (error) {
       system.clearCookiesAndRedirect();
       console.error("Error al obtener el carrito:", error);
-      return;
+      return [];
     }
   },
 
@@ -91,7 +97,7 @@ const CartService = {
       console.error("Error al crear la orden temporal:", error);
       return;
     }
-  }
+  },
 };
 
 export default CartService;

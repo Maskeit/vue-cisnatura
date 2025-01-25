@@ -89,7 +89,7 @@ export default {
           this.$router.push("/Catalogo");
         }
       } catch (error) {
-        this.errorMessage = "Credenciales incorrectas o error en el servidor";
+        this.errorMessage = "Credenciales incorrectas";
         console.error("Error al iniciar sesión:", error);
       } finally {
         this.isLoading = false;

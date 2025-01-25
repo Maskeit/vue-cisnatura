@@ -150,7 +150,13 @@ export default {
             this.cartCount = cartItems.reduce((total, item) => total + item.cantidad, 0);
         });
         // Inicializar el contador del carrito desde el almacenamiento local
-        const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+        let cart = [];
+        try {
+            cart = JSON.parse(localStorage.getItem("cart") || "[]");
+        } catch (error) {
+            console.error("Error parsing cart from localStorage:", error);
+            localStorage.removeItem("cart"); // Limpiar datos inválidos
+        }
         this.cartCount = cart.reduce((total, item) => total + item.cantidad, 0);
     },
     beforeDestroy() {

@@ -17,14 +17,15 @@ import Cookies from "@/views/Cookies.vue";
 import Login from "@/views/Login.vue";
 import Register from "@/views/Register.vue";
 import Error from "@/views/Error.vue";
-
+import ServiceOut from "@/views/FueraDeServicio.vue";
 
 // Vistas para administradores
 
 import AdminLogin from "@/views/admin/AdminLogin.vue";
 import AdminProducts from "@/views/admin/AdminProducts.vue";
-import AdminDashboard from "@/views/admin/AdminDashboard.vue";
-
+import AdminDashboard from "@/views/admin/dashboard/AdminDashboard.vue";
+import RecentOrder from "@/views/admin/dashboard/components/RecentOrder.vue";
+import OrderDetails from "@/views/admin/dashboard/components/OrderDetails.vue";
 const routes = [
   // Rutas de usuarios regulares
   {
@@ -37,7 +38,7 @@ const routes = [
       { path: "carrito", name: "Carrito", component: Carrito },
       { path: "cookies", name: "Cookies", component: Cookies },
       { path: "address", name: "Address", component: Address },
-      { path: "ConfirmOrder", name: "ConfirmOrder", component: ConfirmOrder},
+      { path: "ConfirmOrder", name: "ConfirmOrder", component: ConfirmOrder },
       { path: "Success", name: "Success", component: Success },
       { path: "Cancel", name: "Cancel", component: Cancel },
     ],
@@ -73,15 +74,39 @@ const routes = [
     children: [{ path: "", name: "Register", component: Register }],
   },
 
-  // Rutas de administrador protegidas
-  // Ruta de login para administrador
+  // Rutas de administrador protegidas, ayudame a organizar bien
   {
     path: "/xqc",
     component: AdminLayout,
     children: [
-      { path: "/adminProducts", name: "AdminProducts", component: AdminProducts },
-      { path: "/adminDashboard", name: "AdminDashboard", component: AdminDashboard }
+      {
+        path: "/AdminProducts",
+        name: "AdminProducts",
+        component: AdminProducts,
+      },
+      {
+        path: "/dashboard",
+        component: AdminDashboard,
+        children: [
+          {
+            path: "RecentOrder", // Ruta anidada bajo `/xqc/dashboard`
+            name: "RecentOrder",
+            component: RecentOrder,
+          },
+          {
+            path: "OrderDetails/:id", // Ruta dinámica para detalles de orden
+            name: "OrderDetails",
+            component: OrderDetails,
+            props: true, // Habilita el paso de `id` como prop
+          },
+        ],
+      },
     ],
+  },
+  {
+    path: "/fuera-de-servicio",
+    name: "ServiceOut",
+    component: ServiceOut,
   },
 ];
 

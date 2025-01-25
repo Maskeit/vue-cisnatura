@@ -6,17 +6,25 @@
             <div class="lg:col-span-2">
                 <h2 class="text-2xl font-bold text-gray-600">Productos del carrito</h2>
 
+                <!-- Loader mientras se traen los productos -->
+                <div v-if="loading" class="flex items-center justify-center py-20">
+                    <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-green-500"></div>
+                </div>
+
                 <!-- Mostrar mensaje si el carrito está vacío -->
-                <div v-if="cartProducts.length === 0" class="text-center py-10">
+                <div v-else-if="cartProducts.length === 0" class="text-center py-10">
                     <p class="text-gray-500">No hay productos en tu carrito.</p>
                     <router-link to="/Catalogo"
                         class="mt-4 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded inline-block">
-                        Ir al catalogo
+                        Ir al catálogo
                     </router-link>
                 </div>
+
                 <!-- Tarjetas de productos -->
-                <ProductCartCard v-for="(product, index) in cartProducts" :key="index" :product="product"
-                    @update-quantity="updateProductQuantity" @remove-product="removeProductFromCart" />
+                <div v-else>
+                    <ProductCartCard v-for="(product, index) in cartProducts" :key="index" :product="product"
+                        @update-quantity="updateProductQuantity" @remove-product="removeProductFromCart" />
+                </div>
             </div>
 
             <!-- Columna de resumen -->
@@ -97,15 +105,21 @@ export default {
     },
     async mounted() {
         try {
-            // Traer productos del carrito
+            this.loading = true; // Mostrar el loader
             const cart = await CartService.getCart();
-            this.cartProducts = cart; // Guardar productos en el estado
+
+            if (!cart || cart.length === 0) {
+                this.cartProducts = []; // Si no hay productos, asigna un array vacío
+            } else {
+                this.cartProducts = cart; // Guardar productos en el estado
+            }
+
             // Emitir evento para actualizar el contador del carrito en el Navbar
-            EventBus.emit("cart-updated", cart);
+            EventBus.emit("cart-updated", this.cartProducts);
         } catch (error) {
-            console.error(error);
+            console.error("Error al obtener los productos del carrito:", error);
         } finally {
-            this.loading = false; // Deshabilitar loader
+            this.loading = false; // Ocultar el loader
         }
     },
     methods: {
