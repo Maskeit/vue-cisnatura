@@ -4,6 +4,7 @@ import { system } from "../system";
 
 const Operations = {
   async getOrders(page = 1, limit = 6) {
+    if (!system.http.check.live()) return;
     try {
       const response = await axiosInstance.get(
         `/admin/orders/get?page=${page}&limit=${limit}`
@@ -15,6 +16,7 @@ const Operations = {
     }
   },
   async getOrder(orderId) {
+    if (!system.http.check.live()) return;
     try {
       const response = await axiosInstance.get(`/admin/order/get?orderId=${orderId}`);
       return response.data.data; // Aseguramos que devuelva solo los datos
@@ -24,6 +26,7 @@ const Operations = {
     }
   },
   async updateOrder(orderId, status, type){
+    if (!system.http.check.live()) return;
     try {
       const response = await axiosInstance.put(`/admin/orders/update`, {data: {orderId: orderId, status: status, type: type}});
       return response.data.status; // esto retorna ya el codigo 200, 400, 500

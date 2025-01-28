@@ -17,8 +17,7 @@
             </div>
 
             <!-- Modal -->
-            <ProductModal v-if="isModalOpen" :isOpen="isModalOpen" :product="selectedProduct" @close="closeModal"
-                @add-to-cart="handleAddToCart" />
+            <ProductModal v-if="isModalOpen" :isOpen="isModalOpen" :product="selectedProduct" @close="closeModal" />
 
             <!-- Paginación -->
             <Pagination :currentPage="currentPage" :totalPages="totalPages" @changePage="changePage" />
@@ -198,9 +197,6 @@ export default {
         closeModal() {
             this.isModalOpen = false;
             this.selectedProduct = null;
-        },
-        handleAddToCart(productId) {
-            console.log(`Producto ${productId} añadido al carrito.`);
         },
     },
 };

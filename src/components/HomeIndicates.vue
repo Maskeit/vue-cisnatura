@@ -2,7 +2,7 @@
     <div class="flex flex-col md:flex-row items-center justify-between px-6 py-8 bg-gray-50 shadow rounded-lg">
         <!-- Imagen -->
         <div class="w-full md:w-1/2 mb-6 md:mb-0">
-            <img src="/public/inc/plc2.webp" alt="Blog de CISnatura" class="rounded-lg shadow-lg w-full h-auto" />
+            <img src="/src/assets/inc/plc2.webp" alt="Blog de CISnatura" class="rounded-lg shadow-lg w-full h-auto" />
         </div>
 
         <!-- Información -->

@@ -56,7 +56,7 @@
             <div class="register-footer">
                 <p>¿Ya tienes una cuenta? <router-link to="/Login" class="link">Inicia sesión aquí</router-link></p>
             </div>
-            <img src="/icons/logocis.svg" alt="Logo" class="h-16 m-auto" />
+            <img src="/logocis.svg" alt="Logo" class="h-16 m-auto" />
         </div>
         <!-- Modal para notificación -->
         <div v-if="showModal" class="modal-overlay">

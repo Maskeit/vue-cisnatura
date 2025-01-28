@@ -14,8 +14,7 @@
                 @add-to-cart="handleAddToCart" />
         </div>
         <!-- Modal de Producto -->
-        <ProductModal :isOpen="isModalOpen" :product="selectedProduct" @close="closeModal"
-            @add-to-cart="handleAddToCart" />
+        <ProductModal :isOpen="isModalOpen" :product="selectedProduct" @close="closeModal"/>
     </div>
     <HomeIndicates />
 </template>
@@ -56,9 +55,6 @@ export default {
         closeModal() {
             this.isModalOpen = false;
             this.selectedProduct = {}; // Limpia el producto seleccionado
-        },
-        handleAddToCart(productId) {
-            console.log(`Producto ${productId} añadido al carrito.`);
         },
     },
 };

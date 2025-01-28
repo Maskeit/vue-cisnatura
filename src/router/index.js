@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import MainLayout from "@/layouts/MainLayout.vue";
 import AdminLayout from "@/layouts/AdminLayout.vue";
 import BlankLayout from "@/layouts/BlankLayout.vue";
+import CuentaLayout from "@/layouts/CuentaLayout.vue";
 
 // Vistas para usuarios regulares
 import Home from "@/views/Home.vue";
@@ -107,6 +108,38 @@ const routes = [
     path: "/fuera-de-servicio",
     name: "ServiceOut",
     component: ServiceOut,
+  },
+  {
+    path: "/Cuenta",
+    redirect: { name: "PerfilUsuario" },
+    component: CuentaLayout,
+    children: [
+      {
+        path: "",
+        name: "PerfilUsuario",
+        component: () => import("@/components/Cuenta/PerfilUsuario.vue"),
+      },
+      {
+        path: "Historial",
+        name: "HistorialCompras",
+        component: () => import("@/components/Cuenta/HistorialCompras.vue"),
+      },
+      {
+        path: "Direcciones",
+        name: "Direcciones",
+        component: () => import("@/components/Cuenta/Direcciones.vue"),
+      },
+      {
+        path: "Configuracion",
+        name: "ConfiguracionCuenta",
+        component: () => import("@/components/Cuenta/ConfiguracionCuenta.vue"),
+      },
+      {
+        path: "Ayuda",
+        name: "Ayuda",
+        component: () => import("@/components/Cuenta/Ayuda.vue"),
+      },
+    ],
   },
 ];
 

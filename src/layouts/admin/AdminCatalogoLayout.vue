@@ -108,7 +108,6 @@ export default {
     },
     methods: {
         async fetchProducts(page) {
-            console.log("Llamando a fetchProducts con página:", page); // Debug
             this.isLoading = true;
             try {
                 const { products, total } = await ProductServices.getCatalogoProducts(page, this.limit);
@@ -216,7 +215,6 @@ export default {
                 }
 
                 if (response === 201) {
-                    console.log("Producto actualizado exitosamente:", response);
                     // Recargar productos después de guardar
                     await this.fetchProducts(this.currentPage);
                     // Emitir un evento al modal para que muestre el mensaje de éxito
@@ -230,7 +228,6 @@ export default {
             try {
                 const response = await ProductServices.createProduct(formData);
                 if (response === 201) {
-                    console.log("Producto creado exitosamente:", response);
                     this.isCreateModalOpen = false; // Cierra el modal
                     await this.fetchProducts(this.currentPage); // Recarga los productos
                 }

@@ -16,14 +16,14 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://cisnaturatienda.local",
+        target: "http://cisnaturatienda.local", // este es dominio local donde corre el servidor php que uso siempre
         changeOrigin: true,
         secure: false,
         credentials: "include", // Permitir cookies
       },
     },
     cors: {
-      origin: "http://localhost:5173",
+      origin: "http://localhost:5173", // 
       credentials: true, // Permitir cookies en solicitudes entre sitios
     },
   },

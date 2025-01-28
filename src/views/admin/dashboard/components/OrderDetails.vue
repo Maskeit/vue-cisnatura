@@ -178,31 +178,7 @@ const loadOrder = async () => {
         console.error("Error al cargar la orden:", error);
     }
 };
-// const loadOrder = async () => {
-//     if (!orderStore.selectedOrder || orderStore.selectedOrder.id !== orderId) {
-//         // Si no hay orden seleccionada o no coincide con el ID actual, busca la orden en el backend
-//         console.log("Buscando orden desde el backend...");
-//         const orders = orderStore.orders;
-//         const foundOrder = orders.find((o) => o.id == orderId);
 
-//         if (!foundOrder) {
-//             // Si no está en el store, busca en el backend
-//             await orderStore.fetchOrders(); // Puedes mejorar para solo traer una orden específica
-//             order.value = orderStore.orders.find((o) => o.id == orderId);
-//         } else {
-//             order.value = foundOrder;
-//         }
-//     } else {
-//         // Si hay una orden seleccionada, úsala
-//         order.value = orderStore.selectedOrder;
-//     }
-
-//     if (!order.value) {
-//         console.error("No se pudo cargar la orden.");
-//     }
-// };
-
-// Llamar a la función al montar el componente
 onMounted(loadOrder);
 
 // Cambiar estados
@@ -221,7 +197,6 @@ const closeConfirmationModal = () => {
 
 // Actualizar estado de la orden
 const updateOrderStatus = async () => {
-    console.log("Nuevo estado de la orden:", orderStatus.value);
     const response = await Operations.updateOrder(orderId, orderStatus.value, "false"); // es un 200, 400 o 500
     if (response === 200) {
         openConfirmationModal("El estado de la orden se actualizó correctamente.");
@@ -232,7 +207,6 @@ const updateOrderStatus = async () => {
 
 // Actualizar estado de envío
 const updateShippingStatus = async () => {
-    console.log("Nuevo estado de envío:", shippingStatus.value);
     const response = await Operations.updateOrder(orderId, shippingStatus.value, "true"); // es un 200, 400 o 500
     if (response === 200) {
         openConfirmationModal("El estado de la orden se actualizó correctamente.");

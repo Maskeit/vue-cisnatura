@@ -4,7 +4,7 @@
         <div class="flex justify-between items-center px-4 py-2 lg:px-8">
             <!-- Logo -->
             <div class="flex items-center">
-                <img src="/icons/logocis.svg" alt="Logo" class="h-10 lg:h-16 mr-2" />
+                <img src="/logocis.svg" alt="Logo" class="h-10 lg:h-16 mr-2" />
             </div>
             <div class="hidden lg:flex justify-center space-x-6 py-2">
                 <router-link to="/AdminProducts" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">

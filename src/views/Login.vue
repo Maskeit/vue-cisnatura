@@ -38,7 +38,7 @@
             Registrarse
           </router-link></p>
       </div>
-      <img src="/icons/logocis.svg" alt="Logo" class="h-16 m-auto" />
+      <img src="/logocis.svg" alt="Logo" class="h-16 m-auto" />
     </div>
   </div>
 </template>

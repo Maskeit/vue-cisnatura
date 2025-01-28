@@ -76,13 +76,13 @@ export default {
       interval: null, // Intervalo para el desplazamiento automático
       slides: [
         {
-          image: "/public/img/bg/back1.png",
+          image: "/img/bg/back1.png",
           title: "Desde dentro de la naturaleza",
           subtitle: "Productos herbolarios y fórmulas magistrales",
           buttonText: "Ver Productos",
         },
         {
-          image: "/public/img/bg/back2.png",
+          image: "/img/bg/back2.png",
           title: "Calidad y Tradición",
           subtitle: "Descubre nuestras tinturas y microdosis",
           buttonText: "Explorar",

@@ -1,6 +1,6 @@
 import axiosInstance from "./axiosInstance";
 import { system, V_Global_API } from "./system";
-import Cookes from 'js-cookie';
+import Cookes from "js-cookie";
 export const AuthService = {
   async login(email, password) {
     try {
@@ -44,37 +44,6 @@ export const AuthService = {
       return response.data;
     } catch (error) {
       console.error("Error al restablecer contraseña:", error);
-      throw error;
-    }
-  },
-
-  async getUserInfo() {
-    try {
-      const token = localStorage.getItem("Authorization");
-      if (!token) {
-        return;
-      }
-      // Verificar si ya existe en localStorage el nombre del usuario
-      const cachedName = localStorage.getItem("username");
-      if (cachedName) {
-        return { name: cachedName }; // Devuelve el nombre almacenado localmente
-      }
-      // Hacer la solicitud al servidor si no está en localStorage
-      const response = await axiosInstance.post(
-        "/username",
-        {}, // Cuerpo vacío
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Asegúrate de que el formato sea correcto
-          },
-        }
-      );
-
-      const userName = response.data.data[0].name;
-      localStorage.setItem("username", userName); // Almacenar en localStorage
-      return { name: userName }; // Devuelve el nombre obtenido del servidor
-    } catch (error) {
-      console.error("Error obteniendo la información del usuario:", error);
       throw error;
     }
   },

@@ -33,6 +33,5 @@ const panels = [
 
 const navigateTo = (path: string) => {
     router.push(path); // Navega a la ruta correspondiente
-    console.log(path);
 };
 </script>

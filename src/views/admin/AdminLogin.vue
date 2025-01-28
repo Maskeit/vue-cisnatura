@@ -35,7 +35,7 @@
                 </div>
                 <p v-if="errorMessage" class="error-server-message">{{ errorMessage }}</p>
             </form>
-            <img src="/icons/logocis.svg" alt="Logo" class="h-16 m-auto" />
+            <img src="/logocis.svg" alt="Logo" class="h-16 m-auto" />
         </div>
     </div>
 </template>

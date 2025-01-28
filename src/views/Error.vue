@@ -24,7 +24,6 @@ export default {
     }
   }
 };
-console.log(location.pathname);
 </script>
 
 <style scoped>

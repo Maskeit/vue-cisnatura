@@ -1,6 +1,7 @@
 import axiosInstance from "./axiosInstance";
 import { system } from "./system";
 system.initializeAuth();
+
 export const UserAccountService = {
   saveAddress: async function (json) {
     if (!system.http.check.live()) return;
@@ -36,7 +37,6 @@ export const UserAccountService = {
       return;
     }
   },
-
   async deleteAddress(id) {
     if (!system.http.check.live()) return;
     try {
@@ -47,7 +47,6 @@ export const UserAccountService = {
       return;
     }
   },
-
   async sendAddressToOrder(id) {
     if (!system.http.check.live()) return;
     try {
@@ -67,5 +66,48 @@ export const UserAccountService = {
       console.error("Error al obtener los pedidos:", error);
       return;
     }
+  },
+  async getUserInfo() {
+    try {
+      const cachedName = localStorage.getItem("username");
+      if (cachedName) {
+        return { name: cachedName, email: null, phone: null }; // Devuelve datos mínimos
+      }
+  
+      const response = await axiosInstance.get("/user/data/get");
+      const userData = response.data.data[0];
+      localStorage.setItem("username", userData.name); // Guarda el nombre en localStorage
+      return {
+        name: userData.name,
+        email: userData.email,
+        phone: userData.phone,
+      };
+    } catch (error) {
+      console.error("Error obteniendo la información del usuario:", error);
+      throw error;
+    }
+  },
+  async updateUserInfo(json) {
+    if (!system.http.check.live()) return;
+    try {
+      const response = await axiosInstance.put("/user/data/update", { data: json });
+      return response.data.status;
+    } catch (error) {
+      console.error("Error al actualizar la información del usuario:", error);
+      return;
+    }
+  },
+  async getOrdersHistory() {
+    if (!system.http.check.live()) return;
+    try {
+      const response = await axiosInstance.get("/order/history/get");
+      return response.data.data;
+    } catch (error) {
+      console.error("Error al obtener el historial de pedidos:", error);
+      return;
+    }
   }
+
 };
+
+export default UserAccountService;

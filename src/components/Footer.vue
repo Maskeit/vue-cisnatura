@@ -1,5 +1,5 @@
 <template>
-    <footer class="bg-gray-800 text-white py-6">
+    <footer class="bg-green-800 text-white py-6">
       <div class="container mx-auto px-4">
         <!-- Menú de enlaces -->
         <ul class="flex flex-wrap justify-center space-x-4 mb-4">

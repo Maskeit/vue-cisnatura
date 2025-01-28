@@ -17,7 +17,6 @@ export default {
     },
     watch: {
         value(newValue) {
-            console.log("Nuevo valor recibido en el editor:", newValue);
             if (this.quill && this.quill.root.innerHTML !== newValue) {
                 this.quill.root.innerHTML = this.sanitizeHtml(newValue || "");
             }
@@ -45,8 +44,6 @@ export default {
         },
     },
     mounted() {
-        console.log("Contenido inicial recibido por el editor:", this.value);
-
         this.quill = new Quill(this.$refs.editor, {
             theme: "snow",
             modules: {
@@ -61,7 +58,6 @@ export default {
 
         // Limpia y valida el contenido HTML antes de asignarlo
         const sanitizedContent = this.sanitizeHtml(this.value || "");
-        console.log("Contenido después de limpieza:", sanitizedContent);
         this.quill.root.innerHTML = sanitizedContent;
 
         this.quill.on("text-change", () => {

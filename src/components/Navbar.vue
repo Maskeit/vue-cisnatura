@@ -4,7 +4,7 @@
         <div class="flex justify-between items-center px-4 py-2 lg:px-8">
             <!-- Logo -->
             <div class="flex items-center">
-                <img src="/icons/logocis.svg" alt="Logo" class="h-10 lg:h-16 mr-2" />
+                <img src="/logocis.svg" alt="Logo" class="h-10 lg:h-16 mr-2" />
             </div>
 
             <!-- Barra de búsqueda -->
@@ -101,9 +101,16 @@
                         <router-link @click="toggleMenu" to="/Login"
                             class="block text-green-600 hover:text-green-800">Iniciar Sesión</router-link>
                     </li>
-                    <li v-else>
-                        <button @click="logout" class="block text-red-600 hover:text-red-800">Cerrar Sesión</button>
-                    </li>
+                    <div v-else>
+                        <div @click="toggleUserDropdown"
+                            class="block text-green-600 hover:text-green-800 cursor-pointer">Cuenta
+                            <ChevronDownIcon class="h-4 w-4" />
+                        </div>
+                        <ul v-if="userDropdownOpen" class="mt-2">
+                            <li @click="goToAccount" class="block text-green-600 hover:text-green-800">Cuenta</li>
+                            <li @click="logout" class="block text-red-600 hover:text-red-800">Cerrar Sesión</li>
+                        </ul>
+                    </div>
                 </ul>
             </div>
         </div>
@@ -114,9 +121,12 @@
 import SearchBar from "./SearchBar.vue";
 import { Bars3Icon, ChevronDownIcon, ShoppingCartIcon, MapPinIcon } from "@heroicons/vue/24/outline";
 import { AuthService } from "@/services/AuthService";
+import { UserAccountService } from "@/services/UserAccountService";
 import { EventBus } from "@/services/eventBus";
 import Cookies from 'js-cookie';
-import CartService from "../services/CartService";
+import CartService from "@/services/CartService";
+import { useUserStore } from "@/services/stores/userStore";
+
 export default {
     props: {
         categories: {
@@ -164,22 +174,27 @@ export default {
     },
     methods: {
         async checkUserLoginStatus() {
+            const userStore = useUserStore();
             try {
-                const cachedName = localStorage.getItem("userName");
+                // Verifica si hay un nombre en localStorage
+                const cachedName = localStorage.getItem("username");
                 if (cachedName) {
-                    this.userName = cachedName;
+                    userStore.setUserFromCache(cachedName); // Carga el nombre desde el cache
+                    this.userName = cachedName; // Mostrar en el navbar
                     this.userLoggedIn = true;
                     return;
                 }
-
-                const userData = await AuthService.getUserInfo();
-                if (userData && userData.name) {
-                    this.userName = userData.name;
+                // Si no está en el cache, intenta obtener los datos del servidor
+                await userStore.fetchUserInfo();
+                if (userStore.loggedIn) {
+                    this.userName = userStore.name; // Mostrar en el navbar
                     this.userLoggedIn = true;
+                } else {
+                    this.userLoggedIn = false;
                 }
             } catch (error) {
                 console.error("Error al obtener los datos del usuario:", error);
-                this.userLoggedIn = false; // Asegura que el estado se limpie
+                this.userLoggedIn = false; // Limpia el estado en caso de error
             }
         },
         toggleMenu() { // menu desplegable
