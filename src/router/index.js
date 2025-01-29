@@ -19,7 +19,8 @@ import Login from "@/views/Login.vue";
 import Register from "@/views/Register.vue";
 import Error from "@/views/Error.vue";
 import ServiceOut from "@/views/FueraDeServicio.vue";
-
+import Reestablecer from "@/views/Reestablecer.vue";
+import RequestRecoverPwd from "@/views/RequestRecoverPwd.vue";
 // Vistas para administradores
 
 import AdminLogin from "@/views/admin/AdminLogin.vue";
@@ -27,6 +28,7 @@ import AdminProducts from "@/views/admin/AdminProducts.vue";
 import AdminDashboard from "@/views/admin/dashboard/AdminDashboard.vue";
 import RecentOrder from "@/views/admin/dashboard/components/RecentOrder.vue";
 import OrderDetails from "@/views/admin/dashboard/components/OrderDetails.vue";
+import { fromJSON } from "postcss";
 const routes = [
   // Rutas de usuarios regulares
   {
@@ -73,6 +75,16 @@ const routes = [
     path: "/register",
     component: BlankLayout,
     children: [{ path: "", name: "Register", component: Register }],
+  },
+  {
+    path: "/Reestablecer",
+    component: BlankLayout,
+    children: [{ path: "", name: "Reestablecer", component: Reestablecer }],
+  },
+  {
+    path: "/RequestRecover",
+    component: BlankLayout,
+    children: [{ path: "", name: "RequestRecover", component: RequestRecoverPwd }],
   },
 
   // Rutas de administrador protegidas, ayudame a organizar bien
@@ -138,6 +150,11 @@ const routes = [
         path: "Ayuda",
         name: "Ayuda",
         component: () => import("@/components/Cuenta/Ayuda.vue"),
+      },
+      {
+        path: "Reestablecer",
+        name: "ResPwd",
+        component: () => import("@/components/Cuenta/ResPwd.vue"),
       },
     ],
   },

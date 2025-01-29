@@ -40,7 +40,9 @@ export const UserAccountService = {
   async deleteAddress(id) {
     if (!system.http.check.live()) return;
     try {
-      const response = await axiosInstance.post("/address/delete", {data: id});
+      const response = await axiosInstance.post("/address/delete", {
+        data: id,
+      });
       return response.data.status;
     } catch (error) {
       console.error("Error al eliminar la dirección:", error);
@@ -50,33 +52,32 @@ export const UserAccountService = {
   async sendAddressToOrder(id) {
     if (!system.http.check.live()) return;
     try {
-      const response = await axiosInstance.put("/order/update/address", {data: id});
+      const response = await axiosInstance.put("/order/update/address", {
+        data: id,
+      });
       return response.data.status;
     } catch (error) {
       console.error("Error al enviar la dirección al pedido:", error);
       return;
     }
   },
-  async getOrder(){
+  async getOrder() {
     if (!system.http.check.live()) return;
-    try{
+    try {
       const response = await axiosInstance.get("/order/get");
       return response.data.data;
-    } catch (error){
+    } catch (error) {
       console.error("Error al obtener los pedidos:", error);
       return;
     }
   },
   async getUserInfo() {
+    if (!system.http.check.auth()) return;
     try {
-      const cachedName = localStorage.getItem("username");
-      if (cachedName) {
-        return { name: cachedName, email: null, phone: null }; // Devuelve datos mínimos
-      }
-  
       const response = await axiosInstance.get("/user/data/get");
       const userData = response.data.data[0];
-      localStorage.setItem("username", userData.name); // Guarda el nombre en localStorage
+      // Asegurarse de que se guarda con la clave correcta
+      localStorage.setItem("userData", JSON.stringify(userData));
       return {
         name: userData.name,
         email: userData.email,
@@ -90,7 +91,9 @@ export const UserAccountService = {
   async updateUserInfo(json) {
     if (!system.http.check.live()) return;
     try {
-      const response = await axiosInstance.put("/user/data/update", { data: json });
+      const response = await axiosInstance.put("/user/data/update", {
+        data: json,
+      });
       return response.data.status;
     } catch (error) {
       console.error("Error al actualizar la información del usuario:", error);
@@ -106,8 +109,7 @@ export const UserAccountService = {
       console.error("Error al obtener el historial de pedidos:", error);
       return;
     }
-  }
-
+  },
 };
 
 export default UserAccountService;
