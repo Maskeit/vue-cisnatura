@@ -1,104 +1,66 @@
 <template>
-    <div class="flex flex-grow items-center space-x-2">
-        <!-- Botón de categorías -->
-        <div class="relative">
-            <button @click="toggleCategoryDropdown"
-                class="bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-700 px-4 py-2 rounded-l-md flex items-center">
-                <span class="hidden lg:block">Categorías</span>
-                <ChevronDownIcon class="h-5 w-5" />
+    <div class="relative w-full max-w-lg mx-auto">
+        <div class="flex items-center">
+            <input type="text" v-model="localSearchTerm" placeholder="Buscar productos o categorías..."
+                class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                @focus="isFocused = true"
+                @keydown.enter="executeSearch"/>
+            <button @click="executeSearch"
+                class="ml-2 p-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none">
+                <MagnifyingGlassIcon class="h-5 w-5" />
             </button>
-            <!-- Dropdown de categorías -->
-            <ul v-if="categoryDropdownOpen"
-                class="absolute z-10 bg-white shadow-md border mt-2 rounded-md w-48 text-sm">
-                <li v-for="category in categories" :key="category.value" @click="handleCategorySelect(category.value)"
-                    class="hover:bg-green-100 px-4 py-2 cursor-pointer">
-                    {{ category.displayName }}
-                </li>
-            </ul>
         </div>
 
-        <!-- Barra de búsqueda -->
-        <div class="flex flex-grow">
-            <input v-model="searchQuery" @input="handleRealTimeSearch" @keydown.enter="handleSearch" type="text"
-                placeholder="Buscar productos..."
-                class="border-t border-b border-gray-300 p-2 w-full focus:outline-none" />
-            <button @click="handleSearch"
-                class="bg-green-500 hover:bg-green-600 text-white px-4 rounded-r-md focus:outline-none">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="h-5 w-5">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                </svg>
-            </button>
-        </div>
+        <ul v-if="isFocused && searchStore.searchResults.length > 0"
+            class="absolute left-0 w-full bg-white border border-gray-200 shadow-md rounded-md mt-1 z-50">
+            <li v-for="suggestion in searchStore.searchResults" :key="suggestion.id"
+                class="px-4 py-2 cursor-pointer hover:bg-green-100 flex justify-between"
+                @click="selectProduct(suggestion)">
+                <strong>{{ suggestion.product_name }}</strong>
+                <small v-if="suggestion.type" class="text-gray-500">({{ suggestion.type }})</small>
+            </li>
+        </ul>
     </div>
 </template>
 
-<script>
-import { ChevronDownIcon } from "@heroicons/vue/24/outline";
-import { EventBus } from "@/services/eventBus";
+<script setup>
+import { ref, watch, defineEmits } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { useSearchStore } from "@/services/stores/searchStore";
+import { MagnifyingGlassIcon } from "@heroicons/vue/24/solid";
 
-export default {
-    props: {
-        categories: {
-            type: Array,
-            required: true,
-        },
-    },
-    components: {
-        ChevronDownIcon,
-    },
-    data() {
-        return {
-            categoryDropdownOpen: false,            
-            searchQuery: "", // Almacena la búsqueda actual
-            searchError: null, // Error al buscar            
-            searchResults: [], // Resultados encontrados
-            localProducts: [], // Productos cargados en memoria
-        };
-    },
-    methods: {
-        toggleCategoryDropdown() {
-            this.categoryDropdownOpen = !this.categoryDropdownOpen;
-        },
-        handleCategorySelect(categoryValue) {
-            this.categoryDropdownOpen = false; // Cierra el dropdown
-            this.$router.push({
-                path: "/Catalogo",
-                query: { category: categoryValue },
-            });
-        },
-        handleRealTimeSearch() {
-            EventBus.emit("filterProducts", this.searchQuery.trim());
-        },
-        handleSearch() {
-            if (!this.searchQuery.trim()) {
-                this.searchError = "Por favor, ingresa un término para buscar.";
-                return;
-            }
-            EventBus.emit("serverSearch", this.searchQuery);
-        },
-    },
+
+const router = useRouter();
+const route = useRoute();
+const searchStore = useSearchStore();
+const localSearchTerm = ref("");
+const emit = defineEmits(["updateResults"]);
+const isFocused = ref(false); // Nuevo estado para manejar la visibilidad del ul
+
+
+watch(localSearchTerm, (newSearch) => {
+    if (route.path === "/Catalogo") {
+        searchStore.searchLocal(newSearch);
+        emit("updateResults", searchStore.searchResults);
+    }
+});
+
+const executeSearch = () => {
+    if (!localSearchTerm.value.trim()) return;
+
+    if (route.path !== "/Catalogo") {
+        router.push({ path: "/Catalogo", query: { q: localSearchTerm.value.trim() } });
+    } else {
+        searchStore.searchLocal(localSearchTerm.value);
+        emit("updateResults", searchStore.searchResults);
+    }
+};
+
+
+const selectProduct = (product) => {
+    localSearchTerm.value = product.product_name; // Mostrar el nombre en la barra
+    emit("updateResults", [product]); // Emitir evento con el producto seleccionado
+    isFocused.value = false; // Oculta el ul después de seleccionar un producto
+
 };
 </script>
-<style>
-
-ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.cat-list {
-    padding: 8px 16px;
-    cursor: pointer;
-}
-
-.cat-list:last-child {
-    border-bottom: none;
-}
-
-.cat-list:hover {
-    background-color: #f0f0f0;
-}
-</style>

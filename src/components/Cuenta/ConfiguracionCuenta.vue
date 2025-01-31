@@ -15,28 +15,31 @@
         </div>
 
         <!-- Sección: Cambiar Contraseña -->
-        <div class="mt-8 border-t pt-6">
+        <!-- <div class="mt-8 border-t pt-6">
             <h3 class="text-lg font-medium text-gray-800 mb-3">Seguridad</h3>
             <p class="text-gray-600 mb-4">Para cambiar tu contraseña, accede al siguiente formulario:</p>
             <router-link to="/Cuenta/Reestablecer"
                 class="block text-center w-full bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-md transition">
                 Cambiar Contraseña
             </router-link>
-        </div>
+        </div> -->
     </div>
 </template>
 
 <script setup>
 import { ref } from "vue";
+import UserAccountService from "@/services/UserAccountService";
 
 const telefono = ref(""); // Estado reactivo para el teléfono
 
-const guardarTelefono = () => {
-    if (telefono.value.trim() === "") {
+
+const guardarTelefono = async () => {
+    if (!telefono.value.trim()) {
         alert("Por favor, ingresa un número de teléfono válido.");
         return;
     }
-    alert(`Número de teléfono actualizado: ${telefono.value}`);
-    // Aquí puedes hacer la petición a la API para actualizar el número en la BD
+
+    const response = await UserAccountService.updateUserInfo({ telefono: telefono.value });
+    console.log(response);
 };
 </script>

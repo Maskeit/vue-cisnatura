@@ -40,59 +40,61 @@
     </div>
 </template>
 
-<script>
+<script setup>
+import { ref } from "vue";
+import { useRouter } from "vue-router";
 import { AuthService } from "@/services/AdminServices/AuthService";
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 
-export default {
-    data() {
-        return {
-            email: "",
-            password: "",
-            errorMessage: "",
-            errors: {},
-            isLoading: false,
-        };
-    },
-    methods: {
-        validateInputs() {
-            let errors = {};
-            if (!this.email) {
-                errors.email = "El correo electrónico es obligatorio.";
-            } else if (!/\S+@\S+\.\S+/.test(this.email)) {
-                errors.email = "Introduce un correo válido.";
-            }
+const router = useRouter();
+const email = ref("");
+const password = ref("");
+const errorMessage = ref("");
+const errors = ref({});
+const isLoading = ref(false);
 
-            if (!this.password) {
-                errors.password = "La contraseña es obligatoria.";
-            } else if (this.password.length < 6) {
-                errors.password = "La contraseña debe tener al menos 6 caracteres.";
-            }
+const validateInputs = () => {
+    const validationErrors = {};
 
-            this.errors = errors;
-            return Object.keys(errors).length === 0;
-        },
-        async handleLogin() {
-            if (!this.validateInputs()) {
-                return;
-            }
-            try {
-                this.isLoading = true;
-                const result = await AuthService.login(this.email, this.password);
-                if (result) {
-                    const token = result;
-                    localStorage.setItem("Authorization", token);
-                    Cookies.set('SSK', token, { expires: 7, path: '' });
-                    this.$router.push("/AdminProducts");
-                }
-            } catch (error) {
-                this.errorMessage = "Credenciales incorrectas o error en el servidor";
-                console.error("Error al iniciar sesión:", error);
-            } finally {
-                this.isLoading = false;
-            }
-        },
-    },
+    if (!email.value) {
+        validationErrors.email = "El correo electrónico es obligatorio.";
+    } else if (!/\S+@\S+\.\S+/.test(email.value)) {
+        validationErrors.email = "Introduce un correo válido.";
+    }
+
+    if (!password.value) {
+        validationErrors.password = "La contraseña es obligatoria.";
+    } else if (password.value.length < 6) {
+        validationErrors.password = "La contraseña debe tener al menos 6 caracteres.";
+    }
+
+    errors.value = validationErrors;
+    return Object.keys(validationErrors).length === 0;
+};
+
+const handleLogin = async () => {
+    if (!validateInputs()) {
+        return;
+    }
+    try {
+        isLoading.value = true;
+        const { status, token, message } = await AuthService.login(email.value, password.value);
+
+        if (status === 200) {
+            localStorage.setItem("Authorization", token);
+            Cookies.set("Authorization", token, { expires: 7, path: "/" });
+            router.push("/AdminProducts");
+        } else if (status === 401) {
+            errorMessage.value = "Credenciales incorrectas";
+        } else {
+            errorMessage.value = message || "Error desconocido, intente más tarde.";
+        }
+    } catch (error) {
+        errorMessage.value = "Error en el servicio, intente más tarde.";
+        console.error("Error al iniciar sesión:", error);
+    } finally {
+        isLoading.value = false;
+    }
 };
 </script>
 

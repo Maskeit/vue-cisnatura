@@ -15,14 +15,23 @@ import Success from "@/views/PaymentStatus/Success.vue";
 import Cancel from "@/views/PaymentStatus/Cancel.vue";
 import Cookies from "@/views/Cookies.vue";
 
+// vistas del perfil de usuario Cuenta/
+import PerfilUsuario from "@/components/Cuenta/PerfilUsuario.vue";
+import HistorialCompras from "@/components/Cuenta/HistorialCompras.vue";
+import Direcciones from "@/components/Cuenta/Direcciones.vue";
+import Ayuda from "@/components/Cuenta/Ayuda.vue";
+import ResPwd from "@/components/Cuenta/ResPwd.vue";
+import ConfiguracionCuenta from "@/components/Cuenta/ConfiguracionCuenta.vue";
+
 import Login from "@/views/Login.vue";
 import Register from "@/views/Register.vue";
 import Error from "@/views/Error.vue";
 import ServiceOut from "@/views/FueraDeServicio.vue";
 import Reestablecer from "@/views/Reestablecer.vue";
 import RequestRecoverPwd from "@/views/RequestRecoverPwd.vue";
-// Vistas para administradores
 
+
+// Vistas para administradores
 import AdminLogin from "@/views/admin/AdminLogin.vue";
 import AdminProducts from "@/views/admin/AdminProducts.vue";
 import AdminDashboard from "@/views/admin/dashboard/AdminDashboard.vue";
@@ -98,7 +107,7 @@ const routes = [
         component: AdminProducts,
       },
       {
-        path: "/dashboard",
+        path: "/Dashboard",
         component: AdminDashboard,
         children: [
           {
@@ -129,32 +138,32 @@ const routes = [
       {
         path: "",
         name: "PerfilUsuario",
-        component: () => import("@/components/Cuenta/PerfilUsuario.vue"),
+        component: PerfilUsuario,
       },
       {
         path: "Historial",
         name: "HistorialCompras",
-        component: () => import("@/components/Cuenta/HistorialCompras.vue"),
+        component: HistorialCompras,
       },
       {
         path: "Direcciones",
         name: "Direcciones",
-        component: () => import("@/components/Cuenta/Direcciones.vue"),
+        component: Direcciones,
       },
       {
         path: "Configuracion",
         name: "ConfiguracionCuenta",
-        component: () => import("@/components/Cuenta/ConfiguracionCuenta.vue"),
+        component:ConfiguracionCuenta,
       },
       {
         path: "Ayuda",
         name: "Ayuda",
-        component: () => import("@/components/Cuenta/Ayuda.vue"),
+        component: Ayuda,
       },
       {
         path: "Reestablecer",
         name: "ResPwd",
-        component: () => import("@/components/Cuenta/ResPwd.vue"),
+        component: ResPwd,
       },
     ],
   },

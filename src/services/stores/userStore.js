@@ -20,17 +20,18 @@ export const useUserStore = defineStore("userStore", {
           const userData = JSON.parse(cachedUser);
           this.name = userData.name;
           this.email = userData.email;
-          this.phone = userData.phone;
+          this.phone = userData.telefono;
           this.loggedIn = true;
           return;
         }
 
         // Si no hay datos en localStorage, obtener de la API
         const userData = await UserAccountService.getUserInfo();
+
         if (userData) {
           this.name = userData.name;
           this.email = userData.email;
-          this.phone = userData.phone;
+          this.phone = userData.telefono;
           this.loggedIn = true;
 
           // Guardar en localStorage para futuras cargas

@@ -4,41 +4,67 @@ import { system } from "../system";
 export const AuthService = {
   async login(email, password) {
     try {
-      const response = await axiosInstance.post("/sudo/login", {
+      const response = await axiosInstance.post("sudo/login", {
         email: email,
-        passwd: btoa(password), // Encriptar la contraseña
+        passwd: btoa(password),
       });
 
-      if (response.status === 200 && response.data.data) {
-        const authToken = response.data.data; // es el token de la respuesta en data
-        system.authToken = authToken.token; // Guardar el token en el sistema
-        return authToken.token;
+      // Procesar los códigos de estado
+      if (response.status === 200) {
+        const authToken = response.data.data.token; // Token de la respuesta
+        system.authToken = authToken; // Guardar el token en el sistema
+        return { status: 200, token: authToken };
       }
-      return null; // No se encontró el usuario o la contraseña es incorrecta
+
+      // Si no es 200, retorna el código y mensaje del backend
+      return {
+        status: response.status,
+        message: response.data.message || "Error desconocido",
+      };
     } catch (error) {
       console.error("Error en login:", error);
-      throw error;
+
+      // Si es un error del servidor o de red, lo lanzamos
+      if (!error.response || error.response.status === 500) {
+        throw new Error("Error del servidor o de red.");
+      }
+
+      // Si es otro código de estado (400, 401), devolver como respuesta manejable
+      return {
+        status: error.response.status,
+        message: error.response.data.message || "Error desconocido",
+      };
     }
   },
+
   async logout() {
     try {
       const response = await axiosInstance.post("admin/session/close");
-      if (response.data.status !== 200) {
-        return false;
+
+      if (response.status === 200) {
+        return true;
       }
-      return true;
+
+      if (response.status === 401) {
+        console.warn(
+          "No había una sesión activa, pero se limpiarán los datos."
+        );
+        return true;
+      }
+      console.error("Error inesperado al cerrar sesión:", response.status);
+      return false;
     } catch (error) {
-      console.error("Error durante el cierre de sesión:", error);
+      console.error("Error en la solicitud de logout:", error);
+      return false;
     } finally {
-      // Eliminar token y otros datos locales independientemente del resultado
-      system.authToken = null;
-      localStorage.clear(); // Limpia todo el local storage
-      // Opcional: Eliminar cookies relacionadas
-      system.cookies.remove("SSK");
+      // Limpieza obligatoria de la sesión, independientemente del resultado
+      localStorage.clear(); // Eliminar datos del usuario
+      system.authToken = null; // Remover referencia en el sistema
     }
   },
+  
   async getUserInfo() {
-    if (!system.http.check.live()) return;
+    //if (!system.http.check.live()) return;
     try {
       // Verificar si ya existe en localStorage el nombre del usuario
       const cachedName = localStorage.getItem("username");

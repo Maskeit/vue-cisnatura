@@ -51,32 +51,27 @@ export const AuthService = {
     }
   },
 
-  async resetPassword(email, password) {
-    try {
-      const response = await axiosInstance.post("/reset-password", {
-        email,
-        passwd: btoa(password),
-      });
-      return response.data;
-    } catch (error) {
-      console.error("Error al restablecer contraseña:", error);
-      throw error;
-    }
-  },
-
   async logout() {
     try {
       const response = await axiosInstance.post("client/session/close");
-      if (response.data.status !== 200) {
-        return false;
+
+      if (response.status === 200) {
+        return true;
       }
-      return true;
+
+      if (response.status === 401) {
+        console.warn("No había una sesión activa, pero se limpiarán los datos.");
+        return true;
+      }
+      console.error("Error inesperado al cerrar sesión:", response.status);
+      return false;
     } catch (error) {
-      console.error("Error durante el cierre de sesión:", error);
+      console.error("Error en la solicitud de logout:", error);
+      return false;
     } finally {
-      // Eliminar token y otros datos locales independientemente del resultado
-      system.authToken = null;
-      localStorage.clear(); // Limpia todo el local storage
+      // Limpieza obligatoria de la sesión, independientemente del resultado      
+      localStorage.clear(); // Eliminar datos del usuario
+      system.authToken = null; // Remover referencia en el sistema
     }
   },
 
@@ -92,16 +87,23 @@ export const AuthService = {
 
   async recoverPassword(email) {
     try {
-      const response = await axiosInstance.post("/recover/password", {email: email});
+      const response = await axiosInstance.post("/recover/password", {
+        email: email,
+      });
       return response.data;
     } catch (error) {
       console.error("Error al recuperar contraseña:", error);
       throw error;
     }
   },
+
   async recoverPasswordData(email, passwd, token) {
     try {
-      const response = await axiosInstance.post("/recover/password/data", {email: email, passwd: btoa(passwd), token: token});
+      const response = await axiosInstance.post("/recover/password/data", {
+        email: email,
+        passwd: btoa(passwd),
+        token: token,
+      });
       return response.data;
     } catch (error) {
       console.error("Error al recuperar contraseña:", error);

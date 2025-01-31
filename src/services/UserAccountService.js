@@ -77,27 +77,29 @@ export const UserAccountService = {
       const response = await axiosInstance.get("/user/data/get");
       const userData = response.data.data[0];
       // Asegurarse de que se guarda con la clave correcta
-      localStorage.setItem("userData", JSON.stringify(userData));
       return {
         name: userData.name,
         email: userData.email,
-        phone: userData.phone,
+        telefono: userData.telefono,
       };
     } catch (error) {
       console.error("Error obteniendo la información del usuario:", error);
       throw error;
     }
   },
-  async updateUserInfo(json) {
+  async updateUserInfo(updatedData) {
     if (!system.http.check.live()) return;
     try {
-      const response = await axiosInstance.put("/user/data/update", {
-        data: json,
-      });
+      // Validar que al menos un campo se esté enviando
+      if (!updatedData.name && !updatedData.telefono) {
+        return { success: false, message: "Debes proporcionar al menos un campo para actualizar."};
+      }
+      // Enviar solo los valores no vacíos
+      const response = await axiosInstance.put("/user/data/update",updatedData);
       return response.data.status;
     } catch (error) {
       console.error("Error al actualizar la información del usuario:", error);
-      return;
+      return { success: false, message: "Error al actualizar los datos." };
     }
   },
   async getOrdersHistory() {

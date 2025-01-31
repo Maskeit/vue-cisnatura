@@ -1,7 +1,7 @@
 <template>
     <div class="bg-gray-100 min-h-screen">
         <!-- Header -->
-        <header class="bg-green-600 py-8">
+        <header class=" py-8">
             <h1 class="text-white text-center text-4xl font-bold">CISnatura</h1>
             <h2 class="text-white text-center text-2xl">Fábrica de Remedios Herbolarios</h2>
             <h3 class="text-white text-center text-xl mt-2">Contáctanos</h3>
@@ -41,12 +41,11 @@
     </div>
 </template>
 
-<script>
-export default {
-    name: "Contacto",
-};
+<script setup>
 </script>
 
 <style scoped>
-/* Añade estilos personalizados aquí si es necesario */
+header{
+    background-color: #3b590b;
+}
 </style>

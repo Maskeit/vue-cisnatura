@@ -38,7 +38,7 @@
         </div>
         <div v-else-if="status === 401">
           <p class="text-red-500">{{ errorMessage }}</p>
-          <p><router-link class="text-red-700 underline-offset-1" to="/RequestRecover">No recuero mi
+          <p><router-link class="text-red-700 underline-offset-1" to="/RequestRecover">No recuerdo mi
               contraseña</router-link></p>
         </div>
       </form>

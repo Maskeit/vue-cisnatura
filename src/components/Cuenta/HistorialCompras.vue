@@ -63,7 +63,7 @@ import { useUserStore } from "@/services/stores/userStore";
 import { translate } from "@/utils/translations";
 const userStore = useUserStore();
 const selectedOrder = ref(null);
-console.log(userStore.orders);
+
 const showOrderDetails = (order) => {
     selectedOrder.value = order;
 };

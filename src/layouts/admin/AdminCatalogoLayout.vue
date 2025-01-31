@@ -34,238 +34,258 @@
     </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, onMounted, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import Sidebar from "@/components/Sidebar.vue";
+
 import AdminProductCard from "@/components/admin/AdminProductCard.vue";
 import AdminCreateProduct from "@/components/admin/AdminCreateProduct.vue";
 import AdminCreateProductModal from "@/components/admin/AdminCreateProductModal.vue";
 import AdminProductModal from "@/components/admin/AdminProductModal.vue";
+
 import Pagination from "@/components/Pagination.vue";
-import ProductServices from "@/services/AdminServices/ProductServices";
+
+import ProductService from "@/services/AdminServices/ProductService";
 import { EventBus } from "@/services/eventBus";
+import { system } from "@/services/system";
+import { useSearchStore } from "@/services/stores/searchStore";
 
-export default {
-    components: { Sidebar, AdminProductCard, AdminProductModal, AdminCreateProductModal, AdminCreateProduct, Pagination },
-    data() {
-        return {
-            products: [],
-            filteredProducts: [],
-            selectedProduct: null,
-            currentPage: 1,
-            totalPages: 0,
-            limit: 16,
-            isLoading: false,
-            isModalOpen: false,
-            isCreateModalOpen: false,
-            categories: [
-                { displayName: "Todos los productos", value: null },
-                { displayName: "Tinturas", value: "tintura" },
-                { displayName: "Dióxido de cloro", value: "cds" },
-                { displayName: "Cursos/Talleres", value: "curso" },
-                { displayName: "Paquetes", value: "paquete" },
-                { displayName: "Productos Naturales", value: "otro" },
-            ],
-        };
-    },
-    watch: {
-        "$route.query.category": {
-            immediate: true,
-            handler(newCategory) {
-                if (newCategory) {
-                    this.filterByCategory(newCategory);
-                } else {
-                    this.filteredProducts = [...this.products];
-                }
-            },
-        },
-        "$route.query.search": {
-            immediate: true,
-            handler(newSearch) {
-                if (newSearch) {
-                    this.filterProducts(newSearch);
-                }
-            },
-        },
-    },
-    created() {
-        // Escuchar eventos desde el EventBus
-        EventBus.on("filterProducts", this.filterProducts);
-        EventBus.on("serverSearch", this.serverSearch);
-        EventBus.emit("categoriesUpdated", this.categories);
-        // Cargar productos iniciales
-        this.fetchProducts(this.currentPage)
-            .then(() => {
-                this.filteredProducts = [...this.products]; // Inicializar productos filtrados
-            })
-            .catch((error) => {
-                console.error("Error al cargar productos iniciales:", error);
-            });
-    },
-    beforeUnmount() {
-        // Desregistrar eventos al desmontar el componente
-        EventBus.off("filterProducts", this.filterProducts);
-        EventBus.off("serverSearch", this.serverSearch);
-    },
-    methods: {
-        async fetchProducts(page) {
-            this.isLoading = true;
-            try {
-                const { products, total } = await ProductServices.getCatalogoProducts(page, this.limit);
-                this.products = products;
-                this.filteredProducts = products;
-                this.totalPages = Math.ceil(total / this.limit);
-            } catch (error) {
-                console.error("Error al cargar los productos:", error);
-            } finally {
-                this.isLoading = false;
-            }
-        },
-        async changePage(page) {
-            if (page > 0 && page <= this.totalPages) {
-                this.currentPage = page;
-                await this.fetchProducts(this.currentPage);
-            }
-        },
-        /**
-        * Filtra los productos cargados en memoria según la categoría seleccionada.
-        */
-        filterByCategory(categoryValue) {
-            if (!this.products || this.products.length === 0) {
-                console.error("No hay productos disponibles para filtrar.");
-                return;
-            }
+const route = useRoute();
+const router = useRouter();
 
-            if (!categoryValue) {
-                // Mostrar todos los productos si no hay filtro
-                this.filteredProducts = [...this.products];
-            } else {
-                // Aplicar filtro por tipo
-                this.filteredProducts = this.products.filter(
-                    (product) =>
-                        product.type &&
-                        product.type.toLowerCase() === categoryValue.toLowerCase()
-                );
-            }
-        },
+// Estado Reactivo
+const products = ref([]);
+const filteredProducts = ref([]);
+const selectedProduct = ref(null);
+const currentPage = ref(1);
+const totalPages = ref(0);
+const limit = ref(16);
+const isLoading = ref(false);
+const isModalOpen = ref(false);
 
-        /**
-         * Maneja las búsquedas locales de productos en tiempo real.
-         */
-        async filterProducts(query) {
-            const lowerQuery = query.toLowerCase();
+const isCreateModalOpen = ref(false);
 
-            if (!lowerQuery.trim()) {
-                // Si el input está vacío, muestra los productos de la página actual
-                this.filteredProducts = [...this.products];
-                return;
-            }
+const searchStore = useSearchStore();
 
-            // Filtrar productos cargados localmente
-            this.filteredProducts = this.products.filter(
-                (product) =>
-                    product.product_name.toLowerCase().includes(lowerQuery) ||
-                    product.description.toLowerCase().includes(lowerQuery) ||
-                    product.type.toLowerCase().includes(lowerQuery)
-            );
+const categories = searchStore.categories;
 
-            if (this.filteredProducts.length === 0) {
-                console.warn("No se encontraron productos en la búsqueda local.");
-            }
-        },
-
-        /**
-         * Busca productos en el servidor si no se encuentran en la caché local.
-         */
-        async serverSearch(query) {
-            this.loading = true;
-            try {
-                const { products, message } = await ProductServices.searchProducts(query);
-
-                // Actualizar los productos filtrados con los resultados del servidor
-                this.filteredProducts = products.length ? [...products] : [];
-            } catch (error) {
-                console.error("Error al buscar productos en el servidor:", error);
-            } finally {
-                this.loading = false;
-            }
-        },
-        openModal(product) {
-            this.selectedProduct = { ...product };
-            this.isModalOpen = true;
-        },
-        closeModal() {
-            this.isModalOpen = false;
-            this.selectedProduct = null;
-        },
-        openCreateProductModal() {
-            this.isCreateModalOpen = true;
-        },
-        closeCreateProductModal() {
-            this.isCreateModalOpen = false;
-        },
-        async handleSaveProduct(data, hasImage) {
-            try {
-                let response;
-                if (hasImage) {
-                    // Llamar al método para enviar FormData
-                    response = await ProductServices.editProduct(data, true);
-                } else {
-                    // Llamar al método para enviar JSON
-                    response = await ProductServices.editProduct(data, false);
-                }
-
-                if (response === 201) {
-                    // Recargar productos después de guardar
-                    await this.fetchProducts(this.currentPage);
-                    // Emitir un evento al modal para que muestre el mensaje de éxito
-                    EventBus.emit("showConfirmation", "Producto actualizado exitosamente.");
-                }
-            } catch (error) {
-                console.error("Error al actualizar producto:", error);
-            }
-        },
-        async handleCreateProduct(formData) {
-            try {
-                const response = await ProductServices.createProduct(formData);
-                if (response === 201) {
-                    this.isCreateModalOpen = false; // Cierra el modal
-                    await this.fetchProducts(this.currentPage); // Recarga los productos
-                }
-            } catch (error) {
-                console.error("Error al crear el producto:", error);
-            }
-        },
-        async handleDeleteProduct(productId) {
-            try {
-                const response = await ProductServices.deleteProduct(productId);
-                if (response === 201) {
-                    // Elimina el producto de la lista reactiva `products`
-                    this.products = this.products.filter((product) => product.id !== productId);
-                    this.filteredProducts = this.filteredProducts.filter((product) => product.id !== productId);
-                } else {
-                    alert("Error al eliminar el producto.");
-                }
-            } catch (error) {
-                console.error("Error al eliminar el producto:", error);
-            }
-        },
-        async handleToggleProduct(productId) {
-            try {
-                const response = await ProductServices.toggleProduct(productId);
-                if (response === 201) { // esto quiere decir que si se cambio la visibilidad en la base de datos. 
-                    // Encuentra el producto en la lista y actualiza su estado "active"
-                    const product = this.products.find((p) => p.id === productId);
-                    if (product) {
-                        product.active = product.active == 1 ? 0 : 1; // Alterna el estado
-                    }
-                } else {
-                    alert("Error al cambiar estado del producto");
-                }
-            } catch (error) {
-                console.error("Error al alternar el estado del producto:", error);
-            }
+watch(() => searchStore.searchResults,
+    (newResults) => {
+        if (newResults.length > 0) {
+            filteredProducts.value = newResults;
+        } else {
+            filteredProducts.value = [...products.value];
         }
     },
+    { deep: true }
+);
+
+// Escuchar cambios en la URL (búsqueda en la barra de navegación)
+watch(() => route.query.q, async (newSearch) => {
+    if (newSearch && newSearch.trim()) {
+        const lowerSearch = newSearch.toLowerCase();
+        // Verificar si el producto ya está en caché (productos cargados en `products.value`)
+        const cachedResults = products.value.filter(product =>
+            product.product_name.toLowerCase().includes(lowerSearch) ||
+            product.description.toLowerCase().includes(lowerSearch) ||
+            product.type.toLowerCase().includes(lowerSearch)
+        );
+        if (cachedResults.length > 0) {
+            // Si ya está en caché, usar esos productos y NO hacer la consulta al servidor
+            filteredProducts.value = cachedResults;
+            return; // Salir de la función para evitar hacer la consulta al servidor
+        }
+        // Si no está en caché, buscar en el servidor
+        isLoading.value = true;
+        try {
+            const { products: serverResults } = await ProductService.searchProducts(newSearch);
+
+            if (serverResults.length > 0) {
+                filteredProducts.value = serverResults;
+            } else {
+                console.warn("No se encontraron productos en la búsqueda en el servidor.");
+                filteredProducts.value = [];
+            }
+        } catch (error) {
+            console.error("Error en la búsqueda en el servidor:", error);
+            filteredProducts.value = [];
+        } finally {
+            isLoading.value = false;
+        }
+    } else {
+        // Si no hay búsqueda activa, restaurar todos los productos de la primera página
+        filteredProducts.value = [...products.value];
+    }
+}, { immediate: true });
+// Filtrar productos en memoria por búsqueda
+const filterProducts = (query) => {
+    const lowerQuery = query.toLowerCase().trim();
+    filteredProducts.value = lowerQuery
+        ? products.value.filter((product) =>
+            product.product_name.toLowerCase().includes(lowerQuery) ||
+            product.description.toLowerCase().includes(lowerQuery) ||
+            product.type.toLowerCase().includes(lowerQuery)
+        )
+        : [...products.value];
+
+    if (!filteredProducts.value.length) {
+        console.warn("No se encontraron productos en la búsqueda local.");
+    }
+};
+// Cargar Productos y Carrito al Montar
+onMounted(async () => {
+    EventBus.on("filterProducts", filterProducts);
+    EventBus.on("serverSearch", serverSearch);
+    EventBus.emit("categoriesUpdated", categories);
+
+
+    try {
+        await fetchProducts(currentPage.value);
+        filteredProducts.value = [...products.value];
+    } catch (error) {
+        console.error("Error al cargar productos iniciales:", error);
+    }
+});
+
+// Obtener productos de la API para el catalogo y paginas
+const fetchProducts = async (page) => {
+    isLoading.value = true;
+    try {
+        const { products: fetchedProducts, total } = await ProductService.getCatalogoProducts(page, limit.value);
+        
+        products.value = fetchedProducts;
+        filteredProducts.value = fetchedProducts;
+        totalPages.value = Math.ceil(total / limit.value);
+        // Guardamos los productos en el estado global de Pinia
+        searchStore.setProducts(fetchedProducts);
+    } catch (error) {
+        console.error("Error al cargar los productos:", error);
+    } finally {
+        isLoading.value = false;
+    }
+};
+// Cambiar de página en la paginación
+const changePage = async (page) => {
+    if (page > 0 && page <= totalPages.value) {
+        currentPage.value = page;
+        await fetchProducts(currentPage.value);
+    }
+};
+// Filtrar productos por categoría
+const filterByCategory = (categoryValue) => {
+    if (!products.value.length) {
+        console.error("No hay productos disponibles para filtrar.");
+        return;
+    }
+
+    filteredProducts.value = categoryValue
+        ? products.value.filter((product) =>
+            product.type?.toLowerCase() === categoryValue.toLowerCase()
+        )
+        : [...products.value];
+};
+// Buscar productos en el servidor si no están en memoria
+const serverSearch = async (query) => {
+    if (!query || query.trim() === "") return;
+
+    isLoading.value = true;
+    try {
+        // Llamar al método de búsqueda del ProductService
+        const { products, message } = await ProductService.searchProducts(query);
+
+        // Validar si se encontraron productos
+        if (products.length > 0) {
+            filteredProducts.value = [...products];
+        } else {
+            console.warn(message || "No se encontraron productos en la búsqueda.");
+            filteredProducts.value = [];
+        }
+    } catch (error) {
+        console.error("Error al buscar productos en el servidor:", error);
+        filteredProducts.value = [];
+    } finally {
+        isLoading.value = false;
+    }
+};
+
+// Modal de productos
+const openModal = (product) => {
+    selectedProduct.value = { ...product };
+    isModalOpen.value = true;
+};
+const closeModal = () => {
+    isModalOpen.value = false;
+    selectedProduct.value = null;
+};
+
+const openCreateProductModal = () => {
+    isCreateModalOpen = true;
+};
+const closeCreateProductModal = () => {
+    isCreateModalOpen = false;
+};
+const handleSaveProduct = async (data, hasImage) => {
+    try {
+        let response;
+        if (hasImage) {
+            // Llamar al método para enviar FormData
+            response = await ProductService.editProduct(data, true);
+        } else {
+            // Llamar al método para enviar JSON
+            response = await ProductService.editProduct(data, false);
+        }
+
+        if (response === 201) {
+            // Recargar productos después de guardar
+            await fetchProducts(currentPage);
+            // Emitir un evento al modal para que muestre el mensaje de éxito
+            EventBus.emit("showConfirmation", "Producto actualizado exitosamente.");
+        }
+    } catch (error) {
+        console.error("Error al actualizar producto:", error);
+    }
+};
+const handleCreateProduct = async (formData) => {
+    try {
+        const response = await ProductService.createProduct(formData);
+        if (response === 201) {
+            isCreateModalOpen = false; // Cierra el modal
+            await fetchProducts(currentPage); // Recarga los productos
+        }
+    } catch (error) {
+        console.error("Error al crear el producto:", error);
+    }
+};
+const handleDeleteProduct = async (productId) => {
+    try {
+        const response = await ProductService.deleteProduct(productId);
+        if (response === 201) {
+            // Elimina el producto de la lista reactiva `products`
+            products = products.filter((product) => product.id !== productId);
+            filteredProducts = filteredProducts.filter((product) => product.id !== productId);
+        } else {
+            alert("Error al eliminar el producto.");
+        }
+    } catch (error) {
+        console.error("Error al eliminar el producto:", error);
+    }
+};
+const handleToggleProduct = async (productId) => {
+    try {
+        const response = await ProductService.toggleProduct(productId);
+        if (response === 201) { // esto quiere decir que si se cambio la visibilidad en la base de datos. 
+            // Encuentra el producto en la lista y actualiza su estado "active"
+            const product = products.find((p) => p.id === productId);
+            if (product) {
+                product.active = product.active == 1 ? 0 : 1; // Alterna el estado
+            }
+        } else {
+            alert("Error al cambiar estado del producto");
+        }
+    } catch (error) {
+        console.error("Error al alternar el estado del producto:", error);
+    }
 };
 </script>
 <style>

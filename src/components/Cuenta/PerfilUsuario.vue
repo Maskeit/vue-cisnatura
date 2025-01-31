@@ -2,7 +2,7 @@
   <div class="p-6 max-w-lg mx-auto bg-white rounded-lg shadow-md">
     <h1 class="text-2xl font-bold text-gray-800 mb-4">Información del Usuario</h1>
 
-    <div class="bg-green-500 text-white p-4 rounded-md shadow-md">
+    <div class="card text-white p-4 rounded-md shadow-md">
       <p class="text-lg"><strong>Nombre:</strong> {{ userData.name }}</p>
       <p class="text-lg"><strong>Email:</strong> {{ userData.email }}</p>
       <p class="text-lg"><strong>Teléfono:</strong> {{ userData.phone || "No disponible" }}</p>
@@ -28,3 +28,9 @@ onMounted(async () => {
   await userStore.fetchUserInfo();
 });
 </script>
+
+<style scoped>
+.card{
+  background-color: #3b590b;
+}
+</style>
