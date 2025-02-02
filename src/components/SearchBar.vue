@@ -24,7 +24,7 @@
 </template>
 
 <script setup>
-import { ref, watch, defineEmits } from "vue";
+import { ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useSearchStore } from "@/services/stores/searchStore";
 import { MagnifyingGlassIcon } from "@heroicons/vue/24/solid";

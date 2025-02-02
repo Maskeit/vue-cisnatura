@@ -13,7 +13,7 @@
             <div class="flex flex-col md:flex-row h-auto overflow-auto">
                 <!-- Imagen -->
                 <div class="w-full md:w-1/2 p-4 flex flex-col items-center justify-center bg-gray-50">
-                    <img :src="previewImage || `http://cisnaturatienda.local/app/pimg/${editedProduct.thumb}`"
+                    <img :src="previewImage || `${V_Global_IMG}${editedProduct.thumb}`"
                         :alt="editedProduct.product_name"
                         class="w-full max-h-64 md:max-h-full object-contain rounded mb-4" />
                     <input type="file" accept="image/*" @change="handleImageChange"
@@ -30,8 +30,8 @@
                     </div>
                     <div class="mb-4">
                         <label for="productDescription"
-                            class="block text-sm font-medium text-gray-700">Descripción</label>
-                        <QuillEditor v-model:content="editedProduct.description" content-type="html" />
+                            class="block text-sm font-medium text-gray-700">Descripción</label>                        
+                        <Editor v-if="editedProduct" v-model="editedProduct.description" />
                     </div>
                     <div class="mb-4">
                         <label for="productPrice" class="block text-sm font-medium text-gray-700">Precio (MXN)</label>
@@ -78,100 +78,110 @@
         message="El producto se actualizó correctamente." confirmText="Aceptar" @confirm="closeConfirmationModal" />
 </template>
 
-<script>
-import { QuillEditor } from '@vueup/vue-quill';
-import ConfirmationModal from '@/components/shared/ConfirmationModal.vue';
-//use admin 
-export default {
-    components: { QuillEditor, ConfirmationModal },
-    props: {
-        isOpen: Boolean,
-        product: Object
-    },
-    data() {
-        return {
-            editedProduct: { ...this.product },
-            previewImage: null,
-            isDeleteModalOpen: false, // Controla el modal de confirmación
-            isToggleModalOpen: false,
-            isConfirmationModalOpen: false, // Controla el modal de confirmación para ediciones
-        };
-    },
-    methods: {
-        closeModal() {
-            this.$emit("close");
-        },
-        closeConfirmationModal() {
-            this.isConfirmationModalOpen = false;
-        },
-        handleImageChange(event) {
-            const file = event.target.files[0];
-            if (file) {
-                this.previewImage = URL.createObjectURL(file);
-                this.editedProduct.imageFile = file;
-            }
-        },
-        saveProduct() {
-            try {
-                const hasImage = !!this.editedProduct.imageFile; // Verifica si hay una imagen
-                let dataToSend;
+<script setup>
+import { ref, watch } from "vue";
+import Editor from '@/components/shared/Editor.vue';
+import ConfirmationModal from "@/components/shared/ConfirmationModal.vue";
+import { V_Global_IMG } from "@/services/system.js";
 
-                if (hasImage) {
-                    // Construir FormData si hay una imagen
-                    const formData = new FormData();
-                    formData.append("id", this.editedProduct.id);
-                    formData.append("name", this.editedProduct.product_name);
-                    formData.append("description", this.editedProduct.description);
-                    formData.append("price", this.editedProduct.price);
-                    formData.append("stock", this.editedProduct.stock);
-                    formData.append("image", this.editedProduct.imageFile); // Agregar imagen
-                    dataToSend = formData;
-                } else {
-                    // Usar JSON si no hay imagen
-                    dataToSend = {
-                        id: this.editedProduct.id,
-                        name: this.editedProduct.product_name,
-                        description: this.editedProduct.description,
-                        price: this.editedProduct.price,
-                        stock: this.editedProduct.stock,
-                    };
-                }
+// Props
+const props = defineProps({
+    isOpen: Boolean,
+    product: Object,
+});
 
-                // Llamar al método del componente padre
-                this.$emit("save-product", dataToSend, hasImage);
+// Emitir eventos
+const emit = defineEmits(["close", "save-product", "delete-product", "toggle-product"]);
 
-                // Si el producto se guarda correctamente, muestra el modal de confirmación
-                this.isConfirmationModalOpen = true;
-                this.closeModal(); // Cierra el modal principal
-            } catch (error) {
-                console.error("Error al guardar el producto:", error);
-            }
-        },
-        showDeleteConfirmation() {
-            this.isDeleteModalOpen = true; // Abre el modal de confirmación
-        },
-        confirmDeleteProduct() {
-            this.isDeleteModalOpen = false;
-            this.$emit("delete-product", this.editedProduct.id); // Emite el evento para eliminar el producto
-            this.closeModal(); // Cierra el modal principal
-        },
-        showToggleConfirmation() {
-            this.isToggleModalOpen = true;
-        },
-        confirmToggleProduct() {
-            this.isToggleModalOpen = false;
-            this.$emit("toggle-product", this.editedProduct.id);
-            this.closeModal(); // Cierra el modal principal
-        },
-    },
-    watch: {
-        product: {
-            immediate: true,
-            handler(newProduct) {
-                this.editedProduct = { ...newProduct };
-            }
-        }
+// Estado reactivo
+const editedProduct = ref({ ...props.product });
+const previewImage = ref(null);
+const isDeleteModalOpen = ref(false);
+const isToggleModalOpen = ref(false);
+const isConfirmationModalOpen = ref(false);
+
+// Métodos
+const closeModal = () => {
+    emit("close");
+};
+
+const closeConfirmationModal = () => {
+    isConfirmationModalOpen.value = false;
+};
+
+const handleImageChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        previewImage.value = URL.createObjectURL(file);
+        editedProduct.value.imageFile = file;
     }
 };
+
+const saveProduct = () => {
+    try {
+        if (!editedProduct.value.id) {
+            console.error("Error: El ID del producto es inválido:", editedProduct.value);
+            return;
+        }
+
+        const hasImage = !!editedProduct.value.imageFile;
+        let dataToSend;
+
+        if (hasImage) {
+            const formData = new FormData();
+            formData.append("id", editedProduct.value.id); // ✅ Se envía como número
+
+            formData.append("name", editedProduct.value.product_name);
+            formData.append("description", editedProduct.value.description);
+            formData.append("price", editedProduct.value.price);
+            formData.append("stock", editedProduct.value.stock);
+            if (editedProduct.value.imageFile) {
+                formData.append("image", editedProduct.value.imageFile);
+            }
+
+            console.log("✅ Enviando datos con imagen (FormData):", Object.fromEntries(formData.entries())); // Depuración
+            dataToSend = formData;
+        } else {
+            dataToSend = {
+                id: Number(editedProduct.value.id), // 🔹 Convertir a número
+                name: editedProduct.value.product_name,
+                description: editedProduct.value.description,
+                price: editedProduct.value.price,
+                stock: editedProduct.value.stock,
+            };
+            console.log("✅ Enviando datos sin imagen (JSON):", dataToSend); // Depuración
+        }
+
+        emit("save-product", dataToSend, hasImage);
+        isConfirmationModalOpen.value = true;
+        closeModal();
+    } catch (error) {
+        console.error("❌ Error al guardar el producto:", error);
+    }
+};
+const showDeleteConfirmation = () => {
+    isDeleteModalOpen.value = true;
+};
+
+const confirmDeleteProduct = () => {
+    isDeleteModalOpen.value = false;
+    emit("delete-product", editedProduct.value.id);
+    closeModal();
+};
+const confirmToggleProduct = () => {
+    isToggleModalOpen.value = false;
+    emit("toggle-product", editedProduct.value.id);
+    closeModal();
+};
+
+const showToggleConfirmation = () => {
+    isToggleModalOpen.value = true;
+};
+
+
+// Actualiza `editedProduct` cuando cambia `product`
+watch(() => props.product, (newProduct) => {
+    editedProduct.value = { ...newProduct };
+}, { immediate: true });
 
 </script>

@@ -33,12 +33,12 @@
         </div>
         <div v-if="errorMessage">
           <p class="text-red-500">{{ errorMessage }}</p>
-          <p><router-link class="text-red-700 underline-offset-1" to="/RequestRecover">No recuero mi
+          <p><router-link class="text-red-700 underline" to="/RequestRecover">No recuerdo mi
               contraseña</router-link></p>
         </div>
         <div v-else-if="status === 401">
           <p class="text-red-500">{{ errorMessage }}</p>
-          <p><router-link class="text-red-700 underline-offset-1" to="/RequestRecover">No recuerdo mi
+          <p><router-link class="text-red-700 underline" to="/RequestRecover">No recuerdo mi
               contraseña</router-link></p>
         </div>
       </form>

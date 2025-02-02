@@ -21,7 +21,7 @@
         </li>
       </ul>
       <!-- Información de derechos reservados -->
-      <p class="text-center text-sm">&copy; 2024 CISnatura, Inc. Todos los derechos reservados.</p>
+      <p class="text-center text-sm">&copy; 2025 CISnatura. Todos los derechos reservados.</p>
     </div>
   </footer>
 </template>

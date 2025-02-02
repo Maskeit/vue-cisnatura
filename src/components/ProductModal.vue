@@ -13,7 +13,7 @@
             <div class="flex flex-col md:flex-row h-auto overflow-auto">
                 <!-- Imagen -->
                 <div class="w-full md:w-1/2 p-4 flex items-center justify-center bg-gray-50">
-                    <img :src="`http://cisnaturatienda.local/app/pimg/${product.thumb}`" :alt="product.product_name"
+                    <img :src="`${V_Global_IMG}${product.thumb}`" :alt="product.product_name"
                         class="w-full max-h-64 md:max-h-full object-contain rounded" />
                 </div>
 
@@ -42,35 +42,42 @@
         </div>
     </div>
 </template>
-<script>
+
+<script setup>
+import { ref } from "vue";
 import { XMarkIcon, ShoppingCartIcon } from "@heroicons/vue/24/solid";
 import CartManager from "@/services/CartManager";
+import { V_Global_IMG } from "@/services/system.js";
 
-export default {
-    components: { XMarkIcon, ShoppingCartIcon },
-    props: {
-        isOpen: { type: Boolean, default: false },
-        product: { type: Object, required: true },
-    },
-    data() {
-        return {
-            addedToCart: false, // Estado temporal para mostrar el mensaje de éxito
-        };
-    },
-    methods: {
-        closeModal() {
-            this.$emit("close");
-        },
-        async addToCart(productId) {
-            const success = await CartManager.addProductToCart(this.product, 1);
-            if (success) {
-                this.$emit("add-to-cart", productId);
-                this.addedToCart = true;
-                setTimeout(() => {
-                    this.addedToCart = false;
-                }, 2000);
-            }
-        },
-    },
+// Props
+const props = defineProps({
+    isOpen: { type: Boolean, default: false },
+    product: { type: Object, required: true },
+});
+
+// Emitir eventos
+const emit = defineEmits(["close", "add-to-cart"]);
+
+// Estado reactivo
+const addedToCart = ref(false);
+
+// Métodos
+const closeModal = () => {
+    emit("close");
+};
+
+const addToCart = async () => {
+    const productData = {
+        pid: props.product.id, // Asegura que se tome el ID correcto
+        cantidad: 1
+    };    
+    const success = await CartManager.addProductToCart(productData.pid, productData.cantidad);
+    if (success) {
+        emit("add-to-cart", props.product.id);
+        addedToCart.value = true;
+        setTimeout(() => {
+            addedToCart.value = false;
+        }, 2000);
+    }
 };
 </script>

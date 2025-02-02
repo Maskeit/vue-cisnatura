@@ -2,7 +2,7 @@
     <div class="flex items-center bg-white shadow-md rounded-lg p-4 mb-4">
         <!-- Imagen del producto -->
         <div class="w-20 h-20 flex-shrink-0">
-            <img :src="`http://cisnaturatienda.local/app/pimg/${product.thumb}`" alt="Product Image"
+            <img :src="`${V_Global_IMG}${product.thumb}`" alt="Product Image"
                 class="w-full h-full object-cover rounded-md" />
         </div>
 
@@ -35,26 +35,32 @@
     </div>
 </template>
 
-<script>
-export default {
-    props: {
-        product: {
-            type: Object,
-            required: true,
-        },
+<script setup>
+import { V_Global_IMG } from "@/services/system.js";
+
+// Props
+const props = defineProps({
+    product: {
+        type: Object,
+        required: true,
     },
-    methods: {
-        incrementQuantity() {
-            this.$emit("update-quantity", this.product.productId, this.product.cantidad + 1);
-        },
-        decrementQuantity() {
-            if (this.product.cantidad > 1) {
-                this.$emit("update-quantity", this.product.productId, this.product.cantidad - 1);
-            }
-        },
-        removeFromCart() {
-            this.$emit("remove-product", this.product.productId);
-        },
-    },
+});
+
+// Emitir eventos
+const emit = defineEmits(["update-quantity", "remove-product"]);
+
+// Métodos
+const incrementQuantity = () => {
+    emit("update-quantity", props.product.productId, props.product.cantidad + 1);
+};
+
+const decrementQuantity = () => {
+    if (props.product.cantidad > 1) {
+        emit("update-quantity", props.product.productId, props.product.cantidad - 1);
+    }
+};
+
+const removeFromCart = () => {
+    emit("remove-product", props.product.productId);
 };
 </script>

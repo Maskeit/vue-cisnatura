@@ -6,18 +6,23 @@ const ProductService = {
   async editProduct(data, isFormData) {
     if (!system.http.check.live()) return;
     try {
-      const headers = isFormData
-        ? { "Content-Type": "multipart/form-data" }
-        : { "Content-Type": "application/json" };
+        let productId = isFormData ? Number(data.get("id")) : Number(data.id);
+        if (!productId) {
+            console.error("❌ Error: Falta el ID del producto en editProduct:", data);
+            throw new Error("Falta el ID del producto.");
+        }
 
-      const response = await axiosInstance.put("/product/update", data, {
-        headers,
-      });
+        const headers = isFormData
+            ? { "Content-Type": "multipart/form-data" }
+            : { "Content-Type": "application/json" };
 
-      return response.data.status;
+        console.log("📤 Enviando actualización al backend:", data);
+
+        const response = await axiosInstance.put("/product/update", data, { headers });
+        return response.data.status;
     } catch (error) {
-      console.error("Error al editar el producto:", error);
-      throw error;
+        console.error("❌ Error al editar el producto:", error);
+        throw error;
     }
   },
 
@@ -68,10 +73,12 @@ const ProductService = {
     if (productsCache[page]) {
       return productsCache[page];
     }
-    if(!system.http.check.live()) return;
+    if (!system.http.check.live()) return;
     try {
-      const response = await axiosInstance.get(`/admin/products?page=${page}&limit=${limit}`);
-      const data = response; 
+      const response = await axiosInstance.get(
+        `/admin/products?page=${page}&limit=${limit}`
+      );
+      const data = response;
       if (data.status === 200) {
         productsCache[page] = {
           products: response.data.data.products,
@@ -103,7 +110,9 @@ const ProductService = {
     }
 
     try {
-      const response = await axiosInstance.get("/search", { params: { search: query }});
+      const response = await axiosInstance.get("/search", {
+        params: { search: query },
+      });
 
       if (response.status === 200 && response.data.data.length > 0) {
         return { products: response.data.data };

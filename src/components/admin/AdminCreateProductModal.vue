@@ -57,13 +57,13 @@
 
                 <div class="mt-4">
                     <label class="block text-sm font-medium text-gray-700">Descripción</label>
-                    <QuillEditor v-model:content="newProduct.description" content-type="html"
-                        :class="{ 'border-red-500': errors.description }" />
+                    <Editor v-if="newProduct" v-model="newProduct.description" />
                     <p v-if="errors.description" class="text-red-500 text-sm mt-1">La descripción es obligatoria.</p>
                 </div>
 
                 <div class="mt-4">
-                    <label class="block text-sm font-medium text-gray-700">Imagen (Se recomienda pixelaje de 500 x 500)</label>
+                    <label class="block text-sm font-medium text-gray-700">Imagen (Se recomienda pixelaje de 500 x
+                        500)</label>
                     <input type="file" @change="handleImageUpload" class="mt-1 block w-full text-sm text-gray-500"
                         :class="{ 'border-red-500': errors.image }" />
                     <p v-if="errors.image" class="text-red-500 text-sm mt-1">La imagen es obligatoria.</p>
@@ -79,78 +79,112 @@
         </div>
     </div>
 </template>
+<script setup>
+import { ref } from "vue";
+import Editor from '@/components/shared/Editor.vue';
+// Props
+const props = defineProps({
+    isOpen: Boolean,
+});
 
-<script>
-import { QuillEditor } from '@vueup/vue-quill';
+// Emitir eventos
+const emit = defineEmits(["close", "create-product"]);
 
-export default {
-    components: { QuillEditor },
-    props: {
-        isOpen: Boolean,
-        product: Object
-    },
-    data() {
-        return {
-            newProduct: {
-                product_name: "",
-                price: "",
-                stock: "",
-                type: "",
-                description: "", // Contenido del editor Quill
-                image: null,
-            },
-            errors: {
-                product_name: false,
-                price: false,
-                stock: false,
-                type: false,
-                description: false,
-                image: false,
-            },
-        };
-    },
-    methods: {
-        handleImageUpload(event) {
-            this.newProduct.image = event.target.files[0];
-        },
+// Estado reactivo para el nuevo producto
+const newProduct = ref({
+    product_name: "",
+    price: "",
+    stock: "",
+    type: "",
+    description: "",
+    image: null,
+});
 
-        validateAndCreateProduct() {
-            // Resetear errores
-            this.errors = {
-                product_name: !this.newProduct.product_name.trim(),
-                price: !this.newProduct.price,
-                stock: !this.newProduct.stock,
-                type: !this.newProduct.type,
-                description: !this.newProduct.description.trim(),
-                image: !this.newProduct.image,
-            };
+// Estado reactivo para errores
+const errors = ref({
+    product_name: false,
+    price: false,
+    stock: false,
+    type: false,
+    description: false,
+    image: false,
+});
 
-            // Verificar si hay errores
-            const hasErrors = Object.values(this.errors).some((error) => error);
+// Estado para la previsualización de la imagen
+const previewImage = ref(null);
 
-            if (hasErrors) {
-                console.error("Hay errores en el formulario.");
-                return; // Detener la ejecución si hay errores
-            }
+// Métodos
 
-            // Crear FormData y enviar
-            const formData = new FormData();
-            formData.append("product_name", this.newProduct.product_name);
-            formData.append("price", this.newProduct.price);
-            formData.append("stock", this.newProduct.stock);
-            formData.append("type", this.newProduct.type);
-            formData.append("description", this.newProduct.description);
-            if (this.newProduct.image) {
-                formData.append("thumb", this.newProduct.image);
-            }
+// Cierra el modal y resetea los datos
+const closeModal = () => {
+    resetForm();
+    emit("close");
+};
 
-            // Emitir evento al componente padre
-            this.$emit("create-product", formData);
-        },
-    },
+// Maneja la carga de imágenes
+const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        previewImage.value = URL.createObjectURL(file);
+        newProduct.value.image = file;
+    }
+};
+
+// Valida los campos antes de crear el producto
+const validateAndCreateProduct = () => {
+    // Resetear errores
+    errors.value = {
+        product_name: !newProduct.value.product_name.trim(),
+        price: !newProduct.value.price,
+        stock: !newProduct.value.stock,
+        type: !newProduct.value.type,
+        description: !newProduct.value.description.trim(),
+        image: !newProduct.value.image,
+    };
+
+    // Verificar si hay errores
+    const hasErrors = Object.values(errors.value).some((error) => error);
+
+    if (hasErrors) {
+        console.error("⚠️ Hay errores en el formulario:", errors.value);
+        return; // Detener la ejecución si hay errores
+    }
+
+    // Crear FormData y enviar
+    const formData = new FormData();
+    formData.append("product_name", newProduct.value.product_name);
+    formData.append("price", newProduct.value.price);
+    formData.append("stock", newProduct.value.stock);
+    formData.append("type", newProduct.value.type);
+    formData.append("description", newProduct.value.description);
+    if (newProduct.value.image) {
+        formData.append("thumb", newProduct.value.image);
+    }
+    // Emitir evento al componente padre
+    emit("create-product", formData);
+
+    // Cerrar modal y resetear formulario
+    closeModal();
+};
+
+// Resetea el formulario al cerrar el modal
+const resetForm = () => {
+    newProduct.value = {
+        product_name: "",
+        price: "",
+        stock: "",
+        type: "",
+        description: "",
+        image: null,
+    };
+    errors.value = {
+        product_name: false,
+        price: false,
+        stock: false,
+        type: false,
+        description: false,
+        image: false,
+    };
+    previewImage.value = null;
 };
 </script>
-
-<style scoped>
-/* Estilo adicional */
-</style>

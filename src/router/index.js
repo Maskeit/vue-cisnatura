@@ -37,7 +37,7 @@ import AdminProducts from "@/views/admin/AdminProducts.vue";
 import AdminDashboard from "@/views/admin/dashboard/AdminDashboard.vue";
 import RecentOrder from "@/views/admin/dashboard/components/RecentOrder.vue";
 import OrderDetails from "@/views/admin/dashboard/components/OrderDetails.vue";
-import { fromJSON } from "postcss";
+
 const routes = [
   // Rutas de usuarios regulares
   {

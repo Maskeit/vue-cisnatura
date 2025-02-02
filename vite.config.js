@@ -1,30 +1,50 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import vue from "@vitejs/plugin-vue";
 import path from "path";
+import { visualizer } from "rollup-plugin-visualizer";
+import compression from "vite-plugin-compression";
 
-// Configura __dirname en ES Modules
 import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export default defineConfig({
-  plugins: [vue()],
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "src"),
-    },
-  },
-  server: {
-    proxy: {
-      "/api": {
-        target: "http://cisnaturatienda.local", // este es dominio local donde corre el servidor php que uso siempre
-        changeOrigin: true,
-        secure: false,
-        credentials: "include", // Permitir cookies
+export default defineConfig(({ mode }) => {
+  let env = loadEnv(mode, process.cwd(), "");
+  return {
+    plugins: [vue(), visualizer({ open: true }), compression()],
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "src"),
       },
     },
-    cors: {
-      origin: "http://localhost:5173", // 
-      credentials: true, // Permitir cookies en solicitudes entre sitios
+    server: {
+      proxy: {
+        "/api": {
+          target: env.VITE_APP_DOMAIN, // Usa la variable de entorno
+          changeOrigin: true,
+          secure: false,
+          credentials: "include",
+        },
+      },
+      cors: {
+        origin: env.VITE_APP_DOMAIN,
+        credentials: true,
+      },
     },
-  },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes("node_modules")) {
+              if (id.includes("@tiptap")) return "tiptap";
+              return "vendor";
+            }
+          },
+        },
+      },
+      optimizeDeps: {
+        include: ["@tiptap/core", "@tiptap/extension-paragraph"],
+        exclude: ["@tiptap/starter-kit"],
+      },
+    },
+  };
 });

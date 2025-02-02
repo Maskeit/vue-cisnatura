@@ -27,10 +27,11 @@
             <AdminProductModal v-if="isModalOpen" :isOpen="isModalOpen" :product="selectedProduct" @close="closeModal"
                 @save-product="handleSaveProduct" @delete-product="handleDeleteProduct"
                 @toggle-product="handleToggleProduct" />
-
             <!-- Paginación -->
             <Pagination :currentPage="currentPage" :totalPages="totalPages" @changePage="changePage" />
         </div>
+        <ConfirmationModal v-if="isConfirmationModalOpen" :isOpen="isConfirmationModalOpen" :title="'Confirmación'"
+            :message="confirmationMessage" confirmText="Aceptar" @confirm="isConfirmationModalOpen = false" />
     </div>
 </template>
 
@@ -43,7 +44,7 @@ import AdminProductCard from "@/components/admin/AdminProductCard.vue";
 import AdminCreateProduct from "@/components/admin/AdminCreateProduct.vue";
 import AdminCreateProductModal from "@/components/admin/AdminCreateProductModal.vue";
 import AdminProductModal from "@/components/admin/AdminProductModal.vue";
-
+import ConfirmationModal from "@/components/shared/ConfirmationModal.vue";
 import Pagination from "@/components/Pagination.vue";
 
 import ProductService from "@/services/AdminServices/ProductService";
@@ -63,12 +64,12 @@ const totalPages = ref(0);
 const limit = ref(16);
 const isLoading = ref(false);
 const isModalOpen = ref(false);
-
 const isCreateModalOpen = ref(false);
-
 const searchStore = useSearchStore();
-
 const categories = searchStore.categories;
+
+const isConfirmationModalOpen = ref(false);
+const confirmationMessage = ref("");
 
 watch(() => searchStore.searchResults,
     (newResults) => {
@@ -153,7 +154,7 @@ const fetchProducts = async (page) => {
     isLoading.value = true;
     try {
         const { products: fetchedProducts, total } = await ProductService.getCatalogoProducts(page, limit.value);
-        
+
         products.value = fetchedProducts;
         filteredProducts.value = fetchedProducts;
         totalPages.value = Math.ceil(total / limit.value);
@@ -209,7 +210,7 @@ const serverSearch = async (query) => {
     }
 };
 
-// Modal de productos
+// Modal de productos normales
 const openModal = (product) => {
     selectedProduct.value = { ...product };
     isModalOpen.value = true;
@@ -219,51 +220,72 @@ const closeModal = () => {
     selectedProduct.value = null;
 };
 
+// Modal del form para crear un producto nuevo
 const openCreateProductModal = () => {
-    isCreateModalOpen = true;
+    isCreateModalOpen.value = true;
 };
+
 const closeCreateProductModal = () => {
-    isCreateModalOpen = false;
+    isCreateModalOpen.value = false;
 };
+
+
 const handleSaveProduct = async (data, hasImage) => {
     try {
+        let productId = hasImage ? data.get("id") : data.id; // Extraer correctamente el ID
+        if (!productId) {
+            console.error("❌ Error: Falta el ID del producto en handleSaveProduct:", data);
+            return;
+        }
+
         let response;
         if (hasImage) {
-            // Llamar al método para enviar FormData
             response = await ProductService.editProduct(data, true);
         } else {
-            // Llamar al método para enviar JSON
             response = await ProductService.editProduct(data, false);
         }
 
         if (response === 201) {
-            // Recargar productos después de guardar
-            await fetchProducts(currentPage);
-            // Emitir un evento al modal para que muestre el mensaje de éxito
-            EventBus.emit("showConfirmation", "Producto actualizado exitosamente.");
+            await fetchProducts(currentPage.value);
+            EventBus.emit("showConfirmation", "✅ Producto actualizado exitosamente.");
         }
     } catch (error) {
-        console.error("Error al actualizar producto:", error);
+        console.error("❌ Error al actualizar producto:", error);
     }
 };
 const handleCreateProduct = async (formData) => {
     try {
         const response = await ProductService.createProduct(formData);
         if (response === 201) {
-            isCreateModalOpen = false; // Cierra el modal
-            await fetchProducts(currentPage); // Recarga los productos
+            confirmationMessage.value = "✅ El producto se ha creado correctamente.";
+            isConfirmationModalOpen.value = true; // Mostrar modal de confirmación
+            isCreateModalOpen.value = false; // Cerrar modal de creación
+            await fetchProducts(currentPage.value); // Recargar productos
+        } else {
+            confirmationMessage.value = "❌ No se pudo crear el producto. Inténtalo de nuevo.";
+            isConfirmationModalOpen.value = true; // Mostrar mensaje de error
         }
     } catch (error) {
         console.error("Error al crear el producto:", error);
+        confirmationMessage.value = "⚠️ Hubo un error al crear el producto.";
+        isConfirmationModalOpen.value = true;
     }
 };
 const handleDeleteProduct = async (productId) => {
     try {
         const response = await ProductService.deleteProduct(productId);
         if (response === 201) {
-            // Elimina el producto de la lista reactiva `products`
-            products = products.filter((product) => product.id !== productId);
-            filteredProducts = filteredProducts.filter((product) => product.id !== productId);
+            // Verifica que products y filteredProducts sean arrays antes de filtrar
+            if (!Array.isArray(products.value) || !Array.isArray(filteredProducts.value)) {
+                console.error("Error: products o filteredProducts no son arrays:", {
+                    products: products.value,
+                    filteredProducts: filteredProducts.value
+                });
+                return;
+            }
+            // Filtra los productos correctamente usando `value`
+            products.value = products.value.filter((product) => product.id !== productId);
+            filteredProducts.value = filteredProducts.value.filter((product) => product.id !== productId);
         } else {
             alert("Error al eliminar el producto.");
         }
@@ -274,11 +296,21 @@ const handleDeleteProduct = async (productId) => {
 const handleToggleProduct = async (productId) => {
     try {
         const response = await ProductService.toggleProduct(productId);
-        if (response === 201) { // esto quiere decir que si se cambio la visibilidad en la base de datos. 
-            // Encuentra el producto en la lista y actualiza su estado "active"
-            const product = products.find((p) => p.id === productId);
+
+        if (response === 201) {
+
+            // Verifica que products es un array
+            if (!Array.isArray(products.value)) {
+                console.error("Error: products no es un array:", products.value);
+                return;
+            }
+
+            // Encuentra el producto y actualiza su estado
+            const product = products.value.find((p) => p.id == productId);
             if (product) {
-                product.active = product.active == 1 ? 0 : 1; // Alterna el estado
+                product.active = product.active == 1 ? 0 : 1;
+            } else {
+                console.warn("No se encontró el producto con ID:", productId);
             }
         } else {
             alert("Error al cambiar estado del producto");

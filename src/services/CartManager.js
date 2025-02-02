@@ -14,7 +14,7 @@ const CartManager = {
     }
 
     try {
-      const status = await CartService.addProduct(product.id, quantity);
+      const status = await CartService.addProduct(product, quantity);
       if (status === 201) {
         // Actualizar carrito en localStorage
         const cart = JSON.parse(localStorage.getItem("cart") || "[]");

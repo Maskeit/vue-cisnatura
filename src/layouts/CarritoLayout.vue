@@ -32,7 +32,7 @@
                 <h2 class="text-2xl font-bold text-gray-600">Resumen de la compra</h2>
                 <div class="bg-white shadow-md rounded-lg p-4 relative">
                     <p v-if="isOnlyCourses" class="text-sm text-green-500">
-                        ¡El envío es gratis porque tu carrito solo contiene cursos!
+                        Sin costo de envío
                     </p>
                     <!-- Mostrar el loader -->
                     <div v-if="loading"

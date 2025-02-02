@@ -4,7 +4,7 @@
         data-product-id="product.id">
         <!-- Imagen -->
         <div class="w-full bg-white">
-            <img :src="`http://cisnaturatienda.local/app/pimg/${product.thumb}`" :alt="product.product_name"
+            <img :src="`${V_Global_IMG}${product.thumb}`" :alt="product.product_name"
                 class="w-full  object-contain p-4" />
         </div>
 
@@ -26,7 +26,6 @@
                 class="bg-white hover:bg-gray-100 text-gray-800 font-medium py-2 px-4 rounded-full shadow flex items-center gap-1">
                 <template v-if="addedToCart">
                     <span>✓</span>
-                    <span>Agregado</span>
                 </template>
                 <template v-else>
                     <span>Añadir</span>
@@ -37,35 +36,33 @@
     </div>
 </template>
 
-<script>
+<script setup>
+import { ref } from "vue";
 import { ShoppingCartIcon } from "@heroicons/vue/24/outline";
 import CartManager from "@/services/CartManager";
+import { V_Global_IMG } from "@/services/system.js";
 
-export default {
-    name: "ProductCard",
-    components: { ShoppingCartIcon },
-    props: {
-        product: {
-            type: Object,
-            required: true,
-        },
-    },
-    data() {
-        return {
-            addedToCart: false, // Estado temporal para mostrar el mensaje de éxito
-        };
-    },
-    methods: {    
-        async handleAddToCart() {
-            const success = await CartManager.addProductToCart(this.product, 1);
-            if (success) {
-                this.addedToCart = true;
-                setTimeout(() => {
-                    this.addedToCart = false;
-                }, 2000);
-            }
-        },
-    },
+// Props
+const props = defineProps({
+    product: {type: Object, required: true},
+});
+
+// Estado reactivo
+const addedToCart = ref(false);
+
+// Métodos
+const handleAddToCart = async () => {
+    const productData = {
+        pid: props.product.id, // Asegura que se tome el ID correcto
+        cantidad: 1
+    };
+    const success = await CartManager.addProductToCart(productData.pid, productData.cantidad);
+    if (success) {
+        addedToCart.value = true;
+        setTimeout(() => {
+            addedToCart.value = false;
+        }, 2000);
+    }
 };
 </script>
 

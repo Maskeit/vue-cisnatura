@@ -4,7 +4,7 @@
         data-product-id="product.id">
         <!-- Imagen -->
         <div :class="{ 'opacity-50': product.active == 0 }" class="w-full bg-white">
-            <img :src="`http://cisnaturatienda.local/app/pimg/${product.thumb}`" :alt="product.product_name"
+            <img :src="`${V_Global_IMG}${product.thumb}`" :alt="product.product_name"
                 class="w-500 h-500 object-cover mx-auto" />
         </div>
 
@@ -34,19 +34,15 @@
     </div>
 </template>
 
-<script>
+<script setup>
 import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline';
+import { V_Global_IMG } from "@/services/system.js";
 //use admin 
-export default {
-    name: "AdminProductCard",
-    props: {
-        product: {
-            type: Object,
-            required: true,
-        },
-    },
-    components: { EyeIcon, EyeSlashIcon }
-};
+
+// Props
+const props = defineProps({
+    product: { type: Object, required: true },
+});
 </script>
 
 <style scoped>
