@@ -13,18 +13,18 @@
             <!-- Productos -->
             <div class="product-list">
                 <!-- Card para agregar producto -->
-                <AdminCreateProduct @open-create-modal="openCreateProductModal" />
+                <CreateProduct @open-create-modal="openCreateProductModal" />
 
                 <!-- Lista de productos -->
-                <AdminProductCard v-for="product in filteredProducts" :key="product.id" :product="product"
+                <ProductCard v-for="product in filteredProducts" :key="product.id" :product="product"
                     @click="openModal(product)" />
             </div>
 
             <!-- Modal para crear producto -->
-            <AdminCreateProductModal v-if="isCreateModalOpen" @close="closeCreateProductModal"
+            <CreateProductModal v-if="isCreateModalOpen" @close="closeCreateProductModal"
                 @create-product="handleCreateProduct" />
             <!-- Modal -->
-            <AdminProductModal v-if="isModalOpen" :isOpen="isModalOpen" :product="selectedProduct" @close="closeModal"
+            <ProductModal v-if="isModalOpen" :isOpen="isModalOpen" :product="selectedProduct" @close="closeModal"
                 @save-product="handleSaveProduct" @delete-product="handleDeleteProduct"
                 @toggle-product="handleToggleProduct" />
             <!-- Paginación -->
@@ -40,10 +40,11 @@ import { ref, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Sidebar from "@/components/Sidebar.vue";
 
-import AdminProductCard from "@/components/admin/AdminProductCard.vue";
-import AdminCreateProduct from "@/components/admin/AdminCreateProduct.vue";
-import AdminCreateProductModal from "@/components/admin/AdminCreateProductModal.vue";
-import AdminProductModal from "@/components/admin/AdminProductModal.vue";
+import ProductCard from "@/components/Admin/Products/ProductCard.vue";
+import CreateProduct from "@/components/Admin/Products/CreateProduct.vue";
+import CreateProductModal from "@/components/Admin/Products/CreateProductModal.vue";
+import ProductModal from "@/components/Admin/Products/ProductModal.vue";
+
 import ConfirmationModal from "@/components/shared/ConfirmationModal.vue";
 import Pagination from "@/components/Pagination.vue";
 

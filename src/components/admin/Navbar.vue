@@ -25,10 +25,10 @@
 
         <!-- Menú de Navegación para escritorio -->
         <div class="hidden lg:flex justify-center space-x-6 py-2 border-t">
-            <router-link to="/AdminProducts" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">
+            <router-link to="/xqc/Productos" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">
                 Productos
             </router-link>
-            <router-link to="/Dashboard/RecentOrder" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">
+            <router-link to="/xqc/Dashboard/RecentOrder" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">
                 Ventas
             </router-link>
             <!-- Menú de Usuario -->
@@ -75,7 +75,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { useUserStore } from "@/views/admin/dashboard/stores/userStore";
+import { useUserStore } from "@/services/stores/userAdminStore";
 import { useRouter } from "vue-router";
 import { Bars3Icon, ChevronDownIcon} from "@heroicons/vue/24/outline";
 import SearchBar from "@/components/SearchBar.vue";
@@ -130,7 +130,7 @@ const logout = async () => {
         userStore.clearUser(); // Limpiar store de usuario
 
         // Redirigir al login
-        router.push("xqc/AdminLogin");
+        router.push("/xqc/Login");
     } catch (error) {
         console.error("Error cerrando sesión:", error);
     } finally {

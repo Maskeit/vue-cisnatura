@@ -79,7 +79,7 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
-import { useOrderStore } from "@/views/admin/dashboard/stores/orderStore";
+import { useOrderStore } from "@/services/stores/orderStore";
 
 const router = useRouter();
 const orderStore = useOrderStore();

@@ -10,7 +10,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig(({ mode }) => {
   let env = loadEnv(mode, process.cwd(), "");
   return {
-    plugins: [vue(), visualizer({ open: true }), compression()],
+    plugins: [vue()],
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "src"),

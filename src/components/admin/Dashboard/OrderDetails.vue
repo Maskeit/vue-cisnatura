@@ -139,7 +139,7 @@
 
 <script setup>
 import { useRouter, useRoute } from "vue-router";
-import { useOrderStore } from "@/views/admin/dashboard/stores/orderStore";
+import { useOrderStore } from "@/services/stores/orderStore";
 import { ref, onMounted } from "vue";
 import ConfirmationModal from "@/components/shared/ConfirmationModal.vue";
 import Operations from "@/services/AdminServices/Operations";

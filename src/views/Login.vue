@@ -31,15 +31,13 @@
             <div class="animate-spin rounded-full h-8 w-8 border-t-4 border-green-500"></div>
           </div>
         </div>
-        <div v-if="errorMessage">
+        <div v-if="codeStatus === 401 || codeStatus === 400 || codeStatus === 404">
           <p class="text-red-500">{{ errorMessage }}</p>
           <p><router-link class="text-red-700 underline" to="/RequestRecover">No recuerdo mi
               contraseña</router-link></p>
         </div>
-        <div v-else-if="status === 401">
-          <p class="text-red-500">{{ errorMessage }}</p>
-          <p><router-link class="text-red-700 underline" to="/RequestRecover">No recuerdo mi
-              contraseña</router-link></p>
+        <div v-else-if="codeStatus === 500">
+          <p class="text-red-700 underline">Error en el servicio intente más tarde.</p>
         </div>
       </form>
       <div class="login-footer">
@@ -64,7 +62,7 @@ const password = ref("");
 const errorMessage = ref("");
 const errors = ref({});
 const isLoading = ref(false);
-
+let codeStatus = ref("");
 const validateInputs = () => {
   const validationErrors = {};
 
@@ -85,9 +83,7 @@ const validateInputs = () => {
 };
 
 const handleLogin = async () => {
-  if (!validateInputs()) {
-    return;
-  }
+  if (!validateInputs()) return;
 
   try {
     isLoading.value = true;
@@ -98,20 +94,14 @@ const handleLogin = async () => {
       localStorage.setItem("Authorization", token);
       Cookies.set("Authorization", token, { expires: 7, path: "" });
       router.push("/Catalogo");
-    } else if (status === 401) {
-      // Credenciales incorrectas
-      errorMessage.value = "Credenciales incorrectas";
-    } else if (status === 400) {
-      // Datos de entrada inválidos
-      errorMessage.value = message || "Datos inválidos, verifica tu información.";
-    } else {
-      // Otros errores
-      errorMessage.value = message || "Error desconocido, intente más tarde.";
+    } else if (status === 401 || status === 400 || status === 404) {
+      errorMessage.value = "Datos incorrectos";
+      codeStatus.value = status;
     }
   } catch (error) {
     // Errores del servidor o de red
     errorMessage.value = "Error en el servicio, intente más tarde.";
-    console.error("Error al iniciar sesión:", error);
+    codeStatus.value = 500;
   } finally {
     isLoading.value = false;
   }

@@ -3,6 +3,7 @@ import { system } from "../system";
 
 
 const Operations = {
+
   async getOrders(page = 1, limit = 6) {
     if (!system.http.check.live()) return;
     try {
@@ -15,6 +16,7 @@ const Operations = {
       return []; // En caso de error, devolvemos una lista vacía para evitar problemas en el componente
     }
   },
+
   async getOrder(orderId) {
     if (!system.http.check.live()) return;
     try {
@@ -25,6 +27,7 @@ const Operations = {
       return null; // En caso de error, devolvemos null para evitar problemas en el componente
     }
   },
+
   async updateOrder(orderId, status, type){
     if (!system.http.check.live()) return;
     try {
@@ -33,6 +36,17 @@ const Operations = {
     } catch (error) {
       console.error("Error al actualizar el estado de la orden:", error);
       return false;
+    }
+  },
+
+  async getCustomers(){
+    if (!system.http.check.live()) return;
+    try {
+      const response = await axiosInstance.get(`/admin/users/get`);
+      return response.data.data; // Aseguramos que devuelva solo los datos
+    } catch (error) {
+      console.error("Error al obtener los clientes:", error);
+      return []; // En caso de error, devolvemos una lista vacía para evitar problemas en el componente
     }
   }
 };

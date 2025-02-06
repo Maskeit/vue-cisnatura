@@ -2,15 +2,15 @@
     <div class="flex flex-col min-h-screen">
         <!-- <Navbar /> -->
         <Navbar :categories="categories" />
-        <main>
+        <main class="flex-1 p-0">
             <router-view />
         </main>
         <Footer />
     </div>
 </template>
 <script>
-import Navbar from "@/components/admin/Navbar.vue";
-import Footer from "@/components/Footer.vue";
+import Navbar from "@/components/Admin/Navbar.vue";
+import Footer from "@/components/Admin/Footer.vue";
 
 export default {
     components: {
@@ -31,10 +31,3 @@ export default {
     },
 };
 </script>
-
-<style>
-main {
-    flex: 1;
-    /* Asegura que el contenido principal ocupe el espacio disponible */
-}
-</style>

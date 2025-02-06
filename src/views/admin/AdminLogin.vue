@@ -83,7 +83,7 @@ const handleLogin = async () => {
         if (status === 200) {
             localStorage.setItem("Authorization", token);
             Cookies.set("Authorization", token, { expires: 7, path: "/" });
-            router.push("/AdminProducts");
+            router.push("/xqc/Productos");
         } else if (status === 401) {
             errorMessage.value = "Credenciales incorrectas";
         } else {

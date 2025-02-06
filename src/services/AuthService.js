@@ -22,13 +22,6 @@ export const AuthService = {
         message: response.data.message || "Error desconocido",
       };
     } catch (error) {
-      console.error("Error en login:", error);
-
-      // Si es un error del servidor o de red, lo lanzamos
-      if (!error.response || error.response.status === 500) {
-        throw new Error("Error del servidor o de red.");
-      }
-
       // Si es otro código de estado (400, 401), devolver como respuesta manejable
       return {
         status: error.response.status,
@@ -44,10 +37,16 @@ export const AuthService = {
         email,
         passwd: btoa(password),
       });
-      return response.data;
+      return {
+        status: response.status,
+        message: response.data.message || "Error desconocido",
+      };
     } catch (error) {
-      console.error("Error en registro:", error);
-      throw error;
+      // Si es otro código de estado (400, 409), devolver como respuesta manejable
+      return {
+        status: error.response.status,
+        message: error.response.data.message || "Error desconocido",
+      };
     }
   },
 
@@ -60,7 +59,9 @@ export const AuthService = {
       }
 
       if (response.status === 401) {
-        console.warn("No había una sesión activa, pero se limpiarán los datos.");
+        console.warn(
+          "No había una sesión activa, pero se limpiarán los datos."
+        );
         return true;
       }
       console.error("Error inesperado al cerrar sesión:", response.status);
@@ -69,7 +70,7 @@ export const AuthService = {
       console.error("Error en la solicitud de logout:", error);
       return false;
     } finally {
-      // Limpieza obligatoria de la sesión, independientemente del resultado      
+      // Limpieza obligatoria de la sesión, independientemente del resultado
       localStorage.clear(); // Eliminar datos del usuario
       system.authToken = null; // Remover referencia en el sistema
     }

@@ -1,16 +1,15 @@
 <template>
-    <div @click="$emit('click', product)"
-        class="product-card bg-white w-56 shadow-md rounded-lg overflow-hidden transform transition duration-300 hover:scale-105 cursor-pointer"
+    <div @click="$emit('click', product)" class="product-card bg-white w-56 h-full shadow-md rounded-lg overflow-hidden transform transition duration-300 hover:scale-105 cursor-pointer flex flex-col"
         data-product-id="product.id">
         <!-- Imagen -->
-        <div class="w-full bg-white">
+        <div class="w-full bg-white flex items-center justify-center">
             <img :src="`${V_Global_IMG}${product.thumb}`" :alt="product.product_name"
-                class="w-full  object-contain p-4" />
+                class="w-full h-full object-cover p-4" />
         </div>
 
         <!-- Información del Producto -->
-        <div class="p-4">
-            <h3 class="text-lg font-bold text-center text-gray-800">
+        <div class="p-4 flex-grow">
+            <h3 class="text-lg font-bold text-center line-clamp-1 text-gray-800">
                 {{ product.product_name }}
             </h3>
             <p class="text-gray-600 text-sm text-center mt-2 line-clamp-1" :title="product.description"
@@ -72,5 +71,14 @@ const handleAddToCart = async () => {
     .product-card {
         min-width: calc(100% - 2rem);
     }
+}
+.product-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.card-footer {
+    margin-top: auto;
 }
 </style>

@@ -24,14 +24,18 @@ const route = useRoute(); // Obtenemos la ruta activa para marcar el estado
 
 // Definimos los paneles con rutas exactas del router
 const panels = [
-    { name: "Pedidos", icon: "📋", path: "/Dashboard/RecentOrder" },
-    { name: "Reporte de ventas", icon: "📊", path: "/Dashboard/SalesReport" },
-    { name: "Productos", icon: "📦", path: "/Dashboard/Products" },
-    { name: "Clientes", icon: "👥", path: "/Dashboard/Clients" },
-    { name: "Configuración", icon: "⚙️", path: "/Dashboard/Settings" },
+    { name: "Pedidos recientes", icon: "📋", path: "/xqc/Dashboard/RecentOrder" },
+    { name: "Envíos", icon: "📊", path: "/xqc/Dashboard/SalesReport" },
+    { name: "Clientes", icon: "👥", path: "/xqc/Dashboard/Clientes" },
+    { name: "Configuración", icon: "⚙️", path: "/xqc/Dashboard/Settings" },
 ];
 
 const navigateTo = (path: string) => {
     router.push(path); // Navega a la ruta correspondiente
 };
 </script>
+<style scoped>
+.aside {
+    background-color: #343A40;
+}
+</style>

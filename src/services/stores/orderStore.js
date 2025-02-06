@@ -8,6 +8,8 @@ export const useOrderStore = defineStore("orderStore", {
     selectedOrder: null, // Orden seleccionada para los detalles
     currentPage: 1, // Página actual
     itemsPerPage: 6, // Límite por página
+
+    users: [], // Lista de usuarios
   }),
 
   // falta agregar un store para pedir una sola orden pasando el id
@@ -60,6 +62,16 @@ export const useOrderStore = defineStore("orderStore", {
     // Obtener una orden específica desde el estado
     getOrderById(orderId) {
       return this.orders.find((order) => order.id === orderId) || null;
+    },
+
+    // Obtener la lista de usuarios
+    async fetchUsers() {
+      try {
+        const users = await Operations.getCustomers();
+        this.users = users;
+      } catch (error) {
+        console.error("Error al obtener los usuarios:", error);
+      }
     },
   },
 

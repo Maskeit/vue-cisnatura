@@ -12,5 +12,5 @@
     </div>
 </template>
 <script setup lang="js">
-import VerticalSidebar from "@/views/admin/dashboard/components/Vertical-Sidebar.vue";
+import VerticalSidebar from "@/components/Admin/Dashboard/Vertical-Sidebar.vue";
 </script>

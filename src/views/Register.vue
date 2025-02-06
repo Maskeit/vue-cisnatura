@@ -49,8 +49,19 @@
                     <span v-if="errors.password2" class="error-message">{{ errors.password2 }}</span>
                 </div>
 
-                <button type="submit" class="btn-submit">Registrarse</button>
-                <p v-if="errorMessage" class="error-server-message">{{ errorMessage }}</p>
+                <!-- Mostrar el botón o el loader -->
+                <div class="form-group">
+                    <button v-if="!isLoading" type="submit" class="btn-submit">Registrarse</button>
+                    <div v-else class="flex items-center justify-center">
+                        <div class="animate-spin rounded-full h-8 w-8 border-t-4 border-green-500"></div>
+                    </div>
+                </div>
+                <div v-if="codeStatus === 409 || codeStatus === 400">
+                    <p class="text-red-500">{{ errorMessage }}</p>
+                </div>
+                <div v-else-if="codeStatus === 500">
+                    <p class="text-red-700 underline">Error en el servicio intente más tarde.</p>
+                </div>
             </form>
 
             <div class="register-footer">
@@ -79,6 +90,7 @@ const password2 = ref("");
 const showPassword = ref(false);
 const showPassword2 = ref(false);
 const errors = ref({});
+const isLoading = ref(false);
 const errorMessage = ref("");
 const showModal = ref(false);
 const router = useRouter();
@@ -121,23 +133,32 @@ const validateForm = () => {
 
     return isValid;
 };
-
+let codeStatus = ref("");
 const handleRegister = async () => {
     if (!validateForm()) return;
 
     try {
-        const result = await AuthService.register(name.value, email.value, password.value);
-
-        if (result.status === 200) {
+        isLoading.value = true;
+        const { status, message } = await AuthService.register(name.value, email.value, password.value);
+        if (status === 200) {
             showModal.value = true;
             setTimeout(() => {
                 showModal.value = false;
                 router.push("/Login");
             }, 5000);
+        } else if (status === 400) {
+            codeStatus.value = status
+            errorMessage.value = "Hubo error en sus datos"
+        } else if (status === 409) {
+            codeStatus.value = status
+            errorMessage.value = "Este correo ya esta registrado"
         }
     } catch (error) {
-        errorMessage.value = error.response?.data?.message || "Error al registrar el usuario.";
-        console.error("Error al registrar:", error);
+        // Errores del servidor o de red
+        errorMessage.value = "Error en el servicio, intente más tarde.";
+        codeStatus.value = 500;
+    } finally {
+        isLoading.value = false;
     }
 };
 </script>

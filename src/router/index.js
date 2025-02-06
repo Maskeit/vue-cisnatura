@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
 import MainLayout from "@/layouts/MainLayout.vue";
-import AdminLayout from "@/layouts/AdminLayout.vue";
 import BlankLayout from "@/layouts/BlankLayout.vue";
 import CuentaLayout from "@/layouts/CuentaLayout.vue";
 
@@ -30,13 +29,52 @@ import ServiceOut from "@/views/FueraDeServicio.vue";
 import Reestablecer from "@/views/Reestablecer.vue";
 import RequestRecoverPwd from "@/views/RequestRecoverPwd.vue";
 
-
+// Layout de Admin
+import AdminLayout from "@/layouts/AdminLayout.vue";
 // Vistas para administradores
-import AdminLogin from "@/views/admin/AdminLogin.vue";
-import AdminProducts from "@/views/admin/AdminProducts.vue";
-import AdminDashboard from "@/views/admin/dashboard/AdminDashboard.vue";
-import RecentOrder from "@/views/admin/dashboard/components/RecentOrder.vue";
-import OrderDetails from "@/views/admin/dashboard/components/OrderDetails.vue";
+import AdminLogin from "@/views/Admin/AdminLogin.vue";
+import Productos from "@/views/Admin/Productos.vue";
+import Dashboard from "@/views/Admin/Dashboard.vue";
+//Componentes de Dashboard
+import RecentOrder from "@/components/Admin/Dashboard/RecentOrder.vue";
+import OrderDetails from "@/components/Admin/Dashboard/OrderDetails.vue";
+import Clientes from "@/components/Admin/Dashboard/Clientes.vue";
+
+const adminRoutes = [
+  // Rutas de administrador protegidas, ayudame a organizar bien
+  {
+    path: "Productos",
+    name: "Productos",
+    component: Productos,
+  },
+  {
+    path: "Dashboard",
+    name: "Dashboard",
+    component: Dashboard,
+    children: [
+      {
+        path: "RecentOrder",
+        name: "RecentOrder",
+        component: RecentOrder,
+      },
+      {
+        path: "Clientes",
+        name: "Clientes",
+        component: Clientes,
+      },
+      {
+        path: "OrderDetails/:id", // Ruta dinámica para detalles de orden
+        name: "OrderDetails",
+        component: OrderDetails,
+        props: true, // Habilita el paso de `id` como prop
+      },
+      {
+        path: "",
+        redirect: { name: "RecentOrder" },
+      },
+    ],
+  },
+];
 
 const routes = [
   // Rutas de usuarios regulares
@@ -93,36 +131,8 @@ const routes = [
   {
     path: "/RequestRecover",
     component: BlankLayout,
-    children: [{ path: "", name: "RequestRecover", component: RequestRecoverPwd }],
-  },
-
-  // Rutas de administrador protegidas, ayudame a organizar bien
-  {
-    path: "/xqc",
-    component: AdminLayout,
     children: [
-      {
-        path: "/AdminProducts",
-        name: "AdminProducts",
-        component: AdminProducts,
-      },
-      {
-        path: "/Dashboard",
-        component: AdminDashboard,
-        children: [
-          {
-            path: "RecentOrder", // Ruta anidada bajo `/xqc/dashboard`
-            name: "RecentOrder",
-            component: RecentOrder,
-          },
-          {
-            path: "OrderDetails/:id", // Ruta dinámica para detalles de orden
-            name: "OrderDetails",
-            component: OrderDetails,
-            props: true, // Habilita el paso de `id` como prop
-          },
-        ],
-      },
+      { path: "", name: "RequestRecover", component: RequestRecoverPwd },
     ],
   },
   {
@@ -153,7 +163,7 @@ const routes = [
       {
         path: "Configuracion",
         name: "ConfiguracionCuenta",
-        component:ConfiguracionCuenta,
+        component: ConfiguracionCuenta,
       },
       {
         path: "Ayuda",
@@ -166,6 +176,16 @@ const routes = [
         component: ResPwd,
       },
     ],
+  },
+  {
+    path: "/xqc",
+    component: AdminLayout,
+    children: adminRoutes,
+  },
+  {
+    path: "/xqc",
+    component: BlankLayout,
+    children: [{ path: "Login", name: "AdminLogin", component: AdminLogin }],
   },
 ];
 
