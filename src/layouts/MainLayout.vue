@@ -1,47 +1,31 @@
 <template>
-  <div class="main-layout">
+  <div class="flex flex-col min-h-screen">
     <!-- <Navbar /> -->
     <Navbar :categories="categories" />
-    <main>
+    <main class="flex-1 p-0">
       <router-view />
     </main>
     <Footer />
   </div>
 </template>
 
-<script>
-import Navbar from "@/components/Navbar.vue";
-import Footer from "@/components/Footer.vue";
+<script setup lang="ts">
+import Navbar from "@/components/Client/Navbar.vue";
+import Footer from "@/components/Client/Footer.vue";
 
-export default {
-  components: {
-    Navbar,
-    Footer,
-  },
-  data() {
-    return {
-      categories: [
-        { displayName: "Todos los productos", value: null },
-        { displayName: "Tinturas", value: "tintura" },
-        { displayName: "Dióxido de cloro", value: "cds" },
-        { displayName: "Cursos/Talleres", value: "curso" },
-        { displayName: "Paquetes", value: "paquete" },
-        { displayName: "Productos Naturales", value: "otro" },
-      ],
-    };
-  },
-};
+// Definimos la estructura de la categoría con TypeScript
+interface Category {
+  displayName: string;
+  value: string | null;
+}
+
+// Lista de categorías
+const categories: Category[] = [
+  { displayName: "Todos los productos", value: null },
+  { displayName: "Tinturas", value: "tintura" },
+  { displayName: "Dióxido de cloro", value: "cds" },
+  { displayName: "Cursos/Talleres", value: "curso" },
+  { displayName: "Paquetes", value: "paquete" },
+  { displayName: "Productos Naturales", value: "otro" },
+];
 </script>
-
-<style>
-.main-layout {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-main {
-  flex: 1;
-  /* Asegura que el contenido principal ocupe el espacio disponible */
-}
-</style>

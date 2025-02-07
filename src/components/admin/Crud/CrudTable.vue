@@ -8,6 +8,7 @@
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Telefono</th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actividad</th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha de registro</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">

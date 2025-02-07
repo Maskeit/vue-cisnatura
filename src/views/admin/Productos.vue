@@ -38,7 +38,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import Sidebar from "@/components/Sidebar.vue";
+import Sidebar from "@/components/shared/Sidebar.vue";
 
 import ProductCard from "@/components/Admin/Products/ProductCard.vue";
 import CreateProduct from "@/components/Admin/Products/CreateProduct.vue";
@@ -46,7 +46,7 @@ import CreateProductModal from "@/components/Admin/Products/CreateProductModal.v
 import ProductModal from "@/components/Admin/Products/ProductModal.vue";
 
 import ConfirmationModal from "@/components/shared/ConfirmationModal.vue";
-import Pagination from "@/components/Pagination.vue";
+import Pagination from "@/components/shared/Pagination.vue";
 
 import ProductService from "@/services/AdminServices/ProductService";
 import { EventBus } from "@/services/eventBus";

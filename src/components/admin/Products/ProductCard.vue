@@ -36,7 +36,7 @@
 
 <script setup>
 import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline';
-import { V_Global_IMG } from "@/services/system.js";
+import { V_Global_IMG } from "@/services/system";
 //use admin 
 
 // Props

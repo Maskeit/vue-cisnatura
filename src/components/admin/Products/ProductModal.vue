@@ -82,7 +82,7 @@
 import { ref, watch } from "vue";
 import Editor from '@/components/shared/Editor.vue';
 import ConfirmationModal from "@/components/shared/ConfirmationModal.vue";
-import { V_Global_IMG } from "@/services/system.js";
+import { V_Global_IMG } from "@/services/system";
 
 // Props
 const props = defineProps({
