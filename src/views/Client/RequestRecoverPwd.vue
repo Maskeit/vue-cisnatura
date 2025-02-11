@@ -11,7 +11,7 @@
             <h2 class="title">Reestablecer contraseña</h2>
             <p class="subtitle">Se te enviara un correo electrónico para confirmar tu identidad.</p>
 
-            <form @submit.prevent="handleRegister" class="register-form">
+            <form @submit.prevent="handleRecoverPassword" class="register-form">
                 <div class="form-group">
                     <label for="email">Correo electrónico</label>
                     <input id="email" v-model="email" type="email" placeholder="Correo electrónico"
@@ -31,27 +31,26 @@
         <!-- Modal para notificación -->
         <div v-if="showModal" class="modal-overlay">
             <div class="modal-content">
-                <p>Revise su bandeja de correo electrónico para validar su correo.</p>
+                <p>{{messageMo}} Revise su bandeja de correo electrónico para validar su correo.</p>
             </div>
         </div>
     </div>
 
 </template>
-<script setup>
+<script setup lang="ts">
 import { ref } from "vue";
-import { AuthService } from "@/services/AuthService";
+import { Auth } from "@/services/Class/Client/Auth";
 import { useRouter } from "vue-router";
 
-const name = ref("");
-const email = ref("");
-const password = ref("");
-const showPassword = ref(false);
-const errors = ref({});
-const errorMessage = ref("");
-const showModal = ref(false);
+const email = ref < string > ("");
+const errors = ref < { email?: string } > ({});
+const errorMessage = ref < string > ("");
+const messageMo = ref < string > ("");
+const showModal = ref < boolean > (false);
 const router = useRouter();
+const auth = new Auth();
 
-const validateForm = () => {
+const validateForm = (): boolean => {
     errors.value = {};
     let isValid = true;
 
@@ -65,21 +64,24 @@ const validateForm = () => {
     return isValid;
 };
 
-const handleRegister = async () => {
+const handleRecoverPassword = async () => {
     if (!validateForm()) return;
 
     try {
-        const result = await AuthService.recoverPassword(email.value);
-        if (result.status === 200) {
+        const {status, message} = await auth.recoverPassword({ email: email.value }); // ✅ Pasando el objeto correctamente tipado
+
+        if (status === 200) {
             showModal.value = true;
+            messageMo.value = message;
+        } else {
+            errorMessage.value = message || "Error al enviar la solicitud.";
         }
     } catch (error) {
-        errorMessage.value = error.response?.data?.message || "Error al registrar el usuario.";
-        console.error("Error al registrar:", error);
+        console.error("Error en la recuperación de contraseña:", error);
+        errorMessage.value = "Hubo un error, intenta nuevamente.";
     }
 };
 </script>
-
 
 <style scoped>
 .register-container {

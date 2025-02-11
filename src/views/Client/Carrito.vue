@@ -1,74 +1,67 @@
 <template>
-    <div class="container mx-auto px-4 py-6">
-        <!-- Estructura del layout -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Columna de productos -->
-            <div class="lg:col-span-2">
-                <h2 class="text-2xl font-bold text-gray-600">Productos del carrito</h2>
+  <div class="container mx-auto px-4 py-6">
+    <!-- Estructura del layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Columna de productos -->
+      <div class="lg:col-span-2">
+        <h2 class="text-2xl font-bold text-gray-600">Productos del carrito</h2>
 
-                <!-- Loader mientras se traen los productos -->
-                <div v-if="loading" class="flex items-center justify-center py-20">
-                    <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-green-500"></div>
-                </div>
-
-                <!-- Mostrar mensaje si el carrito está vacío -->
-                <div v-else-if="cartProducts.length === 0" class="text-center py-10">
-                    <p class="text-gray-500">No hay productos en tu carrito.</p>
-                    <router-link to="/Catalogo"
-                        class="mt-4 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded inline-block">
-                        Ir al catálogo
-                    </router-link>
-                </div>
-
-                <!-- Tarjetas de productos -->
-                <div v-else>
-                  <ProductCartCard 
-    v-for="(cartItem, index) in cartProducts"
-    :key="index"
-    :product="cartItem" 
-    :cartItem="cartItem"
-    @update-quantity="updateProductQuantity"
-    @remove-product="removeProductFromCart"
-/>
-                </div>
-            </div>
-
-            <!-- Columna de resumen -->
-            <div v-if="totalCost > 0">
-                <h2 class="text-2xl font-bold text-gray-600">Resumen de la compra</h2>
-                <div class="bg-white shadow-md rounded-lg p-4 relative">
-                    <p v-if="isOnlyCourses" class="text-sm text-green-500">
-                        Sin costo de envío
-                    </p>
-                    <!-- Mostrar el loader -->
-                    <div v-if="loading"
-                        class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center">
-                        <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
-                    </div>
-
-                    <div class="flex justify-between mb-2">
-                        <span class="font-semibold">Producto:</span>
-                        <span>${{ productSubtotal.toFixed(2) }}</span>
-                    </div>
-                    <div class="flex justify-between mb-2">
-                        <span class="font-semibold">Envío:</span>
-                        <span v-if="totalShippingCost > 0">${{ totalShippingCost.toFixed(2) }}</span>
-                        <span v-else class="text-green-500">¡Gratis!</span>
-                    </div>
-
-                    <div class="flex justify-between border-t pt-2">
-                        <span class="font-semibold text-lg">Total:</span>
-                        <span class="text-lg font-bold">${{ totalCost.toFixed(2) }}</span>
-                    </div>
-                    <button @click="continueToAddress"
-                        class="mt-4 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded w-full text-center block"
-                        :disabled="loading">
-                        Continuar
-                    </button>
-                </div>
-            </div>
+        <!-- Loader mientras se traen los productos -->
+        <div v-if="loading" class="flex items-center justify-center py-20">
+          <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-green-500"></div>
         </div>
+
+        <!-- Mostrar mensaje si el carrito está vacío -->
+        <div v-else-if="cartProducts.length === 0" class="text-center py-10">
+          <p class="text-gray-500">No hay productos en tu carrito.</p>
+          <router-link to="/Catalogo"
+            class="mt-4 bg-[var(--color-highland-500)] hover:bg-[var(--color-highland-800)] text-white py-2 px-4 rounded inline-block">
+            Ir al catálogo
+          </router-link>
+        </div>
+
+        <!-- Tarjetas de productos -->
+        <div v-else>
+          <ProductCartCard v-for="(cartItem, index) in cartProducts" :key="index" :product="cartItem"
+            :cartItem="cartItem" @update-quantity="updateProductQuantity" @remove-product="removeProductFromCart" />
+        </div>
+      </div>
+
+      <!-- Columna de resumen -->
+      <div v-if="totalCost > 0">
+        <h2 class="text-2xl font-bold text-gray-600">Resumen de la compra</h2>
+        <div class="bg-white shadow-md rounded-lg p-4 relative">
+          <p v-if="isOnlyCourses" class="text-sm text-green-500">
+            Sin costo de envío
+          </p>
+          <!-- Mostrar el loader -->
+          <div v-if="loading" class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center">
+            <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
+          </div>
+
+          <div class="flex justify-between mb-2">
+            <span class="font-semibold">Producto:</span>
+            <span>${{ productSubtotal.toFixed(2) }}</span>
+          </div>
+          <div class="flex justify-between mb-2">
+            <span class="font-semibold">Envío:</span>
+            <span v-if="totalShippingCost > 0">${{ totalShippingCost.toFixed(2) }}</span>
+            <span v-else class="text-green-500">¡Gratis!</span>
+          </div>
+
+          <div class="flex justify-between border-t pt-2">
+            <span class="font-semibold text-lg">Total:</span>
+            <span class="text-lg font-bold">${{ totalCost.toFixed(2) }}</span>
+          </div>
+          <button @click="continueToAddress"
+            class="mt-4 bg-[var(--color-highland-500)] hover:bg-[var(--color-highland-800)] cursor-pointer text-white py-2 px-4 rounded w-full text-center block"
+            :disabled="loading">
+            Continuar
+          </button>
+        </div>
+      </div>
     </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -77,7 +70,7 @@ import ProductCartCard from "@/components/Client/Carrito/ProductCartCard.vue";
 import CartService from "@/services/CartService";
 import { EventBus } from "@/services/eventBus";
 import { Products } from "@/interfaces/Products";
-import {CartProduct} from "@/interfaces/CartProduct";
+import { CartProduct } from "@/interfaces/CartProduct";
 // Estado del carrito
 const cartProducts = ref<CartProduct[]>([]);
 const loading = ref<boolean>(true);
@@ -108,7 +101,7 @@ onMounted(async () => {
   try {
     loading.value = true;
     const cart = await CartService.getCart();
-    
+
     cartProducts.value = cart as CartProduct[];
 
     // Emitir evento para actualizar el contador en el Navbar

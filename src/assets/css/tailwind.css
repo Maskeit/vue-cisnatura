@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+/* Agregar fuentes personalizadas */
+@font-face {
+  font-family: "Poppins";
+  font-weight: 400;
+  font-style: normal;
+  src: url("/fonts/Poppins-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Poppins";
+  font-weight: 500;
+  font-style: normal;
+  src: url("/fonts/Poppins-Medium.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Poppins";
+  font-weight: 600;
+  font-style: normal;
+  src: url("/fonts/Poppins-SemiBold.ttf") format("truetype");
+}
+
+/* Aplicar la fuente personalizada a todo el proyecto */
+@layer base {
+  body {
+    font-family: "Poppins", sans-serif;
+  }
+}
+/* Definir los colores personalizados como variables */
+:root {
+    --color-highland-50: #f3f5f0;
+    --color-highland-100: #e5eadd;
+    --color-highland-200: #ccd7bf;
+    --color-highland-300: #acbd99;
+    --color-highland-400: #8ea477;
+    --color-highland-500: #708759;
+    --color-highland-600: #576b45;
+    --color-highland-700: #445338;
+    --color-highland-800: #394430;
+    --color-highland-900: #323c2b;
+    --color-highland-950: #191f14;
+  }

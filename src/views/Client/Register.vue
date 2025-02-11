@@ -80,9 +80,8 @@
 
 <script setup>
 import { ref } from "vue";
-import { AuthService } from "@/services/AuthService";
 import { useRouter } from "vue-router";
-
+import { Auth } from "@/services/Class/Client/Auth";
 const name = ref("");
 const email = ref("");
 const password = ref("");
@@ -134,12 +133,19 @@ const validateForm = () => {
     return isValid;
 };
 let codeStatus = ref("");
+
+const auth = new Auth();
 const handleRegister = async () => {
     if (!validateForm()) return;
 
     try {
         isLoading.value = true;
-        const { status, message } = await AuthService.register(name.value, email.value, password.value);
+        const response = await auth.register({
+            name: name.value,
+            email: email.value,
+            password: password.value,
+        });
+        const status = response.status;
         if (status === 200) {
             showModal.value = true;
             setTimeout(() => {

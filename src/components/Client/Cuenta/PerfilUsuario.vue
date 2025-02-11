@@ -1,36 +1,29 @@
 <template>
-  <div class="p-6 max-w-lg bg-white rounded-lg shadow-md">
     <h1 class="text-2xl font-bold text-gray-800 mb-4">Información del Usuario</h1>
 
-    <div class="card text-white p-4 rounded-md shadow-md">
-      <p class="text-lg"><strong>Nombre:</strong> {{ userData.name }}</p>
-      <p class="text-lg"><strong>Email:</strong> {{ userData.email }}</p>
-      <p class="text-lg"><strong>Teléfono:</strong> {{ userData.phone || "No disponible" }}</p>
+    <div v-if="userStore.user" class="card text-black p-4 rounded-md shadow-md">
+      <p class="text-lg"><strong>Nombre:</strong> {{ userStore.user.name }}</p>
+      <p class="text-lg"><strong>Email:</strong> {{ userStore.user.email }}</p>
+      <p class="text-lg"><strong>Teléfono:</strong> {{ userStore.user.telefono || "No disponible" }}</p>
     </div>
 
-  </div>
+    <div v-else class="text-gray-500">Cargando información del usuario...</div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { onMounted, computed } from "vue";
 import { useUserStore } from "@/services/stores/userStore";
 
+// Instancia del store
 const userStore = useUserStore();
 
-// Enlace reactivo para asegurar que los cambios en el store se reflejan en la UI
-const userData = computed(() => ({
-  name: userStore.name || "Cargando...",
-  email: userStore.email || "Cargando...",
-  phone: userStore.phone || "No disponible",
-}));
+// Computed para obtener la información del usuario desde el store
+const userData = computed(() => userStore.user ?? { name: "Cargando...", email: "Cargando...", telefono: "No disponible" });
 
-onMounted(async () => {
-  await userStore.fetchUserInfo();
+// Cargar los datos del usuario al montar el componente solo si no están en el estado
+onMounted(() => {
+  if (!userStore.user) {
+    userStore.fetchUserInfo();
+  }
 });
 </script>
-
-<style scoped>
-.card{
-  background-color: #3b590b;
-}
-</style>

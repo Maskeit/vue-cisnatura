@@ -2,14 +2,17 @@
     <div @click="$emit('click', product)" class="product-card bg-white w-56 h-full shadow-md rounded-lg overflow-hidden transform transition duration-300 hover:scale-105 cursor-pointer flex flex-col"
         data-product-id="product.id">
         <!-- Imagen -->
-        <div class="w-full bg-white flex items-center justify-center">
+        <div class="w-full aspect-square bg-gray-200 flex items-center justify-center relative">
             <img :src="`${V_Global_IMG}${product.thumb}`" :alt="product.product_name"
-                class="w-full h-full object-cover p-4" />
+                class="w-full h-full object-cover opacity-100 transition-opacity duration-300"
+                @load="imageLoaded = true" />
+
+            <div v-if="!imageLoaded" class="w-full h-full bg-gray-300 animate-pulse"></div>
         </div>
 
         <!-- Información del Producto -->
         <div class="p-4 flex-grow">
-            <h3 class="text-lg font-bold text-center line-clamp-1 text-gray-800">
+            <h3 class="text-lg font-bold text-center line-clamp-1 text-[var(--color-highland-700)]">
                 {{ product.product_name }}
             </h3>
             <p class="text-gray-600 text-sm text-center mt-2 line-clamp-1" :title="product.description"
@@ -18,17 +21,17 @@
 
         <!-- Footer -->
         <div class="flex items-center justify-between px-4 py-3 border-t border-gray-200">
-            <span class="text-md font-semibold text-gray-800">
+            <span class="text-md font-semibold text-[var(--color-highland-600)]">
                 ${{ product.price }} MX
             </span>
             <button @click.stop="handleAddToCart"
-                class="bg-white hover:bg-gray-100 text-gray-800 font-medium py-2 px-4 rounded-full shadow flex items-center gap-1">
+                class="bg-white hover:bg-gray-100 cursor-pointer text-gray-800 font-medium py-2 px-4 rounded-full shadow flex items-center gap-1">
                 <template v-if="addedToCart">
-                    <span>✓</span>
+                    <span class="text-[var(--color-highland-500)]">✓</span>
                 </template>
                 <template v-else>
-                    <span>Añadir</span>
-                    <ShoppingCartIcon class="h-5 w-5 text-gray-800" />
+                    <span class="text-[var(--color-highland-500)]">Añadir</span>
+                    <ShoppingCartIcon class="h-5 w-5 text-[var(--color-highland-500)]" />
                 </template>
             </button>
         </div>
@@ -49,7 +52,7 @@ const props = defineProps<{ product: Products }>();
 const emit = defineEmits<{
   (event: "click", product: Products): void;
 }>();
-
+const imageLoaded = ref(false);
 // Estado reactivo para manejar si el producto fue añadido al carrito
 const addedToCart = ref<boolean>(false);
 

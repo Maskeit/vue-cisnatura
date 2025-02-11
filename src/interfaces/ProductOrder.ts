@@ -6,15 +6,15 @@ export interface ProductOrder {
     payment_intent_id?: string;
     chsession_id?: string;
     userId: string;
-    products: Products[]; // ✅ Ahora es un array de objetos, no un string[]
+    products: Products[];
     subtotal: number;
-    shippingCost: number; // ✅ Cambiado de "envio" a "shippingCost"
+    shippingCost: number;
     total: number;
     order_status: string;
     customer_email: string;
     payment_status?: string;
     payment_method?: string;
-    address: Address[]; // ✅ Ahora es un array, en lugar de un `address_id`
+    address: Address[];
     created_at: string;
     updated_at: string;
 }

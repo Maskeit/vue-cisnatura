@@ -29,24 +29,24 @@
                 </p>
 
                 <!-- Botones -->
+                <!-- Botones -->
                 <div class="flex justify-between items-center mt-4">
                     <label class="flex items-center space-x-2">
-                        <input type="radio" :value="address.id" :checked="selectedId === address.id"
+                        <input type="radio" :value="address.id" :checked="selectedAddressId === address.id"
                             @change="selectAddress(address.id)" />
                         <span class="text-gray-700">Seleccionar</span>
                     </label>
-                    <button @click="deleteAddress(address.id)" :disabled="isDeleting === address.id"
+                    <button @click="openDeleteModal(address.id)"
                         class="bg-gray-400 text-white px-3 py-1 rounded-md hover:bg-red-600">
-                        <span v-if="isDeleting !== address.id">Descartar</span>
-                        <span v-else class="flex items-center justify-center">
-                            <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-white"></div>
-                            Eliminando...
-                        </span>
+                        Eliminar
                     </button>
                 </div>
             </div>
         </div>
-
+        <!-- Modal de confirmación -->
+        <ConfirmationModal v-if="isDeleteModalOpen" :isOpen="isDeleteModalOpen" title="¿Eliminar esta dirección?"
+            message="Esta acción no se puede deshacer. ¿Deseas continuar?" confirmText="Eliminar" cancelText="Cancelar"
+            @confirm="confirmDelete" @cancel="isDeleteModalOpen = false" />
         <!-- Mensaje cuando no hay direcciones -->
         <p v-if="addresses.length === 0" class="text-gray-600 mt-6">
             No tienes direcciones guardadas. Por favor, agrega una nueva dirección.
@@ -54,72 +54,42 @@
     </div>
 </template>
 
-<script>
-import { UserAccountService } from "@/services/UserAccountService";
+<script setup lang="ts">
+import { ref, computed } from "vue";
+import type { Address } from "@/interfaces/Address";
+import ConfirmationModal from "@/components/shared/ConfirmationModal.vue";
 
-export default {
-    data() {
-        return {
-            isDeleting: null,
-            localAddresses: [...this.addresses], // copia local de las direcciones
-            selectedId: null,
-        }
-    },
-    watch: {
-        addresses: {
-            inmediate: true,
-            handler(newVal) {
-                this.localAddresses = [...newVal];
-            }
-        }
-    },
-    props: {
-        addresses: {
-            type: Array,
-            default: () => [],
-        },
-        value: {
-            type: String, // para almacenar id seleccionado
-            default: null,
-        }
-    },
-    methods: {
-        selectAddress(id) {
-            this.selectedId = id; // Actualiza el ID seleccionado localmente
-            this.$emit("addressSelected", id); // Emite evento al padre
-        },
-        async deleteAddress(id) {
-            if (confirm("¿Estás seguro de que deseas eliminar esta dirección?")) {
-                this.isDeleting = id; // Activa el loader para este ID
-                try {
-                    // Realizar la solicitud al servidor
-                    const response = await UserAccountService.deleteAddress(id);
 
-                    if (response === 200) {
-                        // Eliminar del arreglo local
-                        this.localAddresses = this.localAddresses.filter((address) => address.id !== id);
+// Emitir eventos
+const emit = defineEmits(["addressSelected", "delete-address"]);
 
-                        // Emitir evento para sincronizar con el padre
-                        this.$emit("updateAddresses", this.localAddresses);
-                        // Limpia la selección si el domicilio eliminado estaba seleccionado
-                        if (this.selectedId === id) {
-                            this.selectedId = null;
-                            this.$emit("addressSelected", null);
-                        }
-                        // Si hay menos de 3 direcciones, emitir evento para mostrar el formulario
-                        if (this.localAddresses.length < 3) {
-                            this.$emit("showAddressForm");
-                        }
-                    } else {
-                        console.error("No se pudo eliminar el domicilio en el servidor.");
-                    }
-                } catch (error) {
-                    console.error("Error al eliminar el domicilio:", error);
-                } finally {
-                    this.isDeleting = null; // Desactivar el loader
-                }
-            }
-        },
-    },
+// Estados reactivos
+// estado del modal de confirmacion
+const isDeleteModalOpen = ref(false);
+const selectedAddressId = ref<number | null>(null);
+
+const props = defineProps<{
+    addresses: Address[]
+}>();
+
+// Computed para acceder a las direcciones desde el store
+const addresses = computed(() => props.addresses);
+
+// Método para seleccionar una dirección
+const selectAddress = (id: number) => {
+    emit("addressSelected", id);
 };
+
+const openDeleteModal = (id: number | string) => {
+    selectedAddressId.value = Number(id);
+    isDeleteModalOpen.value = true;
+};
+
+const confirmDelete = () => {
+    if (selectedAddressId.value) {
+        emit("delete-address", Number(selectedAddressId.value));
+    }
+    isDeleteModalOpen.value = false;
+};
+
 </script>

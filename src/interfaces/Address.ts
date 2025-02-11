@@ -1,5 +1,5 @@
 export interface Address{
-    id: string;
+    id: number;
     userId: string;
     fullName: string;
     RFC: string | null;

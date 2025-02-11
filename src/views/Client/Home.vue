@@ -6,7 +6,7 @@
         <h1 class="text-4xl font-bold">Bienvenido a CISnatura</h1>
         <p class="text-lg mt-2">Descubre nuestros productos naturales</p>
         <router-link to="/Catalogo">
-          <button class="mt-4 px-6 py-3 bg-green-700 text-white rounded-md hover:bg-green-800 transition">
+          <button class="mt-4 px-6 py-3 cursor-pointer bg-[var(--color-highland-500)] text-white rounded-md hover:bg-[var(--color-highland-700)] transition">
             Ver Catálogo
           </button>
         </router-link>
@@ -15,21 +15,21 @@
 
     <!-- Sección de Categorías -->
     <section class="categories-container">
-      <h2 class="text-center text-2xl font-bold mb-6 hover:underline underline-offset-1">
+      <h2 class="text-center text-[var(--color-highland-600)] text-2xl font-bold mb-6 hover:underline underline-offset-1">
         <router-link to="/Catalogo">Explora los tipos de productos</router-link>
       </h2>
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-6">
         <div v-for="category in categories" :key="category.id" class="category-card">
           <img :src="category.image" alt="icono" class="category-icon">
-          <h3 class="text-lg font-bold">{{ category.name }}</h3>
-          <router-link :to="category.link" class="category-link">Ver más</router-link>
+          <h3 class="text-lg text-[var(--color-highland-700)] font-bold">{{ category.name }}</h3>
+          <router-link :to="category.link" class="text-[var(--color-highland-600)]">Ver más</router-link>
         </div>
       </div>
     </section>
 
     <!-- Sección de Productos Destacados -->
     <section class="products-container">
-      <h2 class="text-center text-2xl font-bold mb-6">Productos Destacados</h2>
+      <h2 class="text-center text-[var(--color-highland-600)] text-2xl font-bold mb-6">Productos Destacados</h2>
       <div v-if="isLoading" class="flex items-center justify-center h-64">
         <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-green-500"></div>
       </div>
@@ -132,7 +132,7 @@ const closeModal = () => {
   margin: 0 auto 1rem;
 }
 
-.category-link {
+. {
   display: block;
   margin-top: 8px;
   color: #799310;
@@ -141,9 +141,5 @@ const closeModal = () => {
 
 .products-container {
   padding: 3rem 0;
-}
-
-h2 {
-  color: #799310;
 }
 </style>

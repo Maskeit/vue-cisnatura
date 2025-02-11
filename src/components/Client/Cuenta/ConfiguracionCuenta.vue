@@ -6,10 +6,10 @@
         <div class="mb-6">
             <label for="telefono" class="block text-sm font-medium text-gray-700 mb-2">Número de Teléfono</label>
             <input v-model="telefono" type="text" id="telefono"
-                class="w-full px-4 py-2 border rounded-md focus:ring focus:ring-green-300 focus:outline-none"
+                class="w-full px-4 py-2  rounded-md focus:ring-1 focus:ring-[var(--color-highland-500)] focus:outline-none"
                 placeholder="Ingresa tu nuevo número" />
             <button @click="guardarTelefono"
-                class="mt-3 w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-md transition">
+                class="mt-3 w-full cursor-pointer bg-[var(--color-highland-500)] hover:bg-[var(--color-highland-800)] text-white py-2 rounded-md transition">
                 Guardar Cambios
             </button>
         </div>
@@ -26,20 +26,23 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from "vue";
-import UserAccountService from "@/services/UserAccountService";
-
+import { UserData } from "@/services/Class/Client/UserData";
 const telefono = ref(""); // Estado reactivo para el teléfono
 
-
+const userdata = new UserData();
 const guardarTelefono = async () => {
-    if (!telefono.value.trim()) {
-        alert("Por favor, ingresa un número de teléfono válido.");
+    const phoneRegex = /^[0-9]{10}$/; // Adjust the regex according to your phone number format
+    if (!phoneRegex.test(telefono.value.trim())) {
+        alert("Por favor, ingresa un número de teléfono válido de 10 dígitos.");
         return;
     }
-
-    const response = await UserAccountService.updateUserInfo({ telefono: telefono.value });
-    console.log(response);
+    const {status, message} = await userdata.updatePhoneNumber({ telefono: telefono.value });
+    if (status === 200) {
+        alert(message);
+    } else {
+        alert(message);
+    }
 };
 </script>

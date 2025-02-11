@@ -99,7 +99,8 @@ export const AuthService = {
   },
 
   /**
-   * Recuperar contraseña (envío de correo)
+   * Paso 1 para recuperar contraseña
+   * Recuperar contraseña (envío de correo para verificar)
    */
   async recoverPassword(email: string): Promise<{ success: boolean; message: string }> {
     try {
@@ -114,6 +115,7 @@ export const AuthService = {
   },
 
   /**
+   * Paso 2 una vez verificado el correo se reestablece la contraseña
    * Restaurar contraseña con token de recuperación
    */
   async recoverPasswordData(email: string, passwd: string, token: string): Promise<{ success: boolean; message: string }> {

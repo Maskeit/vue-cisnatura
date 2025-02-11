@@ -1,5 +1,4 @@
 // tailwind.config.cjs
-const aspectRatio = require("@tailwindcss/aspect-ratio");
 const defaultTheme = require("tailwindcss/defaultTheme");
 
 module.exports = {

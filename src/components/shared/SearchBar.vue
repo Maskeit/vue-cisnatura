@@ -2,17 +2,17 @@
     <div class="relative w-full max-w-lg mx-auto">
         <div class="flex items-center">
             <input type="text" v-model="localSearchTerm" placeholder="Buscar productos o categorías..."
-                class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                class="w-full px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--color-highland-500)]"
                 @focus="isFocused = true"
                 @keydown.enter="executeSearch"/>
             <button @click="executeSearch"
-                class="ml-2 p-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none">
+                class="ml-2 p-2 bg-[var(--color-highland-500)] text-white rounded-md hover:bg-[var(--color-highland-700)] cursor-pointer focus:outline-none">
                 <MagnifyingGlassIcon class="h-5 w-5" />
             </button>
         </div>
 
         <ul v-if="isFocused && searchStore.searchResults.length > 0"
-            class="absolute left-0 w-full bg-white border border-gray-200 shadow-md rounded-md mt-1 z-50">
+            class="absolute left-0 w-full bg-white border border-[var(--color-highland-500)] shadow-md rounded-md mt-1 z-50">
             <li v-for="suggestion in searchStore.searchResults" :key="suggestion.id"
                 class="px-4 py-2 cursor-pointer hover:bg-green-100 flex justify-between"
                 @click="selectProduct(suggestion)">

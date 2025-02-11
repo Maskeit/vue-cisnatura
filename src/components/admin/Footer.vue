@@ -1,5 +1,5 @@
 <template>
-  <footer class=" text-white py-6">
+  <footer class="bg-[var(--color-highland-700)] text-white py-6">
     <div class="container mx-auto px-4">
       <!-- Menú de enlaces -->
       <ul class="flex flex-wrap justify-center space-x-4 mb-4">
@@ -26,8 +26,3 @@
   </footer>
 </template>
 
-<style scoped>
-footer{
-  background-color: #3b590b;
-}
-</style>

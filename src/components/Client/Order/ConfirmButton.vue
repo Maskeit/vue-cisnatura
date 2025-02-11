@@ -7,12 +7,12 @@
     </div>
 </template>
 
-<script>
-export default {
-    methods: {
-        confirm() {
-            this.$emit("confirm");
-        },
-    },
+<script setup lang="ts">
+// Define eventos emitidos
+const emit = defineEmits(["confirm"]);
+
+// Función para emitir el evento
+const confirm = (): void => {
+    emit("confirm");
 };
 </script>

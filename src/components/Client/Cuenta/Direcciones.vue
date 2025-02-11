@@ -27,33 +27,19 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, onMounted } from "vue";
-import { useUserStore } from "@/services/stores/userStore";
+import { useAddressStore } from "@/services/stores/addressStore";
 
-const userStore = useUserStore();
-
-// Enlace reactivo a las direcciones del store
-const addresses = computed(() => userStore.address);
-
-const removeAddress = async (id) => {
-    try {
-        const success = await userStore.deleteAddress(id);
-        if (success) {
-            console.log(`Dirección con ID ${id} eliminada correctamente.`);
-        } else {
-            console.error(`No se pudo eliminar la dirección con ID ${id}.`);
-        }
-    } catch (error) {
-        console.error("Error al eliminar la dirección:", error);
-    }
-};
+const addressStore = useAddressStore();
 
 onMounted(async () => {
-    try {
-        await userStore.getAddress();
-    } catch (error) {
-        console.error("Error al cargar las direcciones:", error);
-    }
+  await addressStore.fetchAddresses(); // ✅ Carga direcciones solo si es necesario
 });
+
+const addresses = computed(() => addressStore.addresses);
+
+const removeAddress = async (id: number) => {
+  await addressStore.removeAddress(id);
+};
 </script>

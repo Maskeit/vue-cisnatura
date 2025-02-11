@@ -32,10 +32,10 @@
                 Ventas
             </router-link>
             <!-- Menú de Usuario -->
-            <div v-if="userStore.loggedIn" class="relative">
+            <div v-if="userAdminStore.loggedIn" class="relative">
                 <button @click="toggleUserDropdown"
                     class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition flex items-center">
-                    {{ userStore.name || "Usuario" }}
+                    {{ userAdminStore.name || "Usuario" }}
                     <ChevronDownIcon class="h-4 w-4 ml-1" />
                 </button>
                 <ul v-if="userDropdownOpen" class="absolute bg-white border shadow-lg mt-2 rounded-md py-1 w-48">
@@ -60,7 +60,7 @@
                     <li>
                         <button @click="toggleUserDropdown"
                             class="text-gray-700 hover:text-green-800 flex items-center">
-                            {{ userStore.name }}
+                            {{ userAdminStore.name }}
                             <ChevronDownIcon class="h-4 w-4 ml-1" />
                         </button>
                         <ul v-if="userDropdownOpen" class="mt-2">
@@ -75,7 +75,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { useUserStore } from "@/services/stores/userAdminStore";
+import { useUserAdminStore } from "@/services/stores/userAdminStore";
 import { useRouter } from "vue-router";
 import { Bars3Icon, ChevronDownIcon} from "@heroicons/vue/24/outline";
 import SearchBar from "@/components/shared/SearchBar.vue";
@@ -91,7 +91,7 @@ defineProps({
     },
 });
 
-const userStore = useUserStore();
+const userAdminStore = useUserAdminStore();
 const router = useRouter();
 const filteredProducts = ref([]);
 const products = ref([]);
@@ -106,8 +106,8 @@ const toggleMenu = () => {
 
 // Cargar información del usuario si no está disponible
 onMounted(async () => {
-    if (!userStore.name) {
-        await userStore.fetchUserInfo();
+    if (!userAdminStore.name) {
+        await userAdminStore.fetchUserInfo();
     }
 });
 // Métodos
@@ -127,7 +127,7 @@ const logout = async () => {
         // Limpieza de sesión
         Cookies.remove("Authorization", {path:'/', domain: ''}); // Eliminar token en cookies
         localStorage.clear(); // Eliminar datos del usuario
-        userStore.clearUser(); // Limpiar store de usuario
+        userAdminStore.clearUser(); // Limpiar store de usuario
 
         // Redirigir al login
         router.push("/xqc/Login");

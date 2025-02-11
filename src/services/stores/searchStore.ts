@@ -1,7 +1,22 @@
 import { defineStore } from "pinia";
+import type { Products } from "@/interfaces/Products";
+
+interface Category {
+    displayName: string;
+    value: string | null;
+}
+
+interface SearchState {
+    searchTerm: string;
+    searchResults: Products[];
+    isLoading: boolean;
+    errorMessage: string;
+    products: Products[];
+    categories: Category[];
+}
 
 export const useSearchStore = defineStore("search", {
-    state: () => ({
+    state: (): SearchState => ({
         searchTerm: "",
         searchResults: [],
         isLoading: false,
@@ -16,26 +31,30 @@ export const useSearchStore = defineStore("search", {
             { displayName: "Productos Naturales", value: "otro" },
         ],
     }),
+
     actions: {
-        setProducts(newProducts) {
+        setProducts(newProducts: Products[]): void {
             // Evitar duplicados y actualizar solo los productos nuevos
             const ids = new Set(this.products.map(p => p.id));
             this.products = [...this.products, ...newProducts.filter(p => !ids.has(p.id))];
         },
-        clearProducts() {
+
+        clearProducts(): void {
             this.products = [];
         },
-        searchLocal(query) {
+
+        searchLocal(query: string): void {
             if (!query.trim()) {
                 this.searchResults = [];
                 return;
             }
+
             const lowerQuery = query.toLowerCase();
-            this.searchResults = this.products.filter(product =>
+            this.searchResults = this.products.filter((product) =>
                 product.product_name.toLowerCase().includes(lowerQuery) ||
                 product.description.toLowerCase().includes(lowerQuery) ||
                 product.type.toLowerCase().includes(lowerQuery)
             );
         },
-    }
+    },
 });

@@ -18,41 +18,20 @@
     </div>
 </template>
 
-<script>
-export default {
-    props: {
-        isOpen: {
-            type: Boolean,
-            required: true, // Controla si el modal está visible
-        },
-        title: {
-            type: String,
-            required: true, // Título del modal
-        },
-        message: {
-            type: String,
-            required: true, // Mensaje que se muestra
-        },
-        confirmText: {
-            type: String,
-            default: "Confirmar", // Texto del botón de confirmación
-        },
-        cancelText: {
-            type: String,
-            default: "Cancelar", // Texto del botón de cancelación
-        },
-    },
-    methods: {
-        cancelAction() {
-            this.$emit("cancel"); // Emitir evento cuando se cancela
-        },
-        confirmAction() {
-            this.$emit("confirm"); // Emitir evento cuando se confirma
-        },
-    },
-};
-</script>
+<script setup lang="ts">
+// Definir propiedades con TypeScript
+defineProps<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    confirmText?: string;
+    cancelText?: string;
+}>();
 
-<style scoped>
-/* Estilos adicionales si los necesitas */
-</style>
+// Emitir eventos
+const emit = defineEmits(["confirm", "cancel"]);
+
+// Métodos para manejar acciones
+const cancelAction = () => emit("cancel");
+const confirmAction = () => emit("confirm");
+</script>

@@ -16,16 +16,16 @@
             </p>
             <div class="flex items-center space-x-2 mt-2">
                 <!-- Botón de disminuir -->
-                <button v-if="cantidad > 1" @click="decrementQuantity" class="border rounded px-2">-</button>
+                <button v-if="cantidad > 1" @click="decrementQuantity" class="shadow-md rounded px-2 cursor-pointer hover:bg-gray-100">-</button>
                 <!-- Mostrar la cantidad actual -->
                 <span class="text-sm">{{ cantidad }}</span>
                 <!-- Botón de incrementar -->
-                <button @click="incrementQuantity" class="border rounded px-2">+</button>
+                <button @click="incrementQuantity" class="shadow-sm rounded px-2 cursor-pointer hover:bg-gray-100">+</button>
             </div>
         </div>
 
         <!-- Botón para eliminar -->
-        <button @click="removeFromCart" class="text-red-500 hover:text-red-700 ml-4">
+        <button @click="removeFromCart" class="text-red-500 hover:text-red-700 ml-4 cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class="w-6 h-6">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />

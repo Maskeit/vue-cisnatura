@@ -1,9 +1,9 @@
 export interface Products {
     id: number;
-    type: string;
+    type: string; // categoria
     product_name: string;
     description: string;
-    thumb?: string;
+    thumb: string;
     price: number;
     stock: number;
     active: number;

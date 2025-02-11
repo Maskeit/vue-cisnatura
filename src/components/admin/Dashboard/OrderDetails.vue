@@ -137,56 +137,57 @@
 
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { useRouter, useRoute } from "vue-router";
 import { useOrderStore } from "@/services/stores/orderStore";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import ConfirmationModal from "@/components/shared/ConfirmationModal.vue";
 import Operations from "@/services/AdminServices/Operations";
+import type { ProductOrder } from "@/interfaces/ProductOrder";
 
+// Instancias de Vue Router y Store
 const router = useRouter();
 const route = useRoute();
 const orderStore = useOrderStore();
 
-const orderId = route.params.id; // Obtenemos el ID de la orden desde la ruta
-let order = ref(null); // Manejamos la orden como una referencia reactiva
+// Obtener ID de la orden desde la ruta
+const orderId = computed(() => Number(route.params.id));
 
-// Estado para el modal de confirmación
-const isConfirmationModalOpen = ref(false);
-const confirmationMessage = ref(""); // Mensaje personalizado para el modal
+// Estado reactivo para la orden
+const order = ref<ProductOrder | null>(null);
 
-// Función para cargar los datos de la orden
-// Función para cargar los datos de la orden
+// Estado para los selectores de estado
+const orderStatus = ref<string>("");
+const shippingStatus = ref<string>("");
+
+// Estado del modal de confirmación
+const isConfirmationModalOpen = ref<boolean>(false);
+const confirmationMessage = ref<string>("");
+
+// Cargar la orden desde el store o desde la API
 const loadOrder = async () => {
     try {
-        // Intentar obtener la orden desde el estado
-        order.value = orderStore.getOrderById(orderId);
+        order.value = orderStore.getOrderById(orderId.value);
         if (!order.value) {
-            // Si no está en el estado, hacer la solicitud al backend
-            await orderStore.fetchOrderById(orderId);
-            order.value = orderStore.getOrderById(orderId);
-
+            await orderStore.fetchOrderById(orderId.value);
+            order.value = orderStore.getOrderById(orderId.value);
             if (!order.value) {
                 console.error("No se pudo cargar la orden ni desde el estado ni desde el backend.");
                 return;
             }
         }
-        // Asegurar que el estado actual esté correctamente asignado
         orderStatus.value = order.value.order_status;
-        shippingStatus.value = order.value.envio_status;
+        shippingStatus.value = order.value.shippingCost ? "in_process" : "pending"; // Valor inicial de estado de envío
     } catch (error) {
         console.error("Error al cargar la orden:", error);
     }
 };
 
+// Llamar `loadOrder` al montar el componente
 onMounted(loadOrder);
 
-// Cambiar estados
-const orderStatus = ref(order.value?.order_status);
-const shippingStatus = ref(order.value?.envio_status);
-
 // Mostrar modal de confirmación
-const openConfirmationModal = (message) => {
+const openConfirmationModal = (message: string) => {
     confirmationMessage.value = message;
     isConfirmationModalOpen.value = true;
 };
@@ -197,28 +198,35 @@ const closeConfirmationModal = () => {
 
 // Actualizar estado de la orden
 const updateOrderStatus = async () => {
-    const response = await Operations.updateOrder(orderId, orderStatus.value, "false"); // es un 200, 400 o 500
-    if (response === 200) {
-        openConfirmationModal("El estado de la orden se actualizó correctamente.");
-    } else {
-        console.error("Error al actualizar el estado de la orden.");
+    try {
+        const response = await Operations.updateOrder(orderId.value, orderStatus.value, "false");
+        if (response === 200) {
+            openConfirmationModal("El estado de la orden se actualizó correctamente.");
+        } else {
+            console.error("Error al actualizar el estado de la orden.");
+        }
+    } catch (error) {
+        console.error("Error al actualizar el estado de la orden:", error);
     }
 };
 
 // Actualizar estado de envío
 const updateShippingStatus = async () => {
-    const response = await Operations.updateOrder(orderId, shippingStatus.value, "true"); // es un 200, 400 o 500
-    if (response === 200) {
-        openConfirmationModal("El estado de la orden se actualizó correctamente.");
-    } else {
-        openConfirmationModal("Error al actualizar el estado de envio.");
+    try {
+        const response = await Operations.updateOrder(orderId.value, shippingStatus.value, "true");
+        if (response === 200) {
+            openConfirmationModal("El estado de la orden se actualizó correctamente.");
+        } else {
+            openConfirmationModal("Error al actualizar el estado de envío.");
+        }
+    } catch (error) {
+        console.error("Error al actualizar el estado de envío:", error);
     }
 };
 
-// Notificar de enviado
+// Notificar de envío
 const notifyShipment = () => {
-    console.log("Notificación enviada para la orden:", orderId);
-    // Aquí puedes llamar a un endpoint para enviar la notificación
+    console.log("Notificación enviada para la orden:", orderId.value);
 };
 
 // Navegar atrás
@@ -227,14 +235,16 @@ const goBack = () => {
 };
 
 // Formatear fecha
-const formatDate = (date) => {
+const formatDate = (date: string): string => {
     return new Date(date).toLocaleDateString("es-MX", {
         year: "numeric",
         month: "long",
         day: "numeric",
     });
 };
-const copyToClipboard = (text) => {
+
+// Copiar texto al portapapeles
+const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
 };
 </script>

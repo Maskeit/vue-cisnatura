@@ -13,14 +13,11 @@
     </div>
 </template>
 
-<script>
-export default {
-    props: {
-        address: {
-            type: Object,
-            required: true, // Puedes eliminar esto si no es obligatorio
-            default: () => ({}), // Valor predeterminado para evitar errores
-        },
-    },
-};
+<script setup lang="ts">
+import type { Address } from "@/interfaces/Address";
+
+// Definir las propiedades con TypeScript
+defineProps<{
+    address: Address | null;
+}>();
 </script>

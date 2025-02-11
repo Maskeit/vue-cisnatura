@@ -1,6 +1,6 @@
 <template>
-    <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-        <div class="bg-white rounded-lg shadow-lg overflow-hidden max-w-4xl w-full h-auto">
+        <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-opacity-80" @click="closeModal">
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden max-w-4xl w-full md:w-11/12 lg:w-3/4 h-auto max-h-[90vh] overflow-y-auto" @click.stop>
             <!-- Header -->
             <div class="p-4 border-b border-gray-200 flex justify-between items-center">
                 <h2 class="text-xl font-bold">{{ product.product_name }}</h2>
@@ -44,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted , onUnmounted} from "vue";
 import { XMarkIcon, ShoppingCartIcon } from "@heroicons/vue/24/solid";
 import CartService from "@/services/CartService";
 import { V_Global_IMG } from "@/services/system";
@@ -61,7 +61,21 @@ const emit = defineEmits<{
     (event: "close"): void;
     (event: "add-to-cart", productId: number): void;
 }>();
+const closeModal = () => {
+    emit("close");
+};
+onMounted(() => {
+    window.addEventListener("keydown", closeOnEscape);
+});
+onUnmounted(() => {
+    window.removeEventListener("keydown", closeOnEscape);
+});
 
+const closeOnEscape = (event: KeyboardEvent) => {
+    if (event.key === "Escape") {
+        closeModal();
+    }
+};
 // Estado reactivo para mostrar que el producto fue agregado
 const addedToCart = ref<boolean>(false);
 

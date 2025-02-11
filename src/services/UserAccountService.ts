@@ -7,37 +7,6 @@ import { Address } from "@/interfaces/Address";
 system.initializeAuth();
 
 export const UserAccountService = {
-  /**
-   * Guarda una nueva dirección
-   */
-  async saveAddress(json: Address): Promise<{ success: boolean; message: string } | number> {
-    if (!system.http.check.live()) return { success: false, message: "El sistema no está disponible" };
-    try {
-      if (!json.fullName || !json.calle || !json.colonia || !json.postalcode || !json.telefono || !json.estado || !json.ciudad) {
-        console.error("Faltan campos obligatorios");
-        return { success: false, message: "Faltan campos obligatorios" };
-      }
-
-      const response = await axiosInstance.post("/address/add", { data: json });
-      return response.data.status;
-    } catch (error) {
-      console.error("Error al guardar la dirección:", error);
-      return { success: false, message: "Error al guardar la dirección" };
-    }
-  },
-  /**
-   * Obtiene todas las direcciones del usuario
-   */
-  async getAllAddress(): Promise<Address[] | null> {
-    if (!system.http.check.live()) return null;
-    try {
-      const response = await axiosInstance.get<{ data: Address[] }>("/address/uid/get");
-      return response.data.data;
-    } catch (error) {
-      console.error("Error al obtener las direcciones:", error);
-      return null;
-    }
-  },
 
   /**
    * Elimina una dirección por ID

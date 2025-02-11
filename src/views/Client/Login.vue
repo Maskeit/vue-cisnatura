@@ -53,18 +53,18 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { AuthService } from "@/services/AuthService";
+import { Auth } from "@/services/Class/Client/Auth";
 import Cookies from "js-cookie";
 
 const router = useRouter();
 
 // Definimos variables reactivas con tipos
-const email = ref < string > ("");
-const password = ref < string > ("");
-const errorMessage = ref < string > ("");
-const errors = ref < { email?: string; password?: string } > ({});
-const isLoading = ref < boolean > (false);
-const codeStatus = ref < number | null > (null);
+const email = ref<string>("");
+const password = ref<string>("");
+const errorMessage = ref<string>("");
+const errors = ref<{ email?: string; password?: string }>({});
+const isLoading = ref<boolean>(false);
+const codeStatus = ref<number | null>(null);
 
 // Función para validar los inputs
 const validateInputs = (): boolean => {
@@ -85,23 +85,23 @@ const validateInputs = (): boolean => {
   errors.value = validationErrors;
   return Object.keys(validationErrors).length === 0;
 };
-
+const auth = new Auth();
 // Método para manejar el inicio de sesión
 const handleLogin = async (): Promise<void> => {
   if (!validateInputs()) return;
 
   try {
     isLoading.value = true;
-    const response = await AuthService.login(email.value, password.value);
+    const { status, token } = await auth.login({ email: email.value, password: password.value });
 
-    if (response.status === 200) {
+    if (status === 200 && token) {
       // Autenticación exitosa
-      localStorage.setItem("Authorization", response.token);
-      Cookies.set("Authorization", response.token, { expires: 7, path: "/" });
+      localStorage.setItem("Authorization", token);
+      Cookies.set("Authorization", token, { expires: 7, path: "/" });
       router.push("/Catalogo");
-    } else if ([401, 400, 404].includes(response.status)) {
+    } else if ([401, 400, 404].includes(status)) {
       errorMessage.value = "Datos incorrectos";
-      codeStatus.value = response.status;
+      codeStatus.value = status;
     }
   } catch (error) {
     // Errores del servidor o de red

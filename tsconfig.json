@@ -16,7 +16,10 @@
     "forceConsistentCasingInFileNames": true,
     "strictPropertyInitialization": false,
     "noImplicitAny": false,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "declaration": true, // muestra los archivos de declaracion de tipos d.ts
+    "declarationDir": "dist/types", // envia los archivos d.ts
+    "resolveJsonModule": true,
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"]
 }

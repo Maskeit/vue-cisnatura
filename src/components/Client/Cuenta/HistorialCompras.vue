@@ -26,7 +26,7 @@
                         {{ translate("shippment_status", order.envio_status) }}
                     </span>
                 </p>
-                <button class="mt-4 w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+                <button class="mt-4 w-full bg-[var(--color-highland-500)] text-white px-4 py-2 rounded hover:bg-[var(--color-highland-800)] transition"
                     @click="showOrderDetails(order)">
                     Ver Detalles
                 </button>
@@ -34,7 +34,7 @@
         </div>
 
         <!-- Modal para mostrar los detalles de la orden -->
-        <div v-if="selectedOrder" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div v-if="selectedOrder" class="fixed inset-0 bg-black/50 backdrop-opacity-80 flex items-center justify-center">
             <div class="bg-white p-6 rounded-lg lg:w-1/2">
                 <h2 class="text-xl font-bold mb-4">
                     Detalles de la Orden #{{ selectedOrder.id }}
@@ -57,26 +57,35 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useUserStore } from "@/services/stores/userStore";
 import { translate } from "@/utils/translations";
-const userStore = useUserStore();
-const selectedOrder = ref(null);
+import type { ProductOrder } from "@/interfaces/ProductOrder";
 
-const showOrderDetails = (order) => {
+// Instancia del store
+const userStore = useUserStore();
+
+// Estado reactivo para la orden seleccionada
+const selectedOrder = ref < ProductOrder | null > (null);
+
+// Función para mostrar los detalles de la orden en el modal
+const showOrderDetails = (order: ProductOrder): void => {
     selectedOrder.value = order;
 };
 
-const closeModal = () => {
+// Función para cerrar el modal
+const closeModal = (): void => {
     selectedOrder.value = null;
 };
 
-const formatDate = (dateString) => {
-    const options = { year: "numeric", month: "long", day: "numeric" };
+// Función para formatear la fecha correctamente
+const formatDate = (dateString: string): string => {
+    const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "long", day: "numeric" };
     return new Date(dateString).toLocaleDateString("es-ES", options);
 };
 
+// Cargar el historial de compras al montar el componente
 onMounted(async () => {
     try {
         await userStore.getHistory();
