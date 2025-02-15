@@ -1,5 +1,6 @@
 <template>
-    <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-opacity-80"
+        @click.self="closeModal">
         <div class="bg-white rounded-lg shadow-lg overflow-hidden max-w-4xl w-full h-auto">
             <!-- Header -->
             <div class="p-4 border-b border-gray-200 flex justify-between items-center">
@@ -30,7 +31,7 @@
                     </div>
                     <div class="mb-4">
                         <label for="productDescription"
-                            class="block text-sm font-medium text-gray-700">Descripción</label>                        
+                            class="block text-sm font-medium text-gray-700">Descripción</label>
                         <Editor v-if="editedProduct" v-model="editedProduct.description" />
                     </div>
                     <div class="mb-4">
@@ -129,34 +130,31 @@ const saveProduct = () => {
 
         if (hasImage) {
             const formData = new FormData();
-            formData.append("id", editedProduct.value.id); // ✅ Se envía como número
+            formData.append("id", Number(editedProduct.value.id));
 
             formData.append("name", editedProduct.value.product_name);
             formData.append("description", editedProduct.value.description);
-            formData.append("price", editedProduct.value.price);
-            formData.append("stock", editedProduct.value.stock);
+            formData.append("price", Number(editedProduct.value.price));
+            formData.append("stock", Number(editedProduct.value.stock));
             if (editedProduct.value.imageFile) {
-                formData.append("image", editedProduct.value.imageFile);
+                formData.append("thumb", editedProduct.value.imageFile);
             }
-
-            console.log("✅ Enviando datos con imagen (FormData):", Object.fromEntries(formData.entries())); // Depuración
             dataToSend = formData;
         } else {
             dataToSend = {
                 id: Number(editedProduct.value.id), // 🔹 Convertir a número
                 name: editedProduct.value.product_name,
                 description: editedProduct.value.description,
-                price: editedProduct.value.price,
-                stock: editedProduct.value.stock,
+                price: Number(editedProduct.value.price),
+                stock: Number(editedProduct.value.stock),
             };
-            console.log("✅ Enviando datos sin imagen (JSON):", dataToSend); // Depuración
         }
 
         emit("save-product", dataToSend, hasImage);
         isConfirmationModalOpen.value = true;
         closeModal();
     } catch (error) {
-        console.error("❌ Error al guardar el producto:", error);
+        console.error( error);
     }
 };
 const showDeleteConfirmation = () => {

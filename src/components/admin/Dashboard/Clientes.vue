@@ -12,7 +12,7 @@ import CrudHeader from '@/components/Admin/Crud/CrudHeader.vue';
 import CrudTable from '@/components/Admin/Crud/CrudTable.vue';
 import CrudModal from '@/components/Admin/Crud/CrudModal.vue';
 import type { User } from '@/interfaces/User';
-import { useOrderStore } from '@/services/stores/orderStore';
+import { useOrderStore } from '@/components/Admin/stores/orderStore';
 // Importa el archivo JSON que contiene los datos de ejemplo
 
 // Aquí usamos el archivo JSON para inicializar la variable 'registros'

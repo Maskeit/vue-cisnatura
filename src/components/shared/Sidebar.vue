@@ -1,8 +1,8 @@
 <template>
     <div>
         <!-- Sidebar para pantallas grandes -->
-        <div class="hidden sm:block bg-gray-100 p-4 h-full">
-            <h2 class="text-green-600 font-bold">Categorías</h2>
+        <div class="hidden sm:block bg-white p-4 h-full">
+            <h2 class="text-[var(--color-highland-600)] font-bold">Categorías</h2>
             <ul class="space-y-4 mt-4">
                 <li v-for="category in categories" :key="category.value"
                     @click="$emit('filterCategory', category.value)" class="hover:text-green-600 cursor-pointer">

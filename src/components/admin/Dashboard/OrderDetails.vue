@@ -9,65 +9,67 @@
                 <p><strong>Subtotal:</strong> {{ order.subtotal }} MXN</p>
                 <p><strong>Envío:</strong> {{ order.envio }} MXN</p>
                 <p><strong>Total:</strong> {{ order.total }} MXN</p>
-                <p><strong>Estado:</strong> {{ order.order_status }}</p>
+                <p><strong>Estado:</strong> {{ translations.order_status[order.status] }}</p>
                 <p><strong>Estado del pago:</strong> {{ order.payment_status }}</p>
-                <p><strong>Fecha de Creación:</strong> {{ formatDate(order.created_at) }}</p>
+                <p><strong>Método de pago:</strong> {{ order.payment_method }}</p>
+                <p><strong>Estado del Envío:</strong> {{ translations.shippment_status[shippingStatus] }} </p>
+                <p><strong>Fecha de Creación:</strong> {{ formatDate(order.updated_at) }}</p>
                 <h4 class="text-md font-bold mt-6">Productos:</h4>
                 <ul class="list-disc pl-5">
-                    <li v-for="product in order.productsData" :key="product.productId">
+                    <li v-for="product in order.productsData" :key="index">
                         {{ product.name }} - Cantidad: {{ product.quantity }}
                     </li>
                 </ul>
             </div>
-            
+
             <!-- Columna 2: Domicilio -->
             <div>
                 <h3 class="text-lg font-semibold mb-4">Domicilio de Envío</h3>
                 <div class="flex items-center mb-2 gap-3">
-                    <p><strong>Nombre:</strong> {{ order.address_id[0].fullName }}</p>
-                    <button @click="copyToClipboard(order.address_id[0].fullName)"
+                    <p><strong>Nombre:</strong> {{ order.address[0].fullName }}</p>
+                    <button @click="copyToClipboard(order.address[0].fullName)"
                         class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-full text-sm px-5 py-2.5 me-2 mb-2  dark:hover:border-gray-600 dark:focus:ring-gray-700">
                         Copiar
                     </button>
                 </div>
                 <div class="flex items-center mb-2 gap-3">
-                    <p><strong>Calle:</strong> {{ order.address_id[0].calle }}</p>
-                    <button @click="copyToClipboard(order.address_id[0].calle)"
+                    <p><strong>Calle:</strong> {{ order.address[0].calle }}</p>
+                    <button @click="copyToClipboard(order.address[0].calle)"
                         class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-full text-sm px-5 py-2.5 me-2 mb-2  dark:hover:border-gray-600 dark:focus:ring-gray-700">
                         Copiar
                     </button>
                 </div>
                 <div class="flex items-center mb-2 gap-3">
-                    <p><strong>Ciudad:</strong> {{ order.address_id[0].ciudad }}</p>
-                    <button @click="copyToClipboard(order.address_id[0].ciudad)"
+                    <p><strong>Ciudad:</strong> {{ order.address[0].ciudad }}</p>
+                    <button @click="copyToClipboard(order.address[0].ciudad)"
                         class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-full text-sm px-5 py-2.5 me-2 mb-2  dark:hover:border-gray-600 dark:focus:ring-gray-700">
                         Copiar
                     </button>
                 </div>
                 <div class="flex items-center mb-2 gap-3">
-                    <p><strong>Estado:</strong> {{ order.address_id[0].estado }}</p>
-                    <button @click="copyToClipboard(order.address_id[0].estado)"
+                    <p><strong>Estado:</strong> {{ order.address[0].estado }}</p>
+                    <button @click="copyToClipboard(order.address[0].estado)"
                         class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-full text-sm px-5 py-2.5 me-2 mb-2  dark:hover:border-gray-600 dark:focus:ring-gray-700">
                         Copiar
                     </button>
                 </div>
                 <div class="flex items-center mb-2 gap-3">
-                    <p><strong>Colonia:</strong> {{ order.address_id[0].colonia }}</p>
-                    <button @click="copyToClipboard(order.address_id[0].colonia)"
+                    <p><strong>Colonia:</strong> {{ order.address[0].colonia }}</p>
+                    <button @click="copyToClipboard(order.address[0].colonia)"
                         class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-full text-sm px-5 py-2.5 me-2 mb-2  dark:hover:border-gray-600 dark:focus:ring-gray-700">
                         Copiar
                     </button>
                 </div>
                 <div class="flex items-center mb-2 gap-3">
-                    <p><strong>Código Postal:</strong> {{ order.address_id[0].postalcode }}</p>
-                    <button @click="copyToClipboard(order.address_id[0].postalcode)"
+                    <p><strong>Código Postal:</strong> {{ order.address[0].postalcode }}</p>
+                    <button @click="copyToClipboard(order.address[0].postalcode)"
                         class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-full text-sm px-5 py-2.5 me-2 mb-2  dark:hover:border-gray-600 dark:focus:ring-gray-700">
                         Copiar
                     </button>
                 </div>
                 <div class="flex items-center mb-2 gap-3">
-                    <p><strong>Teléfono:</strong> {{ order.address_id[0].telefono }}</p>
-                    <button @click="copyToClipboard(order.address_id[0].telefono)"
+                    <p><strong>Teléfono:</strong> {{ order.address[0].telefono }}</p>
+                    <button @click="copyToClipboard(order.address[0].telefono)"
                         class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-full text-sm px-5 py-2.5 me-2 mb-2  dark:hover:border-gray-600 dark:focus:ring-gray-700">
                         Copiar
                     </button>
@@ -139,12 +141,13 @@
 
 <script setup lang="ts">
 import { useRouter, useRoute } from "vue-router";
-import { useOrderStore } from "@/services/stores/orderStore";
+import { useOrderStore } from "@/components/Admin/stores/orderStore";
 import { ref, onMounted, computed } from "vue";
 import ConfirmationModal from "@/components/shared/ConfirmationModal.vue";
-import Operations from "@/services/AdminServices/Operations";
-import type { ProductOrder } from "@/interfaces/ProductOrder";
-
+import { OrderService } from "@/services/Class/Admin/OrderService";
+import type { ProductOrder, OrderStatus, ShippingStatus } from "@/interfaces/ProductOrder";
+import { translations } from "@/utils/translations";
+const orderService = new OrderService();
 // Instancias de Vue Router y Store
 const router = useRouter();
 const route = useRoute();
@@ -156,10 +159,8 @@ const orderId = computed(() => Number(route.params.id));
 // Estado reactivo para la orden
 const order = ref<ProductOrder | null>(null);
 
-// Estado para los selectores de estado
-const orderStatus = ref<string>("");
-const shippingStatus = ref<string>("");
-
+const orderStatus = ref<OrderStatus>("pending"); // Valor inicial válido
+const shippingStatus = ref<ShippingStatus>("in_process"); // Valor inicial válido
 // Estado del modal de confirmación
 const isConfirmationModalOpen = ref<boolean>(false);
 const confirmationMessage = ref<string>("");
@@ -176,8 +177,13 @@ const loadOrder = async () => {
                 return;
             }
         }
-        orderStatus.value = order.value.order_status;
-        shippingStatus.value = order.value.shippingCost ? "in_process" : "pending"; // Valor inicial de estado de envío
+        if (order.value.status) {
+            orderStatus.value = order.value.status as OrderStatus;
+        }
+        // 🔹 Asignar correctamente el estado del envío si existe
+        if (order.value.envio_status) {
+            shippingStatus.value = order.value.envio_status as ShippingStatus;
+        }
     } catch (error) {
         console.error("Error al cargar la orden:", error);
     }
@@ -199,9 +205,12 @@ const closeConfirmationModal = () => {
 // Actualizar estado de la orden
 const updateOrderStatus = async () => {
     try {
-        const response = await Operations.updateOrder(orderId.value, orderStatus.value, "false");
-        if (response === 200) {
+        const response = await orderService.updateOrder(orderId.value, orderStatus.value, false);
+        // response es true or false
+        if (response) {
             openConfirmationModal("El estado de la orden se actualizó correctamente.");
+            orderStore.updateOrderState(orderId.value, { status: orderStatus.value });
+            order.value!.status = orderStatus.value; // 🔹 Actualizar estado en la UI
         } else {
             console.error("Error al actualizar el estado de la orden.");
         }
@@ -213,9 +222,12 @@ const updateOrderStatus = async () => {
 // Actualizar estado de envío
 const updateShippingStatus = async () => {
     try {
-        const response = await Operations.updateOrder(orderId.value, shippingStatus.value, "true");
-        if (response === 200) {
+        const response = await orderService.updateOrder(orderId.value, shippingStatus.value, true);
+        // response es true or false
+        if (response) {
             openConfirmationModal("El estado de la orden se actualizó correctamente.");
+            orderStore.updateOrderState(orderId.value, { envio_status: shippingStatus.value });
+            order.value!.envio_status = shippingStatus.value;
         } else {
             openConfirmationModal("Error al actualizar el estado de envío.");
         }

@@ -1,5 +1,5 @@
 <template>
-    <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-opacity-80">
         <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
             <!-- Título -->
             <h3 class="text-lg font-semibold mb-4">{{ title }}</h3>

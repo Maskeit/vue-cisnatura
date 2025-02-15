@@ -1,5 +1,5 @@
 <template>
-    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="fixed inset-0 bg-black/50 backdrop-opacity-80 flex items-center justify-center z-50" @click.self="closeModal">
         <div class="bg-white w-full max-w-3xl rounded-lg shadow-lg p-6 overflow-auto">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-semibold text-gray-700">Agregar Nuevo Producto</h2>
@@ -79,8 +79,8 @@
         </div>
     </div>
 </template>
-<script setup>
-import { ref } from "vue";
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted } from "vue";
 import Editor from '@/components/shared/Editor.vue';
 // Props
 const props = defineProps({
@@ -186,5 +186,17 @@ const resetForm = () => {
         image: false,
     };
     previewImage.value = null;
+};
+onMounted(() => {
+    window.addEventListener("keydown", closeOnEscape);
+});
+onUnmounted(() => {
+    window.removeEventListener("keydown", closeOnEscape);
+});
+
+const closeOnEscape = (event: KeyboardEvent) => {
+    if (event.key === "Escape") {
+        closeModal();
+    }
 };
 </script>

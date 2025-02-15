@@ -1,5 +1,6 @@
 <template>
   <router-view />
+  <CookieConsent />
   <!-- Modal de advertencia global -->
   <GlobalWarningModal 
     :isVisible="isModalVisible" 
@@ -16,7 +17,7 @@ import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import { EventBus } from "@/services/eventBus";
 import GlobalWarningModal from "@/components/shared/GlobalWarningModal.vue";
-
+import CookieConsent from "@/components/shared/CookiesConsent.vue";
 // Estado del modal
 const isModalVisible = ref<boolean>(false);
 const modalMessage = ref<string>("");

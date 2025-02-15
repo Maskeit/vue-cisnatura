@@ -3,7 +3,6 @@ import MainLayout from "@/layouts/MainLayout.vue";
 import BlankLayout from "@/layouts/BlankLayout.vue";
 
 // Vistas para usuarios regulares
-import Home from "@/views/Client/Home.vue";
 import Contacto from "@/views/Client/Contacto.vue";
 import Catalogo from "@/views/Client/Catalogo.vue";
 import Carrito from "@/views/Client/Carrito.vue";
@@ -52,8 +51,7 @@ const adminRoutes = [
 const clientRoutes = [
   {
     path: "/", children: [
-      { path: "", name: "Home", component: Home },
-      { path: "catalogo", name: "Catalogo", component: Catalogo },
+      { path: "", name: "Catalogo", component: Catalogo },
       { path: "contacto", name: "Contacto", component: Contacto },
       { path: "carrito", name: "Carrito", component: Carrito },
       { path: "cookies", name: "Cookies", component: Cookies },

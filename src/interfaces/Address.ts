@@ -8,5 +8,5 @@ export interface Address{
     calle: string;
     estado: string;
     ciudad: string;
-    postalcode: number;
+    postalcode: string;
 }

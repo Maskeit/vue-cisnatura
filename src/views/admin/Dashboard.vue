@@ -1,7 +1,7 @@
 <template>
     <div class="flex flex-col min-h-screen">
         <!-- Contenido principal -->
-        <div class="flex flex-1 bg-gray-900">
+        <div class="flex flex-1 bg-[var(--color-highland-600)]">
             <!-- Sidebar -->
             <VerticalSidebar />
             <!-- Contenido dinámico -->

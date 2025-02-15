@@ -1,7 +1,7 @@
 <template>
     <div class="max-w-4xl mx-auto my-5">
         <!-- Título -->
-        <h2 class="text-2xl font-bold text-green-700 mb-6">Tus direcciones guardadas</h2>
+        <h2 class="text-2xl font-bold text-[var(--color-highland-600)] mb-6">Tus direcciones guardadas</h2>
 
         <!-- Lista de direcciones -->
         <div v-if="addresses.length > 0" class="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
@@ -28,7 +28,6 @@
                     <strong>RFC:</strong> {{ address.RFC }}
                 </p>
 
-                <!-- Botones -->
                 <!-- Botones -->
                 <div class="flex justify-between items-center mt-4">
                     <label class="flex items-center space-x-2">

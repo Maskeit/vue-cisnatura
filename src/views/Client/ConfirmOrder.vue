@@ -6,7 +6,7 @@
         </div>
 
         <!-- Header -->
-        <header class="bg-green-500 text-white py-4 text-center">
+        <header class="bg-[var(--color-highland-500)] text-white py-4 text-center">
             <h1 class="text-lg font-semibold">Resumen de tu orden</h1>
         </header>
 

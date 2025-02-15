@@ -43,37 +43,21 @@
         </div>
 
         <!-- Menú de Navegación para escritorio -->
-        <div class="hidden lg:flex justify-center space-x-6 py-2">
+        <div class="hidden lg:flex justify-center space-x-6 py-2 relative">
             <router-link to="/" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">
-                Inicio
-            </router-link>
-            <router-link to="/Catalogo" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">
                 Productos
             </router-link>
             <router-link to="/Contacto" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">
                 Contacto
             </router-link>
+
+            <!-- Si el usuario no ha iniciado sesión, mostrar "Iniciar Sesión" -->
             <router-link v-if="!userStore.loggedIn" to="/Login"
                 class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">
                 Iniciar Sesión
             </router-link>
-            <!-- Menú de Usuario -->
-            <div v-if="userStore.loggedIn" class="relative">
-                <button @click="toggleUserDropdown"
-                    class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition flex items-center">
-                    {{ userStore.user?.name || "Usuario" }}
-
-                    <ChevronDownIcon class="h-4 w-4 ml-1" />
-                </button>
-                <ul v-if="userDropdownOpen" class="absolute bg-white border shadow-lg mt-2 rounded-md py-1 w-48">
-                    <li @click="goToAccount" class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                        Cuenta
-                    </li>
-                    <li @click="logout" class="px-4 py-2 hover:bg-red-100 cursor-pointer">
-                        Cerrar sesión
-                    </li>
-                </ul>
-            </div>
+            <!-- Si el usuario ha iniciado sesión, mostrar UserDropdown -->
+            <UserDropdown v-else :name="userStore.user?.name" :email="userStore.user?.email" @logout="logout" />
         </div>
         <!-- Menú desplegable -->
         <transition name="slide-fade">
@@ -81,10 +65,6 @@
                 <ul class="flex flex-col items-center space-y-4 py-4">
                     <li>
                         <router-link @click="toggleMenu" to="/"
-                            class="text-gray-700 hover:text-green-800">Inicio</router-link>
-                    </li>
-                    <li>
-                        <router-link @click="toggleMenu" to="/Catalogo"
                             class="text-gray-700 hover:text-green-800">Productos</router-link>
                     </li>
                     <li>
@@ -117,12 +97,14 @@ import { ref, computed, onMounted } from "vue";
 import { useUserStore } from "@/services/stores/userStore";
 import { useRouter } from "vue-router";
 import { ShoppingCartIcon, MapPinIcon, ChevronDownIcon, Bars3Icon } from "@heroicons/vue/24/outline";
-import SearchBar from "@/components/shared/SearchBar.vue";
+import SearchBar from "@/components/Client/SearchBar.vue";
 import { EventBus } from "@/services/eventBus";
 import { AuthService } from "@/services/AuthService";
 import Cookies from "js-cookie";
 import { useSearchStore } from "@/services/stores/searchStore";
 import type { Products } from "@/interfaces/Products";
+import UserDropdown from "@/components/Client/UserDropdown.vue";
+
 
 const searchStore = useSearchStore();
 const userStore = useUserStore();
@@ -138,12 +120,18 @@ const filteredProducts = ref<Products[]>([]);
 const products = ref<Products[]>([]);
 const isLoading = ref<boolean>(false);
 const menuOpen = ref<boolean>(false);
-const userDropdownOpen = ref<boolean>(false);
+
 const cartCount = ref<number>(0);
 
 // Alternar visibilidad del menú
 const toggleMenu = (): void => {
     menuOpen.value = !menuOpen.value;
+};
+
+const userDropdownOpen = ref<boolean>(false);
+
+const toggleUserDropdown = (state?: boolean): void => {
+    userDropdownOpen.value = state !== undefined ? state : !userDropdownOpen.value;
 };
 
 // Cargar información del usuario si no está disponible
@@ -167,15 +155,6 @@ onMounted(async () => {
     }
 });
 
-// Alternar visibilidad del menú de usuario
-const toggleUserDropdown = (): void => {
-    userDropdownOpen.value = !userDropdownOpen.value;
-};
-
-// Redirigir a la página de cuenta
-const goToAccount = (): void => {
-    router.push("/Cuenta");
-};
 
 // Actualizar productos filtrados
 const updateFilteredProducts = (searchResults: Products[]): void => {

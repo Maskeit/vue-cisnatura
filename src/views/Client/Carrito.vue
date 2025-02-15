@@ -14,7 +14,7 @@
         <!-- Mostrar mensaje si el carrito está vacío -->
         <div v-else-if="cartProducts.length === 0" class="text-center py-10">
           <p class="text-gray-500">No hay productos en tu carrito.</p>
-          <router-link to="/Catalogo"
+          <router-link to="/"
             class="mt-4 bg-[var(--color-highland-500)] hover:bg-[var(--color-highland-800)] text-white py-2 px-4 rounded inline-block">
             Ir al catálogo
           </router-link>

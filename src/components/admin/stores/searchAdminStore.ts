@@ -1,25 +1,20 @@
 import { defineStore } from "pinia";
 import type { Products } from "@/interfaces/Products";
-import { computed } from "vue";
-import { useProductsStore } from "@/services/stores/productStore";
+
 interface Category {
     displayName: string;
     value: string | null;
 }
-
-interface SearchState {
+interface SearchAdminState {
     searchResults: Products[];
-    products: Products[],
-    categories: Category[];
-    currentPage: number;
-    perPage: number;
-    query: string;
+    adminProducts: Products[];
+    categories : Category[];
 }
 
-export const useSearchStore = defineStore("search", {
-    state: (): SearchState => ({
+export const useSearchAdminStore = defineStore("searchAdmin", {
+    state: (): SearchAdminState => ({
         searchResults: [],
-        products: [],
+        adminProducts: [], // 🔹 Aquí guardaremos los productos en caché
         categories: [
             { displayName: "Todos los productos", value: null },
             { displayName: "Tinturas", value: "tintura" },
@@ -28,53 +23,45 @@ export const useSearchStore = defineStore("search", {
             { displayName: "Paquetes", value: "paquete" },
             { displayName: "Productos Naturales", value: "otro" },
         ],
-        currentPage: 1,
-        perPage: 16,
-        query: "",
     }),
-    getters: {
-        /**
-         * Obtiene todos los productos desde el store de productos
-         */
-        allProducts(): Products[] {
-            const productStore = useProductsStore();
-            return productStore.allProducts.length > 0 ? productStore.allProducts : productStore.products;
-        }
-    },
 
     actions: {
         /**
-        /**
-         * Realiza una búsqueda en memoria sin llamar a la API
+         * Guarda los productos en caché cuando se cargan desde `getCatalogoProducts`
          */
-        searchLocal(query: string): void {
-            this.query = query.trim();
-            
-            if (!this.query) {
-                this.clearSearch();
+        setAdminProducts(newProducts: Products[]): void {
+            this.adminProducts = [...newProducts]; // Guardar en caché para búsqueda rápida
+        },
+
+        /**
+         * Busca productos en memoria sin llamar a la API
+         */
+        searchAdminLocal(query: string): void {
+            if (!query.trim()) {
+                this.searchResults = [...this.adminProducts]; // Mostrar todos si el campo está vacío
                 return;
             }
 
             const lowerQuery = query.toLowerCase();
-            this.searchResults = this.allProducts.filter((product) =>
+            this.searchResults = this.adminProducts.filter((product) =>
                 product.product_name.toLowerCase().includes(lowerQuery) ||
                 product.description.toLowerCase().includes(lowerQuery) ||
                 product.type?.toLowerCase().includes(lowerQuery)
             );
         },
+
         /**
-         * Filtra solo el producto seleccionado por ID
+         * Filtrar solo el producto seleccionado
          */
         filterSelectedProduct(productId: number): void {
-            this.searchResults = this.allProducts.filter(product => product.id === productId);
+            this.searchResults = this.adminProducts.filter(product => product.id === productId);
         },
 
         /**
          * Restablece la búsqueda y muestra todos los productos.
          */
         clearSearch(): void {
-            this.query = "";
-            this.searchResults = [...this.products];
+            this.searchResults = [...this.adminProducts];
         },
     },
 });

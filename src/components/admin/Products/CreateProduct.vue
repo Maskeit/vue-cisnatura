@@ -4,7 +4,7 @@
     @click="openModal">
     <!-- Ícono y texto -->
     <div class="flex flex-col items-center">
-      <div class="bg-green-700 text-white rounded-full h-16 w-16 flex items-center justify-center">
+      <div class="bg-[var(--color-highland-600)] text-white rounded-full h-16 w-16 flex items-center justify-center">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-8 w-8">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
         </svg>

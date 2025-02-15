@@ -3,8 +3,8 @@ export const translations = {
     unconfirmed: "Sin confirmar",
     pending: "Pendiente",
     accepted: "Aceptada",
-    completed: "Completada",
-    cancelled: "Cancelada",
+    complete: "Completada",
+    canceled: "Cancelada",
     "in process": "En proceso",
   },
   payment_status: {

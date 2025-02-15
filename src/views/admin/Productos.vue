@@ -23,124 +23,91 @@
             <!-- Modal para crear producto -->
             <CreateProductModal v-if="isCreateModalOpen" @close="closeCreateProductModal"
                 @create-product="handleCreateProduct" />
+
             <!-- Modal -->
             <ProductModal v-if="isModalOpen" :isOpen="isModalOpen" :product="selectedProduct" @close="closeModal"
                 @save-product="handleSaveProduct" @delete-product="handleDeleteProduct"
                 @toggle-product="handleToggleProduct" />
+
             <!-- Paginación -->
             <Pagination :currentPage="currentPage" :totalPages="totalPages" @changePage="changePage" />
         </div>
+
         <ConfirmationModal v-if="isConfirmationModalOpen" :isOpen="isConfirmationModalOpen" :title="'Confirmación'"
             :message="confirmationMessage" confirmText="Aceptar" @confirm="isConfirmationModalOpen = false" />
     </div>
 </template>
 
-<script setup>
-import { ref, computed, onMounted, watch } from "vue";
+<script setup lang="ts">
+import { ref, computed, onMounted, watch, watchEffect } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Sidebar from "@/components/shared/Sidebar.vue";
-
 import ProductCard from "@/components/Admin/Products/ProductCard.vue";
 import CreateProduct from "@/components/Admin/Products/CreateProduct.vue";
 import CreateProductModal from "@/components/Admin/Products/CreateProductModal.vue";
 import ProductModal from "@/components/Admin/Products/ProductModal.vue";
-
 import ConfirmationModal from "@/components/shared/ConfirmationModal.vue";
 import Pagination from "@/components/shared/Pagination.vue";
 
-import ProductService from "@/services/AdminServices/ProductService";
+import { ProductService } from "@/services/Class/Admin/ProductService";
 import { EventBus } from "@/services/eventBus";
 import { system } from "@/services/system";
-import { useSearchStore } from "@/services/stores/searchStore";
 
+import { useSearchAdminStore } from "@/components/Admin/stores/searchAdminStore";
+
+import type { Products } from "@/interfaces/Products";
+
+// Instancia de Vue Router
 const route = useRoute();
 const router = useRouter();
 
-// Estado Reactivo
-const products = ref([]);
-const filteredProducts = ref([]);
-const selectedProduct = ref(null);
-const currentPage = ref(1);
-const totalPages = ref(0);
-const limit = ref(16);
-const isLoading = ref(false);
-const isModalOpen = ref(false);
-const isCreateModalOpen = ref(false);
-const searchStore = useSearchStore();
+// Estado Reactivo con Tipos
+const products = ref<Products[]>([]);
+
+
+const selectedProduct = ref<Products | null>(null);
+const currentPage = ref<number>(1);
+const totalPages = ref<number>(0);
+const limit = ref<number>(16);
+const isLoading = ref<boolean>(false);
+const isModalOpen = ref<boolean>(false);
+const isCreateModalOpen = ref<boolean>(false);
+
+const searchStore = useSearchAdminStore();
+
 const categories = searchStore.categories;
+const isConfirmationModalOpen = ref<boolean>(false);
+const confirmationMessage = ref<string>("");
 
-const isConfirmationModalOpen = ref(false);
-const confirmationMessage = ref("");
+// Instancia de la clase de servicios
+const productService = new ProductService();
+const filteredProducts = ref<Products[]>([]); // con este si se muestran los productos
+watchEffect(() => {
+    filteredProducts.value = searchStore.searchResults.length > 0
+        ? [...searchStore.searchResults]
+        : [...products.value]; // Si no hay búsqueda, mostrar todos los productos
+});
+/**
+ * Filtrar productos en memoria por búsqueda
+ */
 
-watch(() => searchStore.searchResults,
-    (newResults) => {
-        if (newResults.length > 0) {
-            filteredProducts.value = newResults;
-        } else {
-            filteredProducts.value = [...products.value];
-        }
-    },
-    { deep: true }
-);
-
-// Escuchar cambios en la URL (búsqueda en la barra de navegación)
-watch(() => route.query.q, async (newSearch) => {
-    if (newSearch && newSearch.trim()) {
-        const lowerSearch = newSearch.toLowerCase();
-        // Verificar si el producto ya está en caché (productos cargados en `products.value`)
-        const cachedResults = products.value.filter(product =>
-            product.product_name.toLowerCase().includes(lowerSearch) ||
-            product.description.toLowerCase().includes(lowerSearch) ||
-            product.type.toLowerCase().includes(lowerSearch)
-        );
-        if (cachedResults.length > 0) {
-            // Si ya está en caché, usar esos productos y NO hacer la consulta al servidor
-            filteredProducts.value = cachedResults;
-            return; // Salir de la función para evitar hacer la consulta al servidor
-        }
-        // Si no está en caché, buscar en el servidor
-        isLoading.value = true;
-        try {
-            const { products: serverResults } = await ProductService.searchProducts(newSearch);
-
-            if (serverResults.length > 0) {
-                filteredProducts.value = serverResults;
-            } else {
-                console.warn("No se encontraron productos en la búsqueda en el servidor.");
-                filteredProducts.value = [];
-            }
-        } catch (error) {
-            console.error("Error en la búsqueda en el servidor:", error);
-            filteredProducts.value = [];
-        } finally {
-            isLoading.value = false;
-        }
-    } else {
-        // Si no hay búsqueda activa, restaurar todos los productos de la primera página
-        filteredProducts.value = [...products.value];
-    }
-}, { immediate: true });
-// Filtrar productos en memoria por búsqueda
-const filterProducts = (query) => {
-    const lowerQuery = query.toLowerCase().trim();
-    filteredProducts.value = lowerQuery
+const filterProducts = (query: string): void => {
+    filteredProducts.value = query
         ? products.value.filter((product) =>
-            product.product_name.toLowerCase().includes(lowerQuery) ||
-            product.description.toLowerCase().includes(lowerQuery) ||
-            product.type.toLowerCase().includes(lowerQuery)
+            product.product_name.toLowerCase().includes(query) ||
+            product.description.toLowerCase().includes(query) ||
+            product.type?.toLowerCase().includes(query)
         )
-        : [...products.value];
-
-    if (!filteredProducts.value.length) {
-        console.warn("No se encontraron productos en la búsqueda local.");
-    }
+        : [...products.value]; // Restaurar si la búsqueda está vacía
 };
-// Cargar Productos y Carrito al Montar
+
+/**
+ * Cargar Productos y Carrito al Montar
+ */
 onMounted(async () => {
     EventBus.on("filterProducts", filterProducts);
-    EventBus.on("serverSearch", serverSearch);
+    EventBus.on("localSearch", localSearch);
     EventBus.emit("categoriesUpdated", categories);
-
 
     try {
         await fetchProducts(currentPage.value);
@@ -150,32 +117,20 @@ onMounted(async () => {
     }
 });
 
-// Obtener productos de la API para el catalogo y paginas
-const fetchProducts = async (page) => {
-    isLoading.value = true;
-    try {
-        const { products: fetchedProducts, total } = await ProductService.getCatalogoProducts(page, limit.value);
-
-        products.value = fetchedProducts;
-        filteredProducts.value = fetchedProducts;
-        totalPages.value = Math.ceil(total / limit.value);
-        // Guardamos los productos en el estado global de Pinia
-        searchStore.setProducts(fetchedProducts);
-    } catch (error) {
-        console.error("Error al cargar los productos:", error);
-    } finally {
-        isLoading.value = false;
-    }
-};
-// Cambiar de página en la paginación
-const changePage = async (page) => {
+/**
+ * Cambiar de página en la paginación
+ */
+const changePage = async (page: number): Promise<void> => {
     if (page > 0 && page <= totalPages.value) {
         currentPage.value = page;
         await fetchProducts(currentPage.value);
     }
 };
-// Filtrar productos por categoría
-const filterByCategory = (categoryValue) => {
+
+/**
+ * Filtrar productos por categoría
+ */
+const filterByCategory = (categoryValue: string): void => {
     if (!products.value.length) {
         console.error("No hay productos disponibles para filtrar.");
         return;
@@ -187,20 +142,21 @@ const filterByCategory = (categoryValue) => {
         )
         : [...products.value];
 };
-// Buscar productos en el servidor si no están en memoria
-const serverSearch = async (query) => {
+
+/**
+ * Buscar productos en el servidor si no están en memoria
+ */
+const localSearch = async (query: string): Promise<void> => {
     if (!query || query.trim() === "") return;
 
     isLoading.value = true;
     try {
-        // Llamar al método de búsqueda del ProductService
-        const { products, message } = await ProductService.searchProducts(query);
+        const { products: fetchedProducts } = await productService.searchProducts(query);
 
-        // Validar si se encontraron productos
-        if (products.length > 0) {
-            filteredProducts.value = [...products];
+        if (fetchedProducts.length > 0) {
+            filteredProducts.value = [...fetchedProducts];
         } else {
-            console.warn(message || "No se encontraron productos en la búsqueda.");
+            console.warn("No se encontraron productos en la búsqueda.");
             filteredProducts.value = [];
         }
     } catch (error) {
@@ -211,60 +167,80 @@ const serverSearch = async (query) => {
     }
 };
 
-// Modal de productos normales
-const openModal = (product) => {
+/**
+ * Abrir y cerrar modal de producto
+ */
+const openModal = (product: Products): void => {
     selectedProduct.value = { ...product };
     isModalOpen.value = true;
 };
-const closeModal = () => {
+
+const closeModal = (): void => {
     isModalOpen.value = false;
     selectedProduct.value = null;
 };
 
-// Modal del form para crear un producto nuevo
-const openCreateProductModal = () => {
+/**
+ * Abrir y cerrar modal de creación de producto
+ */
+const openCreateProductModal = (): void => {
     isCreateModalOpen.value = true;
 };
 
-const closeCreateProductModal = () => {
+const closeCreateProductModal = (): void => {
     isCreateModalOpen.value = false;
 };
 
-
-const handleSaveProduct = async (data, hasImage) => {
+/**
+ * Obtener productos de la API para el catálogo
+ */
+const fetchProducts = async (page: number): Promise<void> => {
+    isLoading.value = true;
     try {
-        let productId = hasImage ? data.get("id") : data.id; // Extraer correctamente el ID
+        const { products: fetchedProducts, total } = await productService.getCatalogoProducts(page, limit.value);
+        products.value = fetchedProducts;
+        filteredProducts.value = fetchedProducts;
+        totalPages.value = Math.ceil(total / limit.value);
+        searchStore.setAdminProducts(fetchedProducts);
+    } catch (error) {
+        console.error("Error al cargar los productos:", error);
+    } finally {
+        isLoading.value = false;
+    }
+};
+
+const handleSaveProduct = async (data: FormData | Partial<Products>, hasImage: boolean): Promise<void> => {
+    try {
+        const productId = hasImage ? data.get("id") as string | null : (data as Products).id?.toString();
         if (!productId) {
             console.error("❌ Error: Falta el ID del producto en handleSaveProduct:", data);
             return;
         }
 
-        let response;
-        if (hasImage) {
-            response = await ProductService.editProduct(data, true);
-        } else {
-            response = await ProductService.editProduct(data, false);
-        }
+        const response = await productService.editProduct(data, hasImage);
 
         if (response === 201) {
-            await fetchProducts(currentPage.value);
-            EventBus.emit("showConfirmation", "✅ Producto actualizado exitosamente.");
+            // Esperar un breve tiempo antes de recargar para que el usuario vea el cambio
+            setTimeout(() => {
+                window.location.reload();
+            }, 500); // 500ms de espera antes de recargar
         }
     } catch (error) {
         console.error("❌ Error al actualizar producto:", error);
     }
 };
-const handleCreateProduct = async (formData) => {
+
+const handleCreateProduct = async (formData: FormData): Promise<void> => {
     try {
-        const response = await ProductService.createProduct(formData);
+        const response = await productService.createProduct(formData);
         if (response === 201) {
             confirmationMessage.value = "✅ El producto se ha creado correctamente.";
-            isConfirmationModalOpen.value = true; // Mostrar modal de confirmación
-            isCreateModalOpen.value = false; // Cerrar modal de creación
-            await fetchProducts(currentPage.value); // Recargar productos
+            isConfirmationModalOpen.value = true;
+            isCreateModalOpen.value = false;
+            await fetchProducts(currentPage.value);
         } else {
             confirmationMessage.value = "❌ No se pudo crear el producto. Inténtalo de nuevo.";
-            isConfirmationModalOpen.value = true; // Mostrar mensaje de error
+            isConfirmationModalOpen.value = true;
         }
     } catch (error) {
         console.error("Error al crear el producto:", error);
@@ -272,11 +248,11 @@ const handleCreateProduct = async (formData) => {
         isConfirmationModalOpen.value = true;
     }
 };
-const handleDeleteProduct = async (productId) => {
+
+const handleDeleteProduct = async (productId: number): Promise<void> => {
     try {
-        const response = await ProductService.deleteProduct(productId);
+        const response = await productService.deleteProduct(productId);
         if (response === 201) {
-            // Verifica que products y filteredProducts sean arrays antes de filtrar
             if (!Array.isArray(products.value) || !Array.isArray(filteredProducts.value)) {
                 console.error("Error: products o filteredProducts no son arrays:", {
                     products: products.value,
@@ -284,9 +260,8 @@ const handleDeleteProduct = async (productId) => {
                 });
                 return;
             }
-            // Filtra los productos correctamente usando `value`
-            products.value = products.value.filter((product) => product.id !== productId);
-            filteredProducts.value = filteredProducts.value.filter((product) => product.id !== productId);
+            products.value = products.value.filter(product => product.id !== productId);
+            filteredProducts.value = filteredProducts.value.filter(product => product.id !== productId);
         } else {
             alert("Error al eliminar el producto.");
         }
@@ -294,33 +269,39 @@ const handleDeleteProduct = async (productId) => {
         console.error("Error al eliminar el producto:", error);
     }
 };
-const handleToggleProduct = async (productId) => {
+
+const handleToggleProduct = async (productId: number): Promise<void> => {
     try {
-        const response = await ProductService.toggleProduct(productId);
+        const status = await productService.toggleProduct(productId);
 
-        if (response === 201) {
-
-            // Verifica que products es un array
-            if (!Array.isArray(products.value)) {
-                console.error("Error: products no es un array:", products.value);
-                return;
+        if (status === 201) {
+            // Buscar el producto en el array `products` y cambiar su estado en la UI
+            const productIndex = products.value.findIndex(p => p.id === productId);
+            if (productIndex !== -1) {
+                products.value[productIndex] = {
+                    ...products.value[productIndex],
+                    active: products.value[productIndex].active === 1 ? 0 : 1
+                };
             }
 
-            // Encuentra el producto y actualiza su estado
-            const product = products.value.find((p) => p.id == productId);
-            if (product) {
-                product.active = product.active == 1 ? 0 : 1;
-            } else {
-                console.warn("No se encontró el producto con ID:", productId);
+            // También actualizar en `filteredProducts` si se está filtrando
+            const filteredIndex = filteredProducts.value.findIndex(p => p.id === productId);
+            if (filteredIndex !== -1) {
+                filteredProducts.value[filteredIndex] = {
+                    ...filteredProducts.value[filteredIndex],
+                    active: filteredProducts.value[filteredIndex].active === 1 ? 0 : 1
+                };
             }
         } else {
-            alert("Error al cambiar estado del producto");
+            alert("Error al cambiar el estado del producto.");
         }
     } catch (error) {
         console.error("Error al alternar el estado del producto:", error);
     }
 };
+
 </script>
+
 <style>
 .product-list {
     display: grid;

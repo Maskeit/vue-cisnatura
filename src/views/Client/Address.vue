@@ -13,7 +13,7 @@
 
       <!-- Botón de continuar, solo si hay un domicilio seleccionado -->
       <div v-if="selectedAddress" class="my-4 text-center">
-        <button @click="continueToCheckout" class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700">
+        <button @click="continueToCheckout" class="bg-[var(--color-highland-400)] text-white px-6 py-2 rounded-md hover:bg-[var(--color-highland-600)]">
           Continuar
         </button>
       </div>

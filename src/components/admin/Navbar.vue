@@ -10,12 +10,13 @@
                 <img src="/logocis.svg" alt="Logo" class="h-10 lg:h-16 mr-2" />
             </div>
 
+            
             <!-- Barra de búsqueda -->
             <div class="hidden lg:flex items-center flex-grow mx-4">
-                <SearchBar @updateResults="updateFilteredProducts" />
+                <SearchBar @search="updateFilteredProducts" />
             </div>
             <!-- controles -->
-            <div class="flex items-center space-x-4">  
+            <div class="flex items-center space-x-4">
                 <!-- Botón del menú hamburguesa -->
                 <button @click="toggleMenu" class="lg:hidden p-2 rounded-md border border-gray-400">
                     <Bars3Icon class="h-6 w-6 text-gray-700" />
@@ -24,11 +25,12 @@
         </div>
 
         <!-- Menú de Navegación para escritorio -->
-        <div class="hidden lg:flex justify-center space-x-6 py-2 border-t">
+        <div class="hidden lg:flex justify-center space-x-6 py-2">
             <router-link to="/xqc/Productos" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">
                 Productos
             </router-link>
-            <router-link to="/xqc/Dashboard/RecentOrder" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">
+            <router-link to="/xqc/Dashboard/RecentOrder"
+                class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">
                 Ventas
             </router-link>
             <!-- Menú de Usuario -->
@@ -73,16 +75,16 @@
     </nav>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
-import { useUserAdminStore } from "@/services/stores/userAdminStore";
-import { useRouter } from "vue-router";
-import { Bars3Icon, ChevronDownIcon} from "@heroicons/vue/24/outline";
-import SearchBar from "@/components/shared/SearchBar.vue";
+import { useUserAdminStore } from "@/components/Admin/stores/userAdminStore";
+import { Bars3Icon, ChevronDownIcon } from "@heroicons/vue/24/outline";
+import SearchBar from "@/components/Admin/SearchBar.vue";
 import { AuthService } from "@/services/AdminServices/AuthService";
 import Cookies from 'js-cookie';
-import { useSearchStore } from "@/services/stores/searchStore";
-const searchStore = useSearchStore();
+import { useSearchAdminStore } from "@/components/Admin/stores/searchAdminStore";
+import { useRouter } from "vue-router";
+const router = useRouter();
 // Props
 defineProps({
     categories: {
@@ -92,9 +94,8 @@ defineProps({
 });
 
 const userAdminStore = useUserAdminStore();
-const router = useRouter();
-const filteredProducts = ref([]);
 const products = ref([]);
+const searchStore = useSearchAdminStore();
 
 const isLoading = ref(false);
 const menuOpen = ref(false);
@@ -103,7 +104,9 @@ const userDropdownOpen = ref(false);
 const toggleMenu = () => {
     menuOpen.value = !menuOpen.value;
 };
-
+const updateFilteredProducts = (query: string) => {
+    searchStore.searchAdminLocal(query);
+};
 // Cargar información del usuario si no está disponible
 onMounted(async () => {
     if (!userAdminStore.name) {
@@ -125,12 +128,12 @@ const logout = async () => {
         }
 
         // Limpieza de sesión
-        Cookies.remove("Authorization", {path:'/', domain: ''}); // Eliminar token en cookies
+        Cookies.remove("Authorization", { path: '/', domain: '' }); // Eliminar token en cookies
         localStorage.clear(); // Eliminar datos del usuario
         userAdminStore.clearUser(); // Limpiar store de usuario
 
         // Redirigir al login
-        router.push("/xqc/Login");
+        router.push("/xqc/AdminLogin");
     } catch (error) {
         console.error("Error cerrando sesión:", error);
     } finally {

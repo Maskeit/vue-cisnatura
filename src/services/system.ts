@@ -33,7 +33,7 @@ interface HandlerErrorConfig {
 
 // Implementación de `system`
 export const system: SystemConfig = {
-  authToken: null, // ✅ Ahora es modificable
+  authToken: null,
 
   // Método para inicializar `authToken` una vez
   initializeAuth(): string | null {

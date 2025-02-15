@@ -12,7 +12,7 @@
             <div v-for="order in userStore.orders" :key="order.id"
                 class="border border-gray-300 rounded-lg shadow-md p-4 bg-white hover:shadow-lg transition-shadow">
                 <h2 class="text-lg font-bold mb-2">Orden #{{ order.payment_intent_id }}</h2>
-                <p><strong>Fecha:</strong> {{ formatDate(order.created_at) }}</p>
+                <p><strong>Fecha:</strong> {{ formatDate(order.updated_at) }}</p>
                 <p><strong>Total:</strong> ${{ order.total }}</p>
                 <p>
                     <strong>Estado: </strong>
@@ -23,7 +23,7 @@
                 <p>
                     <strong>Envío: </strong>
                     <span class="capitalize">
-                        {{ translate("shippment_status", order.envio_status) }}
+                        {{ translate("shippment_status", order.envio_status) || "Sin confirmar"}} 
                     </span>
                 </p>
                 <button class="mt-4 w-full bg-[var(--color-highland-500)] text-white px-4 py-2 rounded hover:bg-[var(--color-highland-800)] transition"
@@ -41,7 +41,7 @@
                 </h2>
                 <p><strong>Total:</strong> ${{ selectedOrder.total }}</p>
                 <p><strong>Estado:</strong> {{ translate("order_status", selectedOrder.order_status) }}</p>
-                <p><strong>Envió:</strong> {{ translate("shippment_status", selectedOrder.envio_status) }}</p>
+                <p><strong>Envío:</strong> {{ translate("shippment_status", selectedOrder.envio_status) || "Sin Confirmar"}}</p>
                 <p><strong>Productos:</strong></p>
                 <ul v-if="selectedOrder.productsData && selectedOrder.productsData.length" class="list-disc ml-5">
                     <li v-for="product in selectedOrder.productsData" :key="product.id">

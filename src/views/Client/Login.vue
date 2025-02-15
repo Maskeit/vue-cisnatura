@@ -98,7 +98,7 @@ const handleLogin = async (): Promise<void> => {
       // Autenticación exitosa
       localStorage.setItem("Authorization", token);
       Cookies.set("Authorization", token, { expires: 7, path: "/" });
-      router.push("/Catalogo");
+      router.push("/");
     } else if ([401, 400, 404].includes(status)) {
       errorMessage.value = "Datos incorrectos";
       codeStatus.value = status;
